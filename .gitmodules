@@ -1,0 +1,6 @@
+[submodule "Submodules~/xr.sdk.oculus"]
+	path = Submodules~/xr.sdk.oculus
+	url = git@github.cds.internal.unity3d.com:unity/xr.sdk.oculus.git
+[submodule "Submodules~/xr.sdk.openxr"]
+	path = Submodules~/xr.sdk.openxr
+	url = git@github.cds.internal.unity3d.com:unity/xr.sdk.openxr.git

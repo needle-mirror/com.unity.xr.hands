@@ -1,0 +1,36 @@
+{
+  "name": "com.unity.xr.hands",
+  "displayName": "XR Hands",
+  "version": "1.0.0-pre.2",
+  "unity": "2020.3",
+  "description": "Surfaces the cross-platform subsystem API for hand-tracking. Implementations of providers will be found in the package for that platform.",
+  "keywords": [
+    "xr",
+    "vr",
+    "virtual",
+    "reality",
+    "hand",
+    "tracking",
+    "hands",
+    "subsystem"
+  ],
+  "dependencies": {
+    "com.unity.modules.xr": "1.0.0",
+    "com.unity.xr.core-utils": "2.0.0"
+  },
+  "samples": [
+    {
+      "displayName": "HandVisualizer",
+      "description": "Basic sample showing how visualize hands.",
+      "path": "Samples~/HandVisualizer"
+    }
+  ],
+  "upmCi": {
+    "footprint": "7d103714b46e808ffe88613efc90d1e06e291d48"
+  },
+  "repository": {
+    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.xr.hands.git",
+    "type": "git",
+    "revision": "1d0d38d59523beef6a61be3a6b4b82f0d54b92ce"
+  }
+}
