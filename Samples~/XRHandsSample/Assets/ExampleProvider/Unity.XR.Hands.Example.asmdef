@@ -1,0 +1,16 @@
+{
+    "name": "Unity.XR.Hands.Example",
+    "rootNamespace": "",
+    "references": [
+        "GUID:ce522b6ed64c8be4c989a1d26d0e3275"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

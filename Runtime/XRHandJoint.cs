@@ -45,7 +45,7 @@ namespace UnityEngine.XR.Hands
 
         /// <summary>
         /// If successful, retrieves the joint's pose in session space, relative
-        /// to the <c>XROrigin</c>.
+        /// to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin).
         /// </summary>
         /// <param name="pose">
         /// Will be filled out with the tracked pose of this joint if successful.
@@ -58,7 +58,8 @@ namespace UnityEngine.XR.Hands
         /// <remarks>
         /// To transform to world space, use the <see cref="Pose"/> returned by
         /// <see cref="Pose.GetTransformedBy(Pose)"/> when passing a <c>Pose</c>
-        /// populated by the <c>XROrigin</c>'s position and rotation.
+        /// populated by the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin)'s
+        /// position and rotation.
         /// </remarks>
         public bool TryGetPose(out Pose pose)
         {
@@ -74,11 +75,12 @@ namespace UnityEngine.XR.Hands
 
         /// <summary>
         /// If successful, retrieves the joint linear velocity in session space,
-        /// relative to the <c>XROrigin</c>.
+        /// relative to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin).
         /// </summary>
         /// <param name="linearVelocity">
         /// Will be filled out with the tracked linear velocity of this joint
-        /// (relative to the <c>XROrigin</c>) if successful.
+        /// (relative to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin)) if
+        /// successful.
         /// </param>
         /// <returns>
         /// Returns <see langword="true"/> if successful and the velocity was
@@ -87,7 +89,7 @@ namespace UnityEngine.XR.Hands
         /// </returns>
         /// <remarks>
         /// To transform to world space, rotate this by the rotation of the
-        /// <c>XROrigin</c>.
+        /// [XROrigin](xref:Unity.XR.CoreUtils.XROrigin).
         /// </remarks>
         public bool TryGetLinearVelocity(out Vector3 linearVelocity)
         {
@@ -107,7 +109,7 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         /// <param name="angularVelocity">
         /// Will be filled out with the tracked angular velocity of this joint
-        /// (relative to the <c>XROrigin</c>) if successful.
+        /// (relative to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin)) if successful.
         /// </param>
         /// <returns>
         /// Returns <see langword="true"/> if successful and the angular
@@ -116,7 +118,7 @@ namespace UnityEngine.XR.Hands
         /// </returns>
         /// <remarks>
         /// To transform to world space, rotate this by the rotation of the
-        /// <c>XROrigin</c>.
+        /// [XROrigin](xref:Unity.XR.CoreUtils.XROrigin).
         /// </remarks>
         public bool TryGetAngularVelocity(out Vector3 angularVelocity)
         {

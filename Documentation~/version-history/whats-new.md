@@ -24,6 +24,10 @@ As well as these `enum`s:
 - `Handedness`, used to identify which hand is referred to by an `XRHand` using its `handedness` property.
 - `XRHandFingerID`, not used anywhere else in the API surfaced in this package besides its extension methods in `XRHandJointIDUtility`: `GetFrontJointID` and `GetBackJointID`, which together provider an inclusive range for `XRHandJointID`s spanned by the finger represented by `XRHandFingerID`.
 
+The OpenXR package must be installed and in use for these to work:
+- Added OpenXR support through `HandTracking` and `OpenXRHandProvider` types.
+- Added support for Meta Hand Tracking Aim extension in OpenXR through `MetaHandTrackingAim`.
+
 Additional types you may need to interact with if writing a provider (not a common use case):
 - `XRHandSubsystemProvider`, which the subsystem asks for data whenever its `TryUpdateHands` is called (built-in Unity setup calls this each frame) and is also queried when the subsystem and provider are created for which common joints are in the provider's layout using `GetHandLayout`.
 - `XRHandProviderUtility`, which providers should call into using `CreateJoint` during the `TryUpdateHands` per-frame call to fill out the left- and right-hand joint arrays. This same type also has a nested `SubsystemUpdater` type to be used for automatically updating the subsystem each frame. Users can respond to updates by subscribing to the subsystem's `handsUpdated` callback.

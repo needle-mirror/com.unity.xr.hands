@@ -1,7 +1,13 @@
 {
     "name": "Unity.XR.Hands",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:4847341ff46394e83bb78fbd0652937e",
+        "GUID:e40ba710768534012815d3193fa296cb",
+        "GUID:f9fe0089ec81f4079af78eb2287a6163",
+        "GUID:a9582160ded7e3c46829c5005bf42835"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
@@ -9,6 +15,17 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.xr.openxr",
+            "expression": "1.0.0",
+            "define": "UNITY_OPENXR_PACKAGE"
+        },
+        {
+            "name": "com.unity.xr.openxr",
+            "expression": "1.6.0",
+            "define": "UNITY_OPENXR_PACKAGE_1_6"
+        }
+    ],
     "noEngineReferences": false
 }

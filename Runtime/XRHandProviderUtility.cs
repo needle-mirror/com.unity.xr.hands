@@ -22,18 +22,20 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// </param>
         /// <param name="pose">
         /// The pose of the joint in session space, relative to the
-        /// <c>XROrigin</c>.
+        /// [XROrigin](xref:Unity.XR.CoreUtils.XROrigin).
         /// </param>
         /// <param name="radius">
         /// The radius of the joint. The default value is <c>0f</c>.
         /// </param>
         /// <param name="linearVelocity">
         /// The linear velocity of the joint in hand space (relative to the
-        /// <c>XROrigin</c>). The default value is <c>Vector3.zero</c>.
+        /// [XROrigin](xref:Unity.XR.CoreUtils.XROrigin)). The default value is
+        /// <c>Vector3.zero</c>.
         /// </param>
         /// <param name="angularVelocity">
         /// The angular velocity of the joint in hand space (relative to the
-        /// <c>XROrigin</c>). The default value is <c>Vector3.zero</c>.
+        /// [XROrigin](xref:Unity.XR.CoreUtils.XROrigin)). The default value is
+        /// <c>Vector3.zero</c>.
         /// </param>
         /// <returns>
         /// An <see cref="XRHandJoint"/> with the given pose and other supplied
@@ -67,6 +69,11 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// automatic update at the beginning of the <c>EarlyUpdate.XRUpdate</c>
         /// loop.
         /// </summary>
+        /// <remarks>
+        /// If the Input System backend is enabled, this will also create and
+        /// <see cref="XRHandDevice"/>s which update themselves from the
+        /// <see cref="XRHandSubsystem.handsUpdated"/> callback.
+        /// </remarks>
         public class SubsystemUpdater
         {
             /// <summary>
@@ -219,10 +226,48 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
             {
                 Stop();
                 m_Subsystem = null;
+
+#if ENABLE_INPUT_SYSTEM
+                if (XRHandDevice.leftHand != null)
+                {
+                    InputSystem.InputSystem.RemoveDevice(XRHandDevice.leftHand);
+                    XRHandDevice.leftHand = null;
+                }
+
+                if (XRHandDevice.rightHand != null)
+                {
+                    InputSystem.InputSystem.RemoveDevice(XRHandDevice.rightHand);
+                    XRHandDevice.rightHand = null;
+                }
+#endif // ENABLE_INPUT_SYSTEM
             }
 
-            void OnUpdate() => m_Subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic);
-            void OnBeforeRender() => m_Subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.BeforeRender);
+            void OnUpdate() => Update(XRHandSubsystem.UpdateType.Dynamic);
+            void OnBeforeRender() => Update(XRHandSubsystem.UpdateType.BeforeRender);
+
+            void Update(XRHandSubsystem.UpdateType updateType)
+            {
+                var updateSuccessFlags = m_Subsystem.TryUpdateHands(updateType);
+                if (updateSuccessFlags != XRHandSubsystem.UpdateSuccessFlags.None)
+                    EnsureDevicesCreated(updateSuccessFlags, updateType);
+            }
+
+            // using this approach avoids initialization timing issues where
+            // InputSystem tears itself down at inopportune times
+            // (XRHandDevice.Create takes update success flags and type to
+            // use the same method at startup as it does during normal updates
+            // to avoid skipping the first frame of valid updates from the
+            // subsystem)
+            void EnsureDevicesCreated(XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateType)
+            {
+#if ENABLE_INPUT_SYSTEM
+                if (XRHandDevice.leftHand == null)
+                    XRHandDevice.leftHand = XRHandDevice.Create(m_Subsystem, Handedness.Left, updateSuccessFlags, updateType);
+
+                if (XRHandDevice.rightHand == null)
+                    XRHandDevice.rightHand = XRHandDevice.Create(m_Subsystem, Handedness.Right, updateSuccessFlags, updateType);
+#endif // ENABLE_INPUT_SYSTEM
+            }
 
             XRHandSubsystem m_Subsystem;
 

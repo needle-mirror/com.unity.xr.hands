@@ -111,6 +111,22 @@ namespace UnityEngine.XR.Hands
         public Action<UpdateSuccessFlags, UpdateType> handsUpdated;
 
         /// <summary>
+        /// A callback for when the subsystem begins tracking this hand's root pose and joints.
+        /// </summary>
+        /// <remarks>
+        /// This is called before <see cref="handsUpdated"/>.
+        /// </remarks>
+        public Action<XRHand> trackingAcquired;
+
+        /// <summary>
+        /// A callback for when the subsystem stops tracking this hand's root pose and joints.
+        /// </summary>
+        /// <remarks>
+        /// This is called before <see cref="handsUpdated"/>.
+        /// </remarks>
+        public Action<XRHand> trackingLost;
+
+        /// <summary>
         /// Call this to have the subsystem retrieve changes from the provider.
         /// Changes will be reflected in <see cref="leftHand"/> and <see cref="rightHand"/>.
         /// </summary>
@@ -137,6 +153,22 @@ namespace UnityEngine.XR.Hands
                 m_LeftHand.m_Joints,
                 ref m_RightHand.m_RootPose,
                 m_RightHand.m_Joints);
+
+            var wasLeftHandTracked = m_LeftHand.isTracked;
+            var success = UpdateSuccessFlags.LeftHandRootPose | UpdateSuccessFlags.LeftHandJoints;
+            m_LeftHand.isTracked = (flags & success) == success;
+            if (!wasLeftHandTracked && m_LeftHand.isTracked)
+                trackingAcquired?.Invoke(m_LeftHand);
+            else if (wasLeftHandTracked && !m_LeftHand.isTracked)
+                trackingLost?.Invoke(m_LeftHand);
+
+            var wasRightHandTracked = m_RightHand.isTracked;
+            success = UpdateSuccessFlags.RightHandRootPose | UpdateSuccessFlags.RightHandJoints;
+            m_RightHand.isTracked = (flags & success) == success;
+            if (!wasRightHandTracked && m_RightHand.isTracked)
+                trackingAcquired?.Invoke(m_RightHand);
+            else if (wasRightHandTracked && !m_RightHand.isTracked)
+                trackingLost?.Invoke(m_RightHand);
 
             if (handsUpdated != null)
                 handsUpdated.Invoke(flags, updateType);

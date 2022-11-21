@@ -19,17 +19,17 @@ namespace UnityEngine.XR.Hands
         Radius = 1 << 0,
 
         /// <summary>
-        /// Pose of current joint, relative to the <c>XROrigin</c>.
+        /// Pose of current joint, relative to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin).
         /// </summary>
         Pose = 1 << 1,
 
         /// <summary>
-        /// Linear velocity of current joint, relative to the <c>XROrigin</c>.
+        /// Linear velocity of current joint, relative to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin).
         /// </summary>
         LinearVelocity = 1 << 2,
 
         /// <summary>
-        /// Angular velocity of current joint, relative to the <c>XROrigin</c>.
+        /// Angular velocity of current joint, relative to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin).
         /// </summary>
         AngularVelocity = 1 << 3,
 

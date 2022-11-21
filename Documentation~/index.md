@@ -14,7 +14,9 @@ The XR Hands package defines an API that allows you to access hand tracking data
 
 The XR Hands package defines the API for hand tracking, but doesn't implement the feature itself. To use hand tracking on a target platform, you also need a separate *provider plug-in* package for that platform that has been updated to provide hand-tracking data to the [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem), the subsystem which this package defines.
 
-To see if the provider plug-in package you use supports hand tracking, check the documentation for that package.
+This package will work with OpenXR if the OpenXR package is installed and in use.
+
+To see if other provider plug-in packages you use supports hand tracking, check the documentation for those packages.
 
 > [!NOTE]
 > XR Hands will not work on a target platform unless you also install the provider plug-in package for that platform. See [Install XR Hands](xref:xrhands-install) for detailed setup instructions.

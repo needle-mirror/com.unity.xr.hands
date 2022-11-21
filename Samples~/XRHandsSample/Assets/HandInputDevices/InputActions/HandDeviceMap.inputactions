@@ -1,0 +1,334 @@
+{
+    "name": "HandDeviceMap",
+    "maps": [
+        {
+            "name": "HandDeviceMap",
+            "id": "825aaafe-ac6b-47e6-8214-10162c7ac024",
+            "actions": [
+                {
+                    "name": "LeftWristPosition",
+                    "type": "Value",
+                    "id": "d036229f-a083-4d19-b818-c20b75ec5b29",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LeftWristRotation",
+                    "type": "Value",
+                    "id": "772f1107-3f50-4f18-b21c-faecb6fb5938",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LeftIndexTipPosition",
+                    "type": "Value",
+                    "id": "94310526-fab9-4366-aafe-fad3bf449efe",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LeftIndexTipRotation",
+                    "type": "Value",
+                    "id": "80d2cabc-72f6-4ab8-8127-151a9c8c4ac8",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LeftPalmPosition",
+                    "type": "Value",
+                    "id": "ec9ba6c7-ed14-4d2d-b6ac-7546a7c0d04b",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LeftPalmRotation",
+                    "type": "Value",
+                    "id": "10871dd7-d45a-4418-9878-0e548744fe14",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LeftThumbTipPosition",
+                    "type": "Value",
+                    "id": "49d31f59-ea5b-4644-aa7d-c3c4209dc897",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LeftThumbTipRotation",
+                    "type": "Value",
+                    "id": "09219ca6-ae86-4ce4-a07e-21098703f4a8",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightWristPosition",
+                    "type": "Value",
+                    "id": "26de4fa6-d0e1-4a56-8702-2f049eae569a",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightWristRotation",
+                    "type": "Value",
+                    "id": "63f31848-d81a-446a-953c-121e51b6e070",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightIndexTipPosition",
+                    "type": "Value",
+                    "id": "a114d5c8-99ef-4795-bef0-7dc6001da16a",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightIndexTipRotation",
+                    "type": "Value",
+                    "id": "74ee120d-6509-41da-b7a2-c6231031b2e2",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightPalmPosition",
+                    "type": "Value",
+                    "id": "40e56ab4-f51a-4f3d-bcbf-9e76983a31d1",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightPalmRotation",
+                    "type": "Value",
+                    "id": "90aa9146-bbcc-443b-9552-2a00cd08f0be",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightThumbTipPosition",
+                    "type": "Value",
+                    "id": "eb86d8c9-a88d-4814-a4d5-3eb8d8b09a35",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightThumbTipRotation",
+                    "type": "Value",
+                    "id": "bc92a204-4a66-4c81-a288-76ebb9f2ee43",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "956b41b3-6489-4b74-9b31-e0e60a364ff6",
+                    "path": "<XRHandDevice>{LeftHand}/devicePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftWristPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ec101740-7919-4e7b-ae40-669932ffdb78",
+                    "path": "<XRHandDevice>{LeftHand}/deviceRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftWristRotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7f113900-9fc4-4c4b-86f9-b3cbc549f6bb",
+                    "path": "<XRHandDevice>{LeftHand}/pokePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftIndexTipPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "684de921-7b93-4152-afb5-413c3e354afc",
+                    "path": "<XRHandDevice>{LeftHand}/pokeRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftIndexTipRotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c378bfbc-217f-461a-ba0a-3a023fc5f5f5",
+                    "path": "<XRHandDevice>{LeftHand}/gripPosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftPalmPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6dc51f3a-4f9a-440e-bd1a-71e0f8f75392",
+                    "path": "<XRHandDevice>{LeftHand}/gripRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftPalmRotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "19cb2392-d6fa-4bec-80b1-eb7940f7a376",
+                    "path": "<XRHandDevice>{LeftHand}/pinchPosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftThumbTipPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3bf0234c-cb24-4cc5-825c-ff8fc3886f3c",
+                    "path": "<XRHandDevice>{LeftHand}/pinchRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftThumbTipRotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "25e8daa4-40ec-439d-a7cb-bd265b6f1b09",
+                    "path": "<XRHandDevice>{RightHand}/devicePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightWristPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "867c70e4-8bf2-4ed5-9e53-f96d5121dddc",
+                    "path": "<XRHandDevice>{RightHand}/deviceRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightWristRotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3b8943a4-e5a4-48ad-8625-bee50a5aec68",
+                    "path": "<XRHandDevice>{RightHand}/pokePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightIndexTipPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "96d46908-fbeb-4a4e-bffc-077abce3df92",
+                    "path": "<XRHandDevice>{RightHand}/pokeRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightIndexTipRotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ffb33b5a-d9ed-4602-ac91-c578b160aad5",
+                    "path": "<XRHandDevice>{RightHand}/gripPosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightPalmPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3208e389-ee5b-4e07-9a16-61079ccd1796",
+                    "path": "<XRHandDevice>{RightHand}/gripRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightPalmRotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "61dd642e-d96a-4619-ac83-84e17429232f",
+                    "path": "<XRHandDevice>{RightHand}/pinchPosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightThumbTipPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "92514982-9bbc-4c86-947d-3602d0370d68",
+                    "path": "<XRHandDevice>{RightHand}/pinchRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightThumbTipRotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

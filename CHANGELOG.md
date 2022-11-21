@@ -7,6 +7,18 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-pre.2] - 2022-11-21
+
+### Added
+
+- Added `isTracked` to `XRHand`.
+- Added `trackingAcquired` and `trackingLost` to `XRHandSubsystem`.
+- Added `XRHandDevice` and automatic managing of it if the Input System is enabled and hand-tracking is enabled in the target platform's build settings.
+
+The OpenXR package must be installed and enabled for these to work:
+- Added OpenXR support through `HandTracking` and `OpenXRHandProvider` types.
+- Added support for Meta Hand Tracking Aim extension in OpenXR through `MetaHandTrackingAim`.
+
 ## [1.0.0-pre.2] - 2022-10-26
 
 ### Added

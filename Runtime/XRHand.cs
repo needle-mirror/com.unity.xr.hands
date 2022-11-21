@@ -1,3 +1,4 @@
+using System;
 using Unity.Collections;
 
 namespace UnityEngine.XR.Hands
@@ -30,6 +31,11 @@ namespace UnityEngine.XR.Hands
         Handedness m_Handedness;
 
         /// <summary>
+        /// Whether the subsystem is currently tracking this hand's root pose and joints.
+        /// </summary>
+        public bool isTracked { get; internal set; }
+
+        /// <summary>
         /// Returns a string representation of the XRHand.
         /// </summary>
         /// <returns>
@@ -45,6 +51,7 @@ namespace UnityEngine.XR.Hands
             m_RootPose = Pose.identity;
             m_Handedness = handedness;
             m_Joints = new NativeArray<XRHandJoint>(XRHandJointID.EndMarker.ToIndex(), allocator);
+            isTracked = false;
         }
 
         internal void Dispose()

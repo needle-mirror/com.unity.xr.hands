@@ -1,0 +1,27 @@
+{
+    "name": "Unity.XR.Hands.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:ce522b6ed64c8be4c989a1d26d0e3275",
+        "GUID:4847341ff46394e83bb78fbd0652937e",
+        "GUID:96aa6ba065960476598f8f643e7252b6",
+        "GUID:95054a9710b0f114a85f6ced6b7f891c"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.xr.openxr",
+            "expression": "1.6.0",
+            "define": "UNITY_OPENXR_PACKAGE"
+        }
+    ],
+    "noEngineReferences": false
+}
