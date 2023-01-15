@@ -1,0 +1,374 @@
+{
+    "name": "MetaAim",
+    "maps": [
+        {
+            "name": "MetaAim",
+            "id": "d62b27b4-3db9-4aa3-97f4-3a70dd51408c",
+            "actions": [
+                {
+                    "name": "LeftFlags",
+                    "type": "Value",
+                    "id": "86377012-140f-4b95-b11f-3d6d8e8c6607",
+                    "expectedControlType": "Integer",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LeftIndexPressed",
+                    "type": "Button",
+                    "id": "e6ecf763-134e-4619-846f-d82c78645b84",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LeftIndexSlider",
+                    "type": "Value",
+                    "id": "29f76344-6840-4ddd-8494-3604301b4d35",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LeftMiddlePressed",
+                    "type": "Button",
+                    "id": "d3599a73-4bab-4ad1-a765-18755bb27c07",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LeftMiddleSlider",
+                    "type": "Value",
+                    "id": "b4df717a-c623-4221-8685-3cee9361fced",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LeftRingPressed",
+                    "type": "Button",
+                    "id": "9fef5507-a839-4a55-9218-e85b4459fef9",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LeftRingSlider",
+                    "type": "Value",
+                    "id": "b4edc4c5-dc07-4d6e-9b12-f14ba120467e",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LeftLittlePressed",
+                    "type": "Button",
+                    "id": "fda406ce-d376-4559-a5a8-e9cf564e5034",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LeftLittleSlider",
+                    "type": "Value",
+                    "id": "7531ea59-0eb4-4b17-b3b6-752a45dc6e00",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightFlags",
+                    "type": "Value",
+                    "id": "e2c7f296-9e53-4594-bb44-d0058cd88692",
+                    "expectedControlType": "Integer",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightIndexPressed",
+                    "type": "Button",
+                    "id": "6c138c49-31c8-49f9-99b7-29a9999c9998",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RightIndexSlider",
+                    "type": "Value",
+                    "id": "4129c82d-7d33-43f2-9a69-cbede1dac036",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightMiddlePressed",
+                    "type": "Button",
+                    "id": "4afee830-59eb-4ed1-beec-52a87b1dc45f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RightMiddleSlider",
+                    "type": "Value",
+                    "id": "806a7dd1-6083-44b1-8d3e-93dee3597b04",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightRingPressed",
+                    "type": "Button",
+                    "id": "7d4ac849-7a75-4238-b394-45d29181ddf2",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RightRingSlider",
+                    "type": "Value",
+                    "id": "56065514-05f0-4d69-887d-a1a2eab833f3",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RightLittlePressed",
+                    "type": "Button",
+                    "id": "ca83cfdd-7375-4f7e-b505-a057b72adce6",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RightLittleSlider",
+                    "type": "Value",
+                    "id": "b81c0736-03b1-4409-a512-486d449ee363",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "8dda5518-60b3-4f50-84cb-ff339dbc8609",
+                    "path": "<MetaAimHand>{LeftHand}/aimFlags",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftFlags",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5736f797-040b-4115-be62-c118bf41e82a",
+                    "path": "<MetaAimHand>{LeftHand}/indexPressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftIndexPressed",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "de1aeb44-152c-4a2b-902e-3f1b9ab339fd",
+                    "path": "<MetaAimHand>{LeftHand}/pinchStrengthIndex",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftIndexSlider",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bbc679c2-e2c4-48a7-8f67-9996a3e1e532",
+                    "path": "<MetaAimHand>{LeftHand}/middlePressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftMiddlePressed",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5118d5da-c63f-4fb4-9464-71ee21e7b08e",
+                    "path": "<MetaAimHand>{LeftHand}/pinchStrengthMiddle",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftMiddleSlider",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fa4ff71b-360d-4127-9645-10c4bd857fc5",
+                    "path": "<MetaAimHand>{LeftHand}/ringPressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftRingPressed",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a705c50c-6227-415d-b3c4-5a1e83f30b14",
+                    "path": "<MetaAimHand>{LeftHand}/pinchStrengthRing",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftRingSlider",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "71eaa803-2574-497a-8d65-a280a0394df9",
+                    "path": "<MetaAimHand>{LeftHand}/littlePressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftLittlePressed",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3daa5195-bd9f-42c4-b7fc-570062138bf5",
+                    "path": "<MetaAimHand>{LeftHand}/pinchStrengthLittle",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftLittleSlider",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c85a3499-c256-4b72-88b5-a9e0d7d320a0",
+                    "path": "<MetaAimHand>{RightHand}/aimFlags",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightFlags",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "df9c80c5-3902-4453-ae3a-0941a6384279",
+                    "path": "<MetaAimHand>{RightHand}/indexPressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightIndexPressed",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f6c873c4-c5ba-45d9-af28-b59c420a77a8",
+                    "path": "<MetaAimHand>/pinchStrengthIndex",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightIndexSlider",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1c00b696-0a18-4663-b1e2-81f53bcb9c5d",
+                    "path": "<MetaAimHand>{RightHand}/middlePressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightMiddlePressed",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "660a4ba0-b628-4138-9eda-61fb3d2a414d",
+                    "path": "<MetaAimHand>{RightHand}/pinchStrengthMiddle",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightMiddleSlider",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1ab5cf69-7f10-43a2-a750-cdbc92189680",
+                    "path": "<MetaAimHand>{RightHand}/ringPressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightRingPressed",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5ce11883-5cbe-4398-a201-9c893788477b",
+                    "path": "<MetaAimHand>{RightHand}/pinchStrengthRing",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightRingSlider",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5d4be5a7-7da4-4308-98f1-ac53e4e59193",
+                    "path": "<MetaAimHand>{RightHand}/littlePressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightLittlePressed",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2ee12182-6146-41f4-ab28-b66c18f66ee9",
+                    "path": "<MetaAimHand>{RightHand}/pinchStrengthLittle",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightLittleSlider",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

@@ -38,7 +38,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         BuildTargetGroups = new[] { BuildTargetGroup.Standalone, BuildTargetGroup.WSA, BuildTargetGroup.Android },
         Company = "Unity",
         Desc = "Creates and manages an XRHandSubsystem.",
-        DocumentationLink = "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.0/manual/features/handtracking.html",
+        DocumentationLink = "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.1/manual/features/handtracking.html",
         Version = "0.0.1",
         OpenxrExtensionStrings = extensionString,
         Category = UnityEditor.XR.OpenXR.Features.FeatureCategory.Feature,
@@ -170,19 +170,6 @@ namespace UnityEngine.XR.Hands.OpenXR
 #if UNITY_EDITOR
         protected override void GetValidationChecks(List<ValidationRule> results, BuildTargetGroup targetGroup)
         {
-            // remove rule that currently reads, "Only the Oculus Touch Interaction Profile is supported right now."
-            // (for users that want a hands-only experience)
-            for (int resultIndex = 0; resultIndex < results.Count; ++resultIndex)
-            {
-                var message = results[resultIndex].message;
-                if (message.Contains("Interaction Profile") &&
-                    (message.Contains("Quest") || message.Contains("Oculus") || message.Contains("Meta")))
-                {
-                    results.RemoveAt(resultIndex);
-                    break;
-                }
-            }
-
 #if !UNITY_OPENXR_PACKAGE_1_6
             results.Add(new ValidationRule(this)
             {

@@ -7,6 +7,23 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-pre.3] - 2023-01-15
+
+### Added
+
+- The `HandVisualizer` sample now opts into using optimized controls in the Input System. You must be on at least version 1.5.0 of the Input System package for this to have an effect.
+
+### Changed
+
+- `MetaAimHand` and `MetaAimFlags` have been moved outside of the `MetaHandTrackingAim` type and moved from the `UnityEngine.XR.Hands.OpenXR` namespace to `UnityEngine.XR.Hands`. The same input bindings will work the same as before.
+- The HandVisualizer sample meshes has been updated.
+
+### Fixed
+
+- Fixed issue where OpenXR would incorrectly report joints as having updated when they weren't actually tracked that frame. `XRHandSubsystem`'s `trackingAcquired` and `trackingLost`, as well as `XRHand.isTracked`, will now work as expected.
+- Fixed lifetime of `GameObject`s in `HandVisualizer` sample.
+- Reinstated the validation rule that the Meta Touch Interaction Profile is required in the OpenXR Interaction Profiles list.
+
 ## [1.1.0-pre.2] - 2022-11-21
 
 ### Added

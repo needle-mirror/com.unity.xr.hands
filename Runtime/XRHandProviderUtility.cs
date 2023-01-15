@@ -242,11 +242,29 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
 #endif // ENABLE_INPUT_SYSTEM
             }
 
-            void OnUpdate() => Update(XRHandSubsystem.UpdateType.Dynamic);
-            void OnBeforeRender() => Update(XRHandSubsystem.UpdateType.BeforeRender);
+            void OnUpdate()
+            {
+#if UNITY_EDITOR
+                m_AllowUpdates = true;
+#endif // UNITY_EDITOR
+                Update(XRHandSubsystem.UpdateType.Dynamic);
+            }
+
+            void OnBeforeRender()
+            {
+                Update(XRHandSubsystem.UpdateType.BeforeRender);
+#if UNITY_EDITOR
+                m_AllowUpdates = false;
+#endif // UNITY_EDITOR
+            }
 
             void Update(XRHandSubsystem.UpdateType updateType)
             {
+#if UNITY_EDITOR
+                if (!m_AllowUpdates)
+                    return;
+#endif // UNITY_EDITOR
+
                 var updateSuccessFlags = m_Subsystem.TryUpdateHands(updateType);
                 if (updateSuccessFlags != XRHandSubsystem.UpdateSuccessFlags.None)
                     EnsureDevicesCreated(updateSuccessFlags, updateType);
@@ -270,6 +288,10 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
             }
 
             XRHandSubsystem m_Subsystem;
+
+#if UNITY_EDITOR
+            bool m_AllowUpdates;
+#endif // UNITY_EDITOR
 
             struct XRHandSubsystemPlayerLoopRunnerUpdateSystem
             {

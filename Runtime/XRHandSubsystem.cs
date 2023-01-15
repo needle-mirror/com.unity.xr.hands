@@ -10,7 +10,7 @@ namespace UnityEngine.XR.Hands
     /// A subystem for detecting and tracking hands and their corresponding
     /// joint pose data.
     /// </summary>
-    public class XRHandSubsystem
+    public partial class XRHandSubsystem
         : SubsystemWithProvider<XRHandSubsystem, XRHandSubsystemDescriptor, XRHandSubsystemProvider>
     {
         /// <summary>
@@ -72,7 +72,7 @@ namespace UnityEngine.XR.Hands
             LeftHandJoints = 1 << 1,
 
             /// <summary>
-            /// The root pose root pose of <see cref="XRHandSubsystem.rightHand"/> was updated.
+            /// The root pose of <see cref="XRHandSubsystem.rightHand"/> was updated.
             /// </summary>
             RightHandRootPose = 1 << 2,
 
@@ -108,13 +108,13 @@ namespace UnityEngine.XR.Hands
         /// Use this if you don't own the subsystem, but want to be made aware of changes,
         /// such as if you are driving visuals.
         /// </summary>
-        public Action<UpdateSuccessFlags, UpdateType> handsUpdated;
+        public Action<XRHandSubsystem, UpdateSuccessFlags, UpdateType> updatedHands;
 
         /// <summary>
         /// A callback for when the subsystem begins tracking this hand's root pose and joints.
         /// </summary>
         /// <remarks>
-        /// This is called before <see cref="handsUpdated"/>.
+        /// This is called before <see cref="updatedHands"/>.
         /// </remarks>
         public Action<XRHand> trackingAcquired;
 
@@ -122,7 +122,7 @@ namespace UnityEngine.XR.Hands
         /// A callback for when the subsystem stops tracking this hand's root pose and joints.
         /// </summary>
         /// <remarks>
-        /// This is called before <see cref="handsUpdated"/>.
+        /// This is called before <see cref="updatedHands"/>.
         /// </remarks>
         public Action<XRHand> trackingLost;
 
@@ -170,8 +170,13 @@ namespace UnityEngine.XR.Hands
             else if (wasRightHandTracked && !m_RightHand.isTracked)
                 trackingLost?.Invoke(m_RightHand);
 
+            if (updatedHands != null)
+                updatedHands.Invoke(this, flags, updateType);
+
+#pragma warning disable 618
             if (handsUpdated != null)
                 handsUpdated.Invoke(flags, updateType);
+#pragma warning restore 618
 
             return flags;
         }

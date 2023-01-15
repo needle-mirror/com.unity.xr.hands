@@ -161,27 +161,25 @@ namespace UnityEngine.XR.Hands
                 }.ToJson()
             };
             var handDevice = InputSystem.InputSystem.AddDevice(desc) as XRHandDevice;
-
-            handDevice.m_Subsystem = subsystem;
-            subsystem.handsUpdated += handDevice.OnHandsUpdated;
+            subsystem.updatedHands += handDevice.OnUpdatedHands;
             handDevice.m_Handedness = handedness;
 
-            handDevice.OnHandsUpdated(updateSuccessFlags, updateType);
+            handDevice.OnUpdatedHands(subsystem, updateSuccessFlags, updateType);
             return handDevice;
         }
 
-        void OnHandsUpdated(XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateType)
+        void OnUpdatedHands(XRHandSubsystem subsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateType)
         {
             XRHand hand;
             bool areJointsValid = false;
             if (m_Handedness == Handedness.Left)
             {
-                hand = m_Subsystem.leftHand;
+                hand = subsystem.leftHand;
                 areJointsValid = (updateSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints) != XRHandSubsystem.UpdateSuccessFlags.None;
             }
             else
             {
-                hand = m_Subsystem.rightHand;
+                hand = subsystem.rightHand;
                 areJointsValid = (updateSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.RightHandJoints) != XRHandSubsystem.UpdateSuccessFlags.None;
             }
 
@@ -240,9 +238,7 @@ namespace UnityEngine.XR.Hands
 
         const string deviceProductName = "XRHandDevice";
 
-        XRHandSubsystem m_Subsystem;
         Handedness m_Handedness;
-
         bool m_WereJointsValid;
     }
 }
