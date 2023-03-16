@@ -19,17 +19,17 @@ namespace UnityEngine.XR.Hands
         Radius = 1 << 0,
 
         /// <summary>
-        /// Pose of current joint, relative to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin).
+        /// Pose of current joint.
         /// </summary>
         Pose = 1 << 1,
 
         /// <summary>
-        /// Linear velocity of current joint, relative to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin).
+        /// Linear velocity of current joint.
         /// </summary>
         LinearVelocity = 1 << 2,
 
         /// <summary>
-        /// Angular velocity of current joint, relative to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin).
+        /// Angular velocity of current joint.
         /// </summary>
         AngularVelocity = 1 << 3,
 
@@ -276,10 +276,29 @@ namespace UnityEngine.XR.Hands
         public static XRHandJointID FromIndex(int index) => (XRHandJointID)(index + 1);
 
         /// <summary>
-        /// Gets the first valid <see cref="XRHandJointID"/> of a given <see cref="XRHandFingerID"/>.
+        /// Gets the metacarpal <see cref="XRHandJointID"/> of a given <see cref="XRHandFingerID"/>.
         /// </summary>
-        /// <param name="fingerId">ID of the finger you want the first valid <see cref="XRHandJointID"/> of.</param>
-        /// <returns>First valid <see cref="XRHandJointID"/> for the given finger.</returns>
+        /// <param name="fingerId">ID of the finger of which you want the first <see cref="XRHandJointID"/>.</param>
+        /// <returns>
+        /// First <see cref="XRHandJointID"/> for the given finger in an <see cref="XRHand"/>
+        /// object's list of joints.
+        /// </returns>
+        /// <example>
+        /// You can use <c>GetFrontJointID</c> and <see cref="GetBackJointID(XRHandFingerID)"/> to iterate
+        /// through the joints of a specific finger:
+        /// <code>
+        /// <![CDATA[
+        ///     for(var i = XRHandFingerID.Thumb.GetFrontJointID().ToIndex(); // metacarpal
+        ///             i <= XRHandFingerID.Thumb.GetBackJointID().ToIndex();  // tip
+        ///             i++)
+        ///     {
+        ///         // hand is an XRHand object
+        ///         XRHandJoint fingerJoint = hand.GetJoint(XRHandJointIDUtility.FromIndex(i));
+        ///         // Use data...
+        ///     }
+        /// ]]>
+        /// </code>
+        /// </example>
         public static XRHandJointID GetFrontJointID(this XRHandFingerID fingerId)
         {
             switch (fingerId)
@@ -304,10 +323,13 @@ namespace UnityEngine.XR.Hands
         }
 
         /// <summary>
-        /// Gets the last valid <see cref="XRHandJointID"/> of a given <see cref="XRHandFingerID"/>.
+        /// Gets the tip <see cref="XRHandJointID"/> of a given <see cref="XRHandFingerID"/>.
         /// </summary>
-        /// <param name="fingerId">ID of the finger you want the last valid <see cref="XRHandJointID"/> of.</param>
-        /// <returns>Last valid <see cref="XRHandJointID"/> for the given finger.</returns>
+        /// <param name="fingerId">ID of the finger you want the last <see cref="XRHandJointID"/> of.</param>
+        /// <returns>Last <see cref="XRHandJointID"/> for the given finger in an <see cref="XRHand"/>
+        /// object's list of joints.</returns>
+        /// <remarks>Use with <see cref="GetFrontJointID(XRHandFingerID)"/> to iterate through the joints
+        /// of a finger.</remarks>
         public static XRHandJointID GetBackJointID(this XRHandFingerID fingerId)
         {
             switch (fingerId)

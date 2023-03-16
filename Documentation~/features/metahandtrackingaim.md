@@ -1,6 +1,9 @@
-# Meta Hand Tracking Aim
+---
+uid: xrhands-meta-aim-feature
+---
+# Meta Aim Hand OpenXR feature
 
-Unity OpenXR provides support for the Meta Hand Tracking Aim extension specified by Khronos. For this extension to work, you must also enable the [Hand Tracking interaction profile](handtracking.md).
+Unity OpenXR provides support for the Meta Hand Tracking Aim extension specified by Khronos. For this extension to work, you must also enable the [Hand Tracking feature](handtracking.md).
 
 For this extension to be available, you must install the [OpenXR package](https://docs.unity3d.com/Packages/com.unity.xr.openxr@latest).
 

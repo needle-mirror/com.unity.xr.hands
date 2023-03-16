@@ -9,9 +9,7 @@ namespace UnityEngine.XR.Hands
     public partial class XRHandSubsystem
     {
         /// <summary>
-        /// A callback for when hands a call to <see cref="TryUpdateHands"/> completes.
-        /// Use this if you don't own the subsystem, but want to be made aware of changes,
-        /// such as if you are driving visuals.
+        /// Obsolete. Use <see cref="updatedHands"/> instead.
         /// </summary>
         [Obsolete("Use updatedHands instead.")]
         public Action<UpdateSuccessFlags, UpdateType> handsUpdated;

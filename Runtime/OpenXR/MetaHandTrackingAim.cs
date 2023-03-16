@@ -28,7 +28,7 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// XR_FB_hand_tracking_aim</see> in the underlying runtime. This creates
     /// new <see cref="InputDevice"/>s with the <see cref="InputDeviceCharacteristics.HandTracking"/>
     /// characteristic where the <see cref="TrackedDevice.devicePosition"/>
-    /// and <see cref="TrackedDevice.devicePosition"/> represent the aim pose
+    /// and <see cref="TrackedDevice.deviceRotation"/> represent the aim pose
     /// exposed by this extension.
     /// </summary>
     /// <remarks>
@@ -75,7 +75,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </summary>
         const string deviceManufacturerName = "OpenXR Meta";
 
-        /// <inheritdoc/>
+        /// <summary>See <see cref="OpenXRFeature.OnSubsystemStart"/>.</summary>
         protected override void OnSubsystemStart()
         {
             if (UnityOpenXRHands_ToggleMetaAim(true))
@@ -87,11 +87,11 @@ namespace UnityEngine.XR.Hands.OpenXR
             }
             else
             {
-                Debug.LogError("Couldn't enable Meta aim retrieval in plugin - please ensure you enabled the Hand Tracking feature.");
+                Debug.LogError("Couldn't enable Meta aim retrieval in plugin - please ensure you enabled the Hand Tracking Subsystem feature in the OpenXR project settings.");
             }
         }
 
-        /// <inheritdoc/>
+        /// <summary>See <see cref="OpenXRFeature.OnSubsystemStop"/>.</summary>
         protected override void OnSubsystemStop()
         {
             UnityOpenXRHands_ToggleMetaAim(false);
@@ -130,9 +130,9 @@ namespace UnityEngine.XR.Hands.OpenXR
         void OnUpdatedHands(XRHandSubsystem subsystem, XRHandSubsystem.UpdateSuccessFlags successFlags, XRHandSubsystem.UpdateType updateType)
         {
             if ((successFlags & (XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints)) != 0)
-                Hands.MetaAimHand.left.UpdateHand(true);
+                Hands.MetaAimHand.left.UpdateHand(true, (successFlags & XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose) != 0);
             if ((successFlags & (XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints)) != 0)
-                Hands.MetaAimHand.right.UpdateHand(false);
+                Hands.MetaAimHand.right.UpdateHand(false, (successFlags & XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose) != 0);
         }
 
         [DllImport("UnityOpenXRHands")]

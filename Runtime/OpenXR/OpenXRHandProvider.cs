@@ -17,17 +17,23 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// </summary>
     public unsafe class OpenXRHandProvider : XRHandSubsystemProvider
     {
-        /// <inheritdoc/>
+        /// <summary>
+        /// See <see cref="UnityEngine.SubsystemsImplementation.SubsystemProvider{T}.Start"/>.
+        /// </summary>
         public override void Start()
         {
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// See <see cref="UnityEngine.SubsystemsImplementation.SubsystemProvider{T}.Stop"/>.
+        /// </summary>
         public override void Stop()
         {
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// See <see cref="UnityEngine.SubsystemsImplementation.SubsystemProvider{T}.Destroy"/>.
+        /// </summary>
         public override void Destroy()
         {
             UnityOpenXRHands_Destroy();

@@ -58,11 +58,13 @@ class TestHandProvider : XRHandSubsystemProvider
                 continue;
 
             leftHandJoints[jointIndex] = XRHandProviderUtility.CreateJoint(
+                Handedness.Left,
                 XRHandJointTrackingState.Pose,
                 XRHandJointIDUtility.FromIndex(jointIndex),
                 TestHandData.leftHand[jointIndex]);
 
             rightHandJoints[jointIndex] = XRHandProviderUtility.CreateJoint(
+                Handedness.Right,
                 XRHandJointTrackingState.Pose,
                 XRHandJointIDUtility.FromIndex(jointIndex),
                 TestHandData.rightHand[jointIndex]);

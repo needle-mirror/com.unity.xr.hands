@@ -11,7 +11,7 @@ namespace UnityEngine.XR.Hands
 {
     /// <summary>
     /// The flags in the extension for each hand that can be read from
-    /// <see cref="MetaAimHandDevice.aimFlags"/> and casting to this type.
+    /// <see cref="MetaAimHand.aimFlags"/> and casting to this type.
     /// </summary>
     [Flags]
     [Preserve]
@@ -28,10 +28,8 @@ namespace UnityEngine.XR.Hands
         Computed = 1 << 0,
 
         /// <summary>
-        /// The aim pose is valid. Retrieve this data from
-        /// <see cref="TrackedDevice.devicePosition"/> and
-        /// <see cref="TrackedDevice.deviceRotation"/> that
-        /// <see cref="MetaAimHand"/> inherits.
+        /// The aim pose is generally pointed away from the face and is valid
+        /// for use with UI.
         /// </summary>
         Valid = 1 << 1,
 
@@ -88,19 +86,30 @@ namespace UnityEngine.XR.Hands
     /// <summary>
     /// A <see cref="TrackedDevice"/> based off the data exposed in the
     /// <see href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_FB_hand_tracking_aim">
-    /// Meta Hand Tracking Aim extension</see>. Enabled through <see cref="MetaHandTrackingAim"/>
+    /// Meta Hand Tracking Aim extension</see>. Enabled through [Meta Hand Tracking Aim](xref:UnityEngine.XR.Hands.OpenXR.MetaHandTrackingAim)
     /// or by enabling hand-tracking in the Oculus plug-in if the Input System
     /// back-end is enabled.
     /// </summary>
     /// <remarks>
     /// For this type to function, you must enable hand-tracking and be running
     /// with either the OpenXR or Oculus plug-in.
+    /// 
+    /// The <see cref="TrackedDevice.devicePosition"/> and
+    /// <see cref="TrackedDevice.deviceRotation"/> inherited from <see cref="TrackedDevice"/>
+    /// represent the aim pose. You can use these values to discover the target for pinch gestures,
+    /// when appropriate. 
+    /// 
+    /// Use the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin) in the scene to position and orient
+    /// the device properly. If you are using this data to set the Transform of a GameObject in
+    /// the scene hierarchy, you can set the local position and rotation of the Transform and make
+    /// it a child of the <c>CameraOffset</c> object below the <c>XROrigin</c>. Otherwise, you can use the
+    /// Transform of the <c>CameraOffset</c> to transform the data into world space.
     /// </remarks>
 #if UNITY_EDITOR
     [UnityEditor.InitializeOnLoad]
 #endif
     [Preserve, InputControlLayout(displayName = "Meta Aim Hand", commonUsages = new[] { "LeftHand", "RightHand" })]
-    public class MetaAimHand : TrackedDevice
+    public partial class MetaAimHand : TrackedDevice
     {
         /// <summary>
         /// The left-hand <see cref="InputDevice"/> that contains
@@ -246,9 +255,9 @@ namespace UnityEngine.XR.Hands
             if (deviceDescriptor != null)
             {
                 if ((deviceDescriptor.characteristics & InputDeviceCharacteristics.Left) != 0)
-                    UnityEngine.InputSystem.InputSystem.SetDeviceUsage(this, UnityEngine.InputSystem.CommonUsages.LeftHand);
+                    InputSystem.InputSystem.SetDeviceUsage(this, InputSystem.CommonUsages.LeftHand);
                 else if ((deviceDescriptor.characteristics & InputDeviceCharacteristics.Right) != 0)
-                    UnityEngine.InputSystem.InputSystem.SetDeviceUsage(this, UnityEngine.InputSystem.CommonUsages.RightHand);
+                    InputSystem.InputSystem.SetDeviceUsage(this, InputSystem.CommonUsages.RightHand);
             }
         }
 
@@ -257,10 +266,11 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         /// <param name="extraCharacteristics">
         /// Additional characteristics to build the hand device with besides
-        /// <see cref="InputDeviceCharacteristics.HandTracking"/>.
+        /// <see cref="InputDeviceCharacteristics.HandTracking"/> and <see cref="InputDeviceCharacteristics.TrackedDevice"/>.
         /// </param>
         /// <returns>
-        /// A <see cref="MetaAimHand"/> retrieved from <see cref="InputSystem.AddDevice"/>.
+        /// A <see cref="MetaAimHand"/> retrieved from
+        /// <see cref="InputSystem.InputSystem.AddDevice(InputDeviceDescription)"/>.
         /// </returns>
         /// <remarks>
         /// It is recommended that you do not call this yourself. It will be
@@ -276,8 +286,8 @@ namespace UnityEngine.XR.Hands
                 manufacturer = k_MetaAimHandDeviceManufacturerName,
                 capabilities = new XRDeviceDescriptor
                 {
-                    characteristics = InputDeviceCharacteristics.HandTracking | extraCharacteristics,
-                    inputFeatures = new List<XRFeatureDescriptor>()
+                    characteristics = InputDeviceCharacteristics.HandTracking | InputDeviceCharacteristics.TrackedDevice | extraCharacteristics,
+                    inputFeatures = new List<XRFeatureDescriptor>
                     {
                         new XRFeatureDescriptor
                         {
@@ -345,11 +355,14 @@ namespace UnityEngine.XR.Hands
         /// It is not recommended that you call this directly. This will be called
         /// for you when appropriate.
         /// </summary>
+        /// <param name="isHandRootTracked">
+        /// Whether the hand root pose is valid.
+        /// </param>
         /// <param name="aimFlags">
         /// The aim flags to update in the Input System.
         /// </param>
         /// <param name="aimPose">
-        /// The aim pose to update in the Input System.
+        /// The aim pose to update in the Input System. Used if the hand root is tracked.
         /// </param>
         /// <param name="pinchIndex">
         /// The pinch strength for the index finger to update in the Input System.
@@ -364,6 +377,7 @@ namespace UnityEngine.XR.Hands
         /// The pinch strength for the little finger to update in the Input System.
         /// </param>
         public void UpdateHand(
+            bool isHandRootTracked,
             MetaAimFlags aimFlags,
             Pose aimPose,
             float pinchIndex,
@@ -422,7 +436,7 @@ namespace UnityEngine.XR.Hands
                 return;
             }
 
-            if ((aimFlags & MetaAimFlags.Valid) != MetaAimFlags.None)
+            if (isHandRootTracked)
             {
                 InputSystem.InputSystem.QueueDeltaStateEvent(devicePosition, aimPose.position);
                 InputSystem.InputSystem.QueueDeltaStateEvent(deviceRotation, aimPose.rotation);
@@ -443,7 +457,7 @@ namespace UnityEngine.XR.Hands
             }
         }
 
-        internal void UpdateHand(bool isLeft)
+        internal void UpdateHand(bool isLeft, bool isHandRootTracked)
         {
             UnityOpenXRHands_RetrieveMetaAim(
                 isLeft,
@@ -456,6 +470,7 @@ namespace UnityEngine.XR.Hands
                 out float pinchLittle);
 
             UpdateHand(
+                isHandRootTracked,
                 aimFlags,
                 new Pose(aimPosePosition, aimPoseRotation),
                 pinchIndex,
@@ -481,7 +496,7 @@ namespace UnityEngine.XR.Hands
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void RegisterLayout()
         {
-            UnityEngine.InputSystem.InputSystem.RegisterLayout<MetaAimHand>(
+            InputSystem.InputSystem.RegisterLayout<MetaAimHand>(
                     matches: new InputDeviceMatcher()
                     .WithProduct(k_MetaAimHandDeviceProductName)
                     .WithManufacturer(k_MetaAimHandDeviceManufacturerName));

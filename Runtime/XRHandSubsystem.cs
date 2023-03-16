@@ -1,22 +1,52 @@
 using System;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.SubsystemsImplementation;
 using UnityEngine.XR.Hands.ProviderImplementation;
 
 namespace UnityEngine.XR.Hands
 {
     /// <summary>
-    /// A subystem for detecting and tracking hands and their corresponding
+    /// A subsystem for detecting and tracking hands and their corresponding
     /// joint pose data.
     /// </summary>
+    /// <remarks>
+    /// The <c>XRHandSystem</c> class is the main entry point for accessing hand tracking data
+    /// provided by an XR device. A provider implementation that reads tracking data from the
+    /// user's device and provides updates to this subsystem must also be available. The XR
+    /// Hands package includes a provider implementation for OpenXR.
+    ///
+    /// Get an instance for this <c>XRHandSubsystem</c> from the active XR
+    /// loader, as described in [Get the XRHandSubsystem instance](xref:xrhands-access-data#get-instance).
+    /// 
+    /// For lowest latency, read the tracking data available from the <see cref="leftHand"/>
+    /// and <see cref="rightHand"/> properties in a delegate function assigned to the
+    /// <see cref="updatedHands"/> callback. This callback is invoked twice per frame, once near
+    /// the <c>MonoBehaviour.Update</c> event and once near the <see cref="Application.onBeforeRender"/>
+    /// event. The <see cref="UpdateType.BeforeRender"/> update provides the lowest latency between
+    /// hand motion and rendering, but occurs too late to affect physics. In addition, trying to
+    /// perform too much work during the <c>BeforeRender</c> callback can negatively impact framerate.
+    /// For best results, update game logic affected by hand tracking in a
+    /// <see cref="UpdateType.Dynamic"/> update and perform a final update of hand visuals in a
+    /// <see cref="UpdateType.BeforeRender"/> update.
+    ///
+    /// Refer to [Hand tracking data](xref:xrhands-tracking-data) for more information.
+    /// </remarks>
     public partial class XRHandSubsystem
         : SubsystemWithProvider<XRHandSubsystem, XRHandSubsystemDescriptor, XRHandSubsystemProvider>
     {
         /// <summary>
-        /// Constructs a subsystem. Do not invoke directly; call <c>Create</c>
-        /// on the <see cref="XRHandSubsystemDescriptor"/> instead.
+        /// Constructs a subsystem. Do not invoke directly.
         /// </summary>
+        /// <remarks>
+        /// Do not call this constructor if you are an application developer consuming hand tracking data.
+        /// Instead, get an instance for this <c>XRHandTrackingSubsystem</c> from the active XR
+        /// loader, as described in [Get the XRHandSubsystem instance](xref:xrhands-access-data#get-instance).
+        ///
+        /// If you are implementing an XR hand data provider, call <c>Create</c>
+        /// on the <see cref="XRHandSubsystemDescriptor"/> or call
+        /// <see cref="UnityEngine.XR.Management.XRLoaderHelper.CreateSubsystem"/>
+        /// instead of invoking this constructor.
+        /// </remarks>
         public XRHandSubsystem()
         {
         }
@@ -25,6 +55,15 @@ namespace UnityEngine.XR.Hands
         /// Gets the left <see cref="XRHand"/> that is being tracked by this
         /// subsystem.
         /// </summary>
+        /// <remarks>
+        /// Check the <see cref="updateSuccessFlags"/> property to determine what data
+        /// associated with this hand was successfully updated in the last update, if any.
+        /// The <see cref="updateSuccessFlags"/> value is also passed to the callback
+        /// function assigned to <see cref="updatedHands"/>.
+        ///
+        /// Refer to [Hand data model](xref:xrhands-data-model) for a description of the
+        /// available hand tracking data.
+        /// </remarks>
         public XRHand leftHand => m_LeftHand;
         XRHand m_LeftHand;
 
@@ -32,16 +71,35 @@ namespace UnityEngine.XR.Hands
         /// Gets the right <see cref="XRHand"/> that is being tracked by this
         /// subsystem.
         /// </summary>
+        /// <remarks>
+        /// Check the <see cref="updateSuccessFlags"/> property to determine what data
+        /// associated with this hand was successfully updated in the last update, if any.
+        /// The <see cref="updateSuccessFlags"/> value is also passed to the callback
+        /// function assigned to <see cref="updatedHands"/>.
+        ///
+        /// Refer to [Hand data model](xref:xrhands-data-model) for a description of the
+        /// available hand tracking data.
+        /// </remarks>
         public XRHand rightHand => m_RightHand;
         XRHand m_RightHand;
 
         /// <summary>
-        /// Gets a layout array that is marked true for each joint that will
-        /// ever by tracked by the provider attached to this subsystem. To
-        /// retrieve the matching index, call <c>.ToIndex()</c> on the
-        /// <see cref="XRHandJointID"/> in question.
+        /// Indicates which joints in the <see cref="XRHandJointID"/> list are
+        /// supported by the current hand data provider.
         /// </summary>
         /// <remarks>
+        /// Hand data providers might not support tracking every joint in the
+        /// <see cref="XRHandJointID"/> list. This array contains an element for
+        /// each possible joint. A value of true indicates the the current provider
+        /// supports tracking the associated joint.
+        /// 
+        /// To get the correct array index for a joint, call
+        /// <see cref="XRHandJointIDUtility.ToIndex(XRHandJointID)"/> on the
+        /// <see cref="XRHandJointID"/> in question.
+        ///
+        /// Refer to [Get supported joints array](xref:xrhands-access-data#joint-layout)
+        /// for additional information.
+        /// 
         /// This array will already be valid as soon as you have a reference to
         /// a subsystem (in other words, it's filled out before the subsystem is
         /// returned by a call to <c>XRHandSubsystemDescriptor.Create</c>).
@@ -50,14 +108,28 @@ namespace UnityEngine.XR.Hands
         NativeArray<bool> m_JointsInLayout;
 
         /// <summary>
-        /// Return type for <see cref="XRHandSubsystem.TryUpdateHands"/>.
+        /// Describes what data on either hand was updated during the most recent hand update.
+        /// </summary>
+        /// <remarks>
+        /// This property updated every time the hand data is updated, which only occurs while this
+        /// XRHandSubsystem is running.
+        /// 
+        /// The <see cref="updateSuccessFlags"/> value is also passed to the callback
+        /// function assigned to <see cref="updatedHands"/>.
+        /// </remarks>
+        /// <value>The flags for the most recent update. Applies to the <see cref="leftHand"/>
+        /// and <see cref="rightHand"/> properties.</value>
+        public UpdateSuccessFlags updateSuccessFlags { get; protected set; }
+
+        /// <summary>
         /// Describes what data on either hand was updated during the call.
         /// </summary>
+        /// <seealso cref="updateSuccessFlags"/>
         [Flags]
         public enum UpdateSuccessFlags
         {
             /// <summary>
-            /// No data for either hand was successfully updated.
+            /// No data was successfully updated for either hand.
             /// </summary>
             None = 0,
 
@@ -88,8 +160,10 @@ namespace UnityEngine.XR.Hands
         }
 
         /// <summary>
-        /// Update type for <see cref="XRHandSubsystem.TryUpdateHands"/>.
+        /// The timing of a hand update during a frame.
         /// </summary>
+        /// <seealso cref="updatedHands"/>
+        /// <seealso cref="TryUpdateHands(UpdateType)"/>
         public enum UpdateType
         {
             /// <summary>
@@ -104,31 +178,52 @@ namespace UnityEngine.XR.Hands
         }
 
         /// <summary>
-        /// A callback for when hands a call to <see cref="TryUpdateHands"/> completes.
-        /// Use this if you don't own the subsystem, but want to be made aware of changes,
-        /// such as if you are driving visuals.
+        /// A callback invoked for each hand update.
         /// </summary>
+        /// <remarks>
+        /// This callback is invoked twice per frame, once near
+        /// the <c>MonoBehaviour.Update</c> event and once near the <see cref="Application.onBeforeRender"/>
+        /// event. The <see cref="UpdateType.BeforeRender"/> update provides the lowest latency between
+        /// hand motion and rendering, but occurs too late to affect physics. In addition, trying to
+        /// perform too much work during the <c>BeforeRender</c> callback can negatively impact framerate.
+        /// For best results, update game logic affected by hand tracking in a
+        /// <see cref="UpdateType.Dynamic"/> update and update hand visuals in a
+        /// <see cref="UpdateType.BeforeRender"/> update.
+        ///
+        /// The delegate assigned to this property must take three parameters, which have the
+        /// following types and assigned values when the callback is invoked:
+        ///
+        /// * <see cref="XRHandSubsystem"/>: contains a reference to this subsystem.
+        /// * <see cref="UpdateSuccessFlags"/>: the flags indicating which data could be updated.
+        /// * <see cref="UpdateType"/>: the update timing.
+        /// </remarks>
         public Action<XRHandSubsystem, UpdateSuccessFlags, UpdateType> updatedHands;
 
         /// <summary>
-        /// A callback for when the subsystem begins tracking this hand's root pose and joints.
+        /// A callback invoked when the subsystem begins tracking a hand's root pose and joints.
         /// </summary>
         /// <remarks>
         /// This is called before <see cref="updatedHands"/>.
+        ///
+        /// The delegate assigned to this property must take one parameter of type
+        /// <see cref="XRHand"/>, which is assigned a reference to the hand whose tracking was acquired.
         /// </remarks>
         public Action<XRHand> trackingAcquired;
 
         /// <summary>
-        /// A callback for when the subsystem stops tracking this hand's root pose and joints.
+        /// A callback invoked when the subsystem stops tracking a hand's root pose and joints.
         /// </summary>
         /// <remarks>
         /// This is called before <see cref="updatedHands"/>.
+        /// 
+        /// The delegate assigned to this property must take one parameter of type
+        /// <see cref="XRHand"/>, which is assigned a reference to the hand whose tracking was lost.
         /// </remarks>
         public Action<XRHand> trackingLost;
 
         /// <summary>
-        /// Call this to have the subsystem retrieve changes from the provider.
-        /// Changes will be reflected in <see cref="leftHand"/> and <see cref="rightHand"/>.
+        /// Request an update from the hand data provider. Application developers
+        /// consuming hand tracking data should not call this function. 
         /// </summary>
         /// <param name="updateType">
         /// Informs the provider which kind of timing the update is being
@@ -138,6 +233,17 @@ namespace UnityEngine.XR.Hands
         /// Returns <see cref="UpdateSuccessFlags"/> to describe what data was updated successfully.
         /// </returns>
         /// <remarks>
+        /// This function must be called by the subsystem implementation to request an update from
+        /// the hand data provider.
+        ///
+        /// When an update is complete, the updated data is available from the <see cref="leftHand"/> and
+        /// <see cref="rightHand"/> properties. The <see cref="updatedHands"/> callback is invoked.
+        ///
+        /// The update is performed immediately. If you request an update timing that occurs in the
+        /// future, for example, requesting <see cref="UpdateType.BeforeRender"/> from a
+        /// <c>MonoBehaviour.Update</c> function, then the provider predicts what the hand data
+        /// will be at the requested time.
+        /// 
         /// If overriding this method in a derived type, it is expected that you
         /// call <c>base.TryUpdateHands(updateType)</c> and return what it
         /// returns.
@@ -147,7 +253,7 @@ namespace UnityEngine.XR.Hands
             if (!running)
                 return UpdateSuccessFlags.None;
 
-            var flags = provider.TryUpdateHands(
+            updateSuccessFlags = provider.TryUpdateHands(
                 updateType,
                 ref m_LeftHand.m_RootPose,
                 m_LeftHand.m_Joints,
@@ -156,7 +262,7 @@ namespace UnityEngine.XR.Hands
 
             var wasLeftHandTracked = m_LeftHand.isTracked;
             var success = UpdateSuccessFlags.LeftHandRootPose | UpdateSuccessFlags.LeftHandJoints;
-            m_LeftHand.isTracked = (flags & success) == success;
+            m_LeftHand.isTracked = (updateSuccessFlags & success) == success;
             if (!wasLeftHandTracked && m_LeftHand.isTracked)
                 trackingAcquired?.Invoke(m_LeftHand);
             else if (wasLeftHandTracked && !m_LeftHand.isTracked)
@@ -164,21 +270,21 @@ namespace UnityEngine.XR.Hands
 
             var wasRightHandTracked = m_RightHand.isTracked;
             success = UpdateSuccessFlags.RightHandRootPose | UpdateSuccessFlags.RightHandJoints;
-            m_RightHand.isTracked = (flags & success) == success;
+            m_RightHand.isTracked = (updateSuccessFlags & success) == success;
             if (!wasRightHandTracked && m_RightHand.isTracked)
                 trackingAcquired?.Invoke(m_RightHand);
             else if (wasRightHandTracked && !m_RightHand.isTracked)
                 trackingLost?.Invoke(m_RightHand);
 
             if (updatedHands != null)
-                updatedHands.Invoke(this, flags, updateType);
+                updatedHands.Invoke(this, updateSuccessFlags, updateType);
 
 #pragma warning disable 618
             if (handsUpdated != null)
-                handsUpdated.Invoke(flags, updateType);
+                handsUpdated.Invoke(updateSuccessFlags, updateType);
 #pragma warning restore 618
 
-            return flags;
+            return updateSuccessFlags;
         }
 
         /// <summary>
@@ -196,10 +302,17 @@ namespace UnityEngine.XR.Hands
             {
                 if (!m_JointsInLayout[jointIndex])
                 {
-                    var joint = XRHandJoint.willNeverBeValid;
-                    joint.m_Id = XRHandJointIDUtility.FromIndex(jointIndex);
-                    m_LeftHand.m_Joints[jointIndex] = joint;
-                    m_RightHand.m_Joints[jointIndex] = joint;
+                    var id = XRHandJointIDUtility.FromIndex(jointIndex);
+                    m_LeftHand.m_Joints[jointIndex] = XRHandProviderUtility.CreateJoint(
+                        Handedness.Left,
+                        XRHandJointTrackingState.WillNeverBeValid,
+                        id,
+                        Pose.identity);
+                    m_RightHand.m_Joints[jointIndex] = XRHandProviderUtility.CreateJoint(
+                        Handedness.Right,
+                        XRHandJointTrackingState.WillNeverBeValid,
+                        id,
+                        Pose.identity);
                 }
             }
         }

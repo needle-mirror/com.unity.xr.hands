@@ -7,34 +7,39 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.1.0-pre.3] - 2023-01-15
-
-### Added
-
-- The `HandVisualizer` sample now opts into using optimized controls in the Input System. You must be on at least version 1.5.0 of the Input System package for this to have an effect.
-
-### Changed
-
-- `MetaAimHand` and `MetaAimFlags` have been moved outside of the `MetaHandTrackingAim` type and moved from the `UnityEngine.XR.Hands.OpenXR` namespace to `UnityEngine.XR.Hands`. The same input bindings will work the same as before.
-- The HandVisualizer sample meshes has been updated.
-
-### Fixed
-
-- Fixed issue where OpenXR would incorrectly report joints as having updated when they weren't actually tracked that frame. `XRHandSubsystem`'s `trackingAcquired` and `trackingLost`, as well as `XRHand.isTracked`, will now work as expected.
-- Fixed lifetime of `GameObject`s in `HandVisualizer` sample.
-- Reinstated the validation rule that the Meta Touch Interaction Profile is required in the OpenXR Interaction Profiles list.
-
-## [1.1.0-pre.2] - 2022-11-21
+## [1.1.0] - 2023-03-16
 
 ### Added
 
 - Added `isTracked` to `XRHand`.
 - Added `trackingAcquired` and `trackingLost` to `XRHandSubsystem`.
 - Added `XRHandDevice` and automatic managing of it if the Input System is enabled and hand-tracking is enabled in the target platform's build settings.
+- The `HandVisualizer` sample now opts into using optimized controls in the Input System if you enable the **Use Optimized Controls** option. You must be on at least version 1.5.0 of the Input System package for this to have an effect.
+- Added `handedness` getter property to `XRHandJoint`.
+- Added `updateSuccessFlags` property to `XRHandSubsystem` to allow the most recent `UpdateSuccessFlags` to be polled. This value matches the argument to the `updatedHands` callback.
 
 The OpenXR package must be installed and enabled for these to work:
 - Added OpenXR support through `HandTracking` and `OpenXRHandProvider` types.
 - Added support for Meta Hand Tracking Aim extension in OpenXR through `MetaHandTrackingAim`.
+
+### Changed
+
+- `MetaAimHand` and `MetaAimFlags` have been moved outside of the `MetaHandTrackingAim` type and moved from the `UnityEngine.XR.Hands.OpenXR` namespace to `UnityEngine.XR.Hands`. The same input bindings will work the same as before.
+- The HandVisualizer sample meshes has been updated.
+- Changed Hand Visualizer component so it skips setting the shared material on the instantiated hand mesh prefabs when the Hand Mesh Material property is not set.
+- Providers must now create joints with a known `Handedness` during `TryUpdateHands` when calling `XRHandProviderUtility.CreateJoint`.
+- Changed Meta Aim Hand input devices that are added to the Input System to continue updating the `devicePosition` and `deviceRotation` controls even when the `MetaAimFlags.Valid` bit flag is not set. Instead it uses whether the hand root is valid. In practice, the `MetaAimFlags.Valid` flag currently does not necessarily indicate whether the pose is valid but instead is based on whether the user is in a natural orientation for distant UI panel selection.
+- Changed HandVisualizer sample by adding an Assembly Definition file (`.asmdef`).
+
+### Fixed
+
+- Fixed issue where OpenXR would incorrectly report joints as having updated when they weren't actually tracked that frame. `XRHandSubsystem`'s `trackingAcquired` and `trackingLost`, as well as `XRHand.isTracked`, will now work as expected.
+- Fixed issue where `<XRHandDevice>/isTracked` and `<XRHandDevice>/trackingState` controls would never clear.
+- Fixed `XRHandDevice` and `MetaAimHand` to also include `InputDeviceCharacteristics.TrackedDevice` in the `XRDeviceDescriptor`.
+- Fixed lifetime of GameObjects in `HandVisualizer` sample.
+- Fixed `HandVisualizer` so it uses the `XROrigin.Origin` property instead of the Transform of the `XROrigin` itself when transforming joints.
+- Reinstated the validation rule that the Meta Touch Interaction Profile is required in the OpenXR Interaction Profiles list.
+- OpenXR hand root poses now match the wrist, not the palm.
 
 ## [1.0.0-pre.2] - 2022-10-26
 

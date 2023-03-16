@@ -39,13 +39,9 @@ namespace UnityEngine.XR.Hands.OpenXR
         public static MetaAimHand rightHand => null;
 
         /// <summary>
-        /// (Deprecated) The flags in the extension for each hand that can be read from
-        /// <see cref="MetaAimHandDevice.aimFlags"/> and casting to this type.
+        /// (Deprecated) Use <see cref="MetaAimFlags"/> instead.
         /// </summary>
-        /// <remarks>
-        /// This is deprecated. Use <see cref="MetaAimFlags"/> instead.
-        /// </remarks>
-        [Obsolete("Use MetaAimFlags instead. (UnityUpgradable) -> MetaAimFlags", true)]
+        [Obsolete("Use UnityEngine.XR.Hands.MetaAimFlags instead.")]
         [Flags]
         public enum AimFlags : ulong
         {

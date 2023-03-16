@@ -68,14 +68,14 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </summary>
         public static XRHandSubsystem subsystem => s_Subsystem;
 
-        /// <inheritdoc/>
+        /// <summary>See <see cref="OpenXRFeature.OnSystemChange(ulong)"/>.</summary>
         protected override void OnSystemChange(ulong xrSystem)
         {
             base.OnSystemChange(xrSystem);
             UnityOpenXRHands_OnSystemChange(xrSystem);
         }
 
-        /// <inheritdoc/>
+        /// <summary>See <see cref="OpenXRFeature.OnInstanceCreate(ulong)"/>.</summary>
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
             if (!base.OnInstanceCreate(xrInstance))
@@ -84,7 +84,7 @@ namespace UnityEngine.XR.Hands.OpenXR
             return UnityOpenXRHands_OnInstanceCreate(xrInstance, xrGetInstanceProcAddr);
         }
 
-        /// <inheritdoc/>
+        /// <summary>See <see cref="OpenXRFeature.OnAppSpaceChange(ulong)"/>.</summary>
         protected override void OnAppSpaceChange(ulong xrSpace)
         {
             base.OnAppSpaceChange(xrSpace);
@@ -144,7 +144,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </remarks>
         protected override void OnSubsystemStop()
         {
-            m_Updater.Stop();
+            m_Updater?.Stop();
             s_Subsystem?.Stop();
         }
 
@@ -156,14 +156,14 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </remarks>
         protected override void OnSubsystemDestroy()
         {
-            m_Updater.Destroy();
+            m_Updater?.Destroy();
             m_Updater = null;
 
             s_Subsystem?.Destroy();
             s_Subsystem = null;
         }
 
-        /// <inheritdoc />
+        /// <see cref="OpenXRFeature.HookGetInstanceProcAddr(IntPtr)"/>
         protected override IntPtr HookGetInstanceProcAddr(IntPtr func)
             => UnityOpenXRHands_intercept_xrWaitFrame_xrGetInstanceProcAddr(func);
 
@@ -223,7 +223,6 @@ namespace UnityEngine.XR.Hands.OpenXR
         }
 #endif
 
-        ulong m_XrInstance;
         XRHandProviderUtility.SubsystemUpdater m_Updater;
         static XRHandSubsystem s_Subsystem;
     }

@@ -5,12 +5,15 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
     /// <summary>
     /// Utility methods for a provider to a <see cref="XRHandSubsystem"/>.
     /// </summary>
-    public static class XRHandProviderUtility
+    public static partial class XRHandProviderUtility
     {
         /// <summary>
         /// Create a fully configurable joint with at least a pose in hand
         /// space, tracking state, and ID.
         /// </summary>
+        /// <param name="handedness">
+        /// Denotes whether the joint being created is on the left or right hand.
+        /// </param>
         /// <param name="trackingState">
         /// The tracking state flags associated with this joint, representing
         /// which fields of the <see cref="XRHandJoint"/> are valid.
@@ -42,6 +45,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// data.
         /// </returns>
         public static XRHandJoint CreateJoint(
+            Handedness handedness,
             XRHandJointTrackingState trackingState,
             XRHandJointID id,
             Pose pose,
@@ -49,10 +53,14 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
             Vector3 linearVelocity = new Vector3(),
             Vector3 angularVelocity = new Vector3())
         {
+            int idAndHandedness = (int)id;
+            if (handedness == Handedness.Right)
+                idAndHandedness |= XRHandJoint.k_IsRightHandBit;
+
             return new XRHandJoint
             {
                 m_TrackingState = trackingState,
-                m_Id = id,
+                m_IdAndHandedness = idAndHandedness,
                 m_Pose = pose,
                 m_Radius = radius,
                 m_LinearVelocity = linearVelocity,
