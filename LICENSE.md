@@ -1,4 +1,4 @@
-XR Hands copyright © 2022 Unity Technologies ApS
+XR Hands copyright © 2023 Unity Technologies
 
 Licensed under the Unity Package Distribution License (see https://unity3d.com/legal/licenses/Unity_Package_Distribution_License ).
 

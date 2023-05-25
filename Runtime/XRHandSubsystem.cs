@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.SubsystemsImplementation;
+using UnityEngine.XR.Hands.Processing;
 using UnityEngine.XR.Hands.ProviderImplementation;
 
 namespace UnityEngine.XR.Hands
@@ -67,6 +70,13 @@ namespace UnityEngine.XR.Hands
         public XRHand leftHand => m_LeftHand;
         XRHand m_LeftHand;
 
+        internal unsafe void SetLeftHand(XRHand hand)
+        {
+            if (hand.m_Joints.GetUnsafePtr() != m_LeftHand.m_Joints.GetUnsafePtr())
+                throw new InvalidOperationException("Cannot overrwrite the left hand with a hand that was not first retrieved from the subsystem's leftHand property!");
+            m_LeftHand = hand;
+        }
+
         /// <summary>
         /// Gets the right <see cref="XRHand"/> that is being tracked by this
         /// subsystem.
@@ -82,6 +92,13 @@ namespace UnityEngine.XR.Hands
         /// </remarks>
         public XRHand rightHand => m_RightHand;
         XRHand m_RightHand;
+
+        internal unsafe void SetRightHand(XRHand hand)
+        {
+            if (hand.m_Joints.GetUnsafePtr() != m_RightHand.m_Joints.GetUnsafePtr())
+                throw new InvalidOperationException("Cannot overrwrite the right hand with a hand that was not first retrieved from the subsystem's rightHand property!");
+            m_RightHand = hand;
+        }
 
         /// <summary>
         /// Indicates which joints in the <see cref="XRHandJointID"/> list are
@@ -276,6 +293,11 @@ namespace UnityEngine.XR.Hands
             else if (wasRightHandTracked && !m_RightHand.isTracked)
                 trackingLost?.Invoke(m_RightHand);
 
+            preprocessJoints?.Invoke(this, updateSuccessFlags, updateType);
+
+            for (int processorIndex = 0; processorIndex < m_Processors.Count; ++processorIndex)
+                m_Processors[processorIndex].ProcessJoints(this, updateSuccessFlags, updateType);
+
             if (updatedHands != null)
                 updatedHands.Invoke(this, updateSuccessFlags, updateType);
 
@@ -285,6 +307,41 @@ namespace UnityEngine.XR.Hands
 #pragma warning restore 618
 
             return updateSuccessFlags;
+        }
+
+        /// <summary>
+        /// This is called after the subsystem retrieves joint data from the
+        /// provider, and before and <see cref="IXRHandProcessor"/>s'
+        /// <see cref="IXRHandProcessor.ProcessJoints"/> are called.
+        /// </summary>
+        public Action<XRHandSubsystem, UpdateSuccessFlags, UpdateType> preprocessJoints;
+
+        /// <summary>
+        /// Registers a processor for hand joint data.
+        /// </summary>
+        /// <param name="processor">
+        /// The processor to register for this <see cref="XRHandSubsystem"/>.
+        /// </param>
+        public void RegisterProcessor<TProcessor>(TProcessor processor)
+            where TProcessor : class, IXRHandProcessor
+        {
+            if (processor == null)
+                throw new ArgumentException("Processor cannot be null.", nameof(processor));
+
+            m_Processors.Add(processor);
+            m_Processors.Sort(CompareProcessors);
+        }
+
+        /// <summary>
+        /// Unregisters a processor for hand joint data.
+        /// </summary>
+        /// <param name="processor">
+        /// The processor to unregister from this <see cref="XRHandSubsystem"/>.
+        /// </param>
+        public void UnregisterProcessor<TProcessor>(TProcessor processor)
+            where TProcessor : class, IXRHandProcessor
+        {
+            m_Processors.Remove(processor);
         }
 
         /// <summary>
@@ -327,5 +384,10 @@ namespace UnityEngine.XR.Hands
             m_RightHand.Dispose();
             m_JointsInLayout.Dispose();
         }
+
+        List<IXRHandProcessor> m_Processors = new List<IXRHandProcessor>();
+
+        static int CompareProcessors(IXRHandProcessor a, IXRHandProcessor b)
+            => a.callbackOrder.CompareTo(b.callbackOrder);
     }
 }

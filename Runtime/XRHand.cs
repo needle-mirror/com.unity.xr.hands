@@ -12,7 +12,7 @@ namespace UnityEngine.XR.Hands
     /// See [Hand tracking](xref:xrhands-tracking-data) for a description of the hand data model
     /// and how to access the tracking data.
     /// </remarks>
-    public struct XRHand
+    public struct XRHand : IEquatable<XRHand>
     {
         /// <summary>
         /// Retrieves an <see cref="XRHandJoint"/> by its ID.
@@ -61,6 +61,65 @@ namespace UnityEngine.XR.Hands
         {
             return m_Handedness + " XRHand";
         }
+
+        /// <summary>
+        /// Tests for equality.
+        /// </summary>
+        /// <param name="other">The <see cref="XRHand"/> to compare against.</param>
+        /// <returns>
+        /// Returns <see langword="true"/> if the underlying native pointers are
+        /// the same. Returns <see langword="false"/> otherwise.
+        /// </returns>
+        public bool Equals(XRHand other)
+        {
+            return m_Joints == other.m_Joints &&
+                m_RootPose == other.m_RootPose &&
+                m_Handedness == other.m_Handedness &&
+                isTracked == other.isTracked;
+        }
+
+        /// <summary>
+        /// Tests for equality.
+        /// </summary>
+        /// <param name="obj">An <see cref="object"/> to compare against.</param>
+        /// <returns>
+        /// Returns <see langword="true"/> if <paramref name="obj"/> is an
+        /// <see cref="XRHand"/> and it compares equal to this one using
+        /// <see cref="Equals(UnityEngine.XR.Hands.XRHand)"/>.
+        /// </returns>
+        public override bool Equals(object obj) => obj is XRHand other && Equals(other);
+
+        /// <summary>
+        /// Computes a hash code from all fields of XRHand.
+        /// </summary>
+        /// <returns>Returns a hash code of this object.</returns>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = m_Joints.GetHashCode();
+                hash = hash * 486187739 + m_RootPose.GetHashCode();
+                hash = hash * 486187739 + m_Handedness.GetHashCode();
+                hash = hash * 486187739 + isTracked.GetHashCode();
+                return hash;
+            }
+        }
+
+        /// <summary>
+        /// Tests for equality. Same as <see cref="Equals(UnityEngine.XR.Hands.XRHand)"/>.
+        /// </summary>
+        /// <param name="lhs">The left-hand side of the comparison.</param>
+        /// <param name="rhs">The right-hand side of the comparison.</param>
+        /// <returns>Returns the same value as <see cref="Equals(UnityEngine.XR.Hands.XRHand)"/>.</returns>
+        public static bool operator ==(XRHand lhs, XRHand rhs) => lhs.Equals(rhs);
+
+        /// <summary>
+        /// Tests for inequality. Same as !<see cref="Equals(UnityEngine.XR.Hands.XRHand)"/>
+        /// </summary>
+        /// <param name="lhs">The left-hand side of the comparison.</param>
+        /// <param name="rhs">The right-hand side of the comparison.</param>
+        /// <returns>Returns the negation of <see cref="Equals(UnityEngine.XR.Hands.XRHand)"/>.</returns>
+        public static bool operator !=(XRHand lhs, XRHand rhs) => !lhs.Equals(rhs);
 
         internal XRHand(Handedness handedness, Allocator allocator)
         {

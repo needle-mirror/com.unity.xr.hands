@@ -5,6 +5,7 @@
 * [Hand tracking data](xref:xrhands-tracking-data)
   * [Hand data model](xref:xrhands-data-model)
   * [Access hand data](xref:xrhands-access-data)
+  * [Hand Visuals](xref:xrhands-visuals)
 * [Implement a provider](xref:xrhands-implement-a-provider)
 * [OpenXR Features](xref:xrhands-openxr-features)
   * [Hand tracking feature](./features/handtracking.md)

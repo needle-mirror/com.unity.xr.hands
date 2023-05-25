@@ -17,7 +17,7 @@ namespace UnityEngine.XR.Hands
     /// and the data they contain.
     /// </remarks>
     [StructLayout(LayoutKind.Sequential)]
-    public struct XRHandJoint
+    public struct XRHandJoint : IEquatable<XRHandJoint>
     {
         /// <summary>
         /// The ID of this joint.
@@ -94,8 +94,10 @@ namespace UnityEngine.XR.Hands
         ///         return jointPose.GetTransformedBy(xrOriginPose);
         ///     }
         ///     else
+        ///     {
         ///         return Pose.identity;
         ///     }
+        /// }
         /// </code>
         /// </example>
         public bool TryGetPose(out Pose pose)
@@ -180,6 +182,69 @@ namespace UnityEngine.XR.Hands
                 "[{0} {1}] Pose: {2} | Radius: {3} | Linear Velocity: {4} | Angular Velocity: {5} | Tracking State: {6}",
                 handedness, id, m_Pose.ToString("F4"), m_Radius.ToString("F4"), m_LinearVelocity.ToString("F4"), m_AngularVelocity.ToString("F4"), m_TrackingState);
         }
+
+        /// <summary>
+        /// Tests for equality.
+        /// </summary>
+        /// <param name="other">The <see cref="XRHandJoint"/> to compare against.</param>
+        /// <returns>
+        /// Returns <see langword="true"/> if the underlying native pointers are
+        /// the same. Returns <see langword="false"/> otherwise.
+        /// </returns>
+        public bool Equals(XRHandJoint other)
+        {
+            return m_IdAndHandedness == other.m_IdAndHandedness &&
+                m_Pose == other.m_Pose &&
+                m_Radius == other.m_Radius &&
+                m_LinearVelocity == other.m_LinearVelocity &&
+                m_AngularVelocity == other.m_AngularVelocity &&
+                m_TrackingState == other.m_TrackingState;
+        }
+
+        /// <summary>
+        /// Tests for equality.
+        /// </summary>
+        /// <param name="obj">An <see cref="object"/> to compare against.</param>
+        /// <returns>
+        /// Returns <see langword="true"/> if <paramref name="obj"/> is an
+        /// <see cref="XRHandJoint"/> and it compares equal to this one using
+        /// <see cref="Equals(UnityEngine.XR.Hands.XRHandJoint)"/>.
+        /// </returns>
+        public override bool Equals(object obj) => obj is XRHandJoint other && Equals(other);
+
+        /// <summary>
+        /// Computes a hash code from all fields of XRHandJoint.
+        /// </summary>
+        /// <returns>Returns a hash code of this object.</returns>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = m_IdAndHandedness.GetHashCode();
+                hash = hash * 486187739 + m_Pose.GetHashCode();
+                hash = hash * 486187739 + m_Radius.GetHashCode();
+                hash = hash * 486187739 + m_LinearVelocity.GetHashCode();
+                hash = hash * 486187739 + m_AngularVelocity.GetHashCode();
+                hash = hash * 486187739 + m_TrackingState.GetHashCode();
+                return hash;
+            }
+        }
+
+        /// <summary>
+        /// Tests for equality. Same as <see cref="Equals(UnityEngine.XR.Hands.XRHandJoint)"/>.
+        /// </summary>
+        /// <param name="lhs">The left-hand side of the comparison.</param>
+        /// <param name="rhs">The right-hand side of the comparison.</param>
+        /// <returns>Returns the same value as <see cref="Equals(UnityEngine.XR.Hands.XRHandJoint)"/>.</returns>
+        public static bool operator ==(XRHandJoint lhs, XRHandJoint rhs) => lhs.Equals(rhs);
+
+        /// <summary>
+        /// Tests for inequality. Same as !<see cref="Equals(UnityEngine.XR.Hands.XRHandJoint)"/>
+        /// </summary>
+        /// <param name="lhs">The left-hand side of the comparison.</param>
+        /// <param name="rhs">The right-hand side of the comparison.</param>
+        /// <returns>Returns the negation of <see cref="Equals(UnityEngine.XR.Hands.XRHandJoint)"/>.</returns>
+        public static bool operator !=(XRHandJoint lhs, XRHandJoint rhs) => !lhs.Equals(rhs);
 
         internal int m_IdAndHandedness;
         internal Pose m_Pose;

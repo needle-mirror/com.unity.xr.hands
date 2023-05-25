@@ -19,7 +19,7 @@ The XR Hand package provides:
 Refer to [Hand tracking data](xref:xrhands-tracking-data) for more information about using hand data in an application.
 
 > [!NOTE]
-> If you are implementing hand tracking for a Unity provider plug-in, see [Implement a provider](xref:xrhands-implement-a-provider).
+> If you are implementing hand tracking for a Unity provider plug-in, see [Implement a provider](xref:xrhands-implement-a-provider). If you are intercepting hand tracking data to filter or process it before it's reported to the caller, see [Process joints](xref:xrhands-process-joints).
 
 ## Supporting packages
 

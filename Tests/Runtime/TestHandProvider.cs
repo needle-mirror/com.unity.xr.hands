@@ -18,8 +18,14 @@ class TestHandProvider : XRHandSubsystemProvider
     public int numTryUpdateHandsCalls { get; private set; }
     public XRHandSubsystem.UpdateType mostRecentUpdateType { get; private set; }
 
+    public bool leftHandIsTracked { get; set; } = true;
+    
+    public bool rightHandIsTracked { get; set; } = true;
+
     public override void Start()
     {
+        leftHandIsTracked = true;
+        rightHandIsTracked = true;
         ++numStartCalls;
     }
 
@@ -70,8 +76,16 @@ class TestHandProvider : XRHandSubsystemProvider
                 TestHandData.rightHand[jointIndex]);
         }
 
-        return XRHandSubsystem.UpdateSuccessFlags.All;
-    }
+        var successFlags = XRHandSubsystem.UpdateSuccessFlags.All;
+        
+        if (!leftHandIsTracked)
+            successFlags &= ~XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints & ~XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose;
+        
+        if (!rightHandIsTracked)
+            successFlags &= ~XRHandSubsystem.UpdateSuccessFlags.RightHandJoints & ~XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose;
 
+        return successFlags;
+    }
+    
     public static string descriptorId => "Test-Hands";
 }

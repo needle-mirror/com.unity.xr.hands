@@ -51,8 +51,8 @@ class Tests
         {
             var flags = subsystem.TryUpdateHands(
                 ((call & 1) != 0)
-                ? XRHandSubsystem.UpdateType.Dynamic
-                : XRHandSubsystem.UpdateType.BeforeRender);
+                    ? XRHandSubsystem.UpdateType.Dynamic
+                    : XRHandSubsystem.UpdateType.BeforeRender);
             Assert.AreEqual(XRHandSubsystem.UpdateSuccessFlags.None, flags);
         }
 
@@ -73,8 +73,8 @@ class Tests
         {
             var flags = subsystem.TryUpdateHands(
                 ((call & 1) != 0)
-                ? XRHandSubsystem.UpdateType.Dynamic
-                : XRHandSubsystem.UpdateType.BeforeRender);
+                    ? XRHandSubsystem.UpdateType.Dynamic
+                    : XRHandSubsystem.UpdateType.BeforeRender);
             Assert.AreEqual(XRHandSubsystem.UpdateSuccessFlags.All, flags);
         }
 
@@ -122,8 +122,8 @@ class Tests
 
         int numValidLeftJoints = 0, numValidRightJoints = 0;
         for (int jointIndex = XRHandJointID.BeginMarker.ToIndex();
-            jointIndex < XRHandJointID.EndMarker.ToIndex();
-            ++jointIndex)
+             jointIndex < XRHandJointID.EndMarker.ToIndex();
+             ++jointIndex)
         {
             var id = XRHandJointIDUtility.FromIndex(jointIndex);
 
@@ -165,8 +165,8 @@ class Tests
         Assert.AreEqual(XRHandSubsystem.UpdateSuccessFlags.All, updateFlags);
 
         for (int jointIndex = XRHandJointID.BeginMarker.ToIndex();
-            jointIndex < XRHandJointID.EndMarker.ToIndex();
-            ++jointIndex)
+             jointIndex < XRHandJointID.EndMarker.ToIndex();
+             ++jointIndex)
         {
             var id = XRHandJointIDUtility.FromIndex(jointIndex);
 
@@ -198,8 +198,8 @@ class Tests
         var subsystem = CreateTestSubsystem();
 
         for (int jointIndex = XRHandJointID.BeginMarker.ToIndex();
-            jointIndex < XRHandJointID.EndMarker.ToIndex();
-            ++jointIndex)
+             jointIndex < XRHandJointID.EndMarker.ToIndex();
+             ++jointIndex)
         {
             var id = XRHandJointIDUtility.FromIndex(jointIndex);
             var leftJoint = subsystem.leftHand.GetJoint(id);
@@ -358,8 +358,8 @@ class Tests
         Assert.AreEqual(XRHandSubsystem.UpdateSuccessFlags.All, flags);
 
         for (int jointIndex = XRHandJointID.BeginMarker.ToIndex();
-            jointIndex < XRHandJointID.EndMarker.ToIndex();
-            ++jointIndex)
+             jointIndex < XRHandJointID.EndMarker.ToIndex();
+             ++jointIndex)
         {
             var id = XRHandJointIDUtility.FromIndex(jointIndex);
             var leftJoint = subsystem.leftHand.GetJoint(id);
@@ -378,8 +378,8 @@ class Tests
         var subsystem = CreateTestSubsystem();
 
         for (int jointIndex = XRHandJointID.BeginMarker.ToIndex();
-            jointIndex < XRHandJointID.EndMarker.ToIndex();
-            ++jointIndex)
+             jointIndex < XRHandJointID.EndMarker.ToIndex();
+             ++jointIndex)
         {
             Assert.AreEqual(TestHandData.jointsInLayout[jointIndex], subsystem.jointsInLayout[jointIndex]);
         }
@@ -392,20 +392,128 @@ class Tests
     {
         var subsystem = CreateTestSubsystem();
         var updater = new XRHandProviderUtility.SubsystemUpdater(subsystem);
+        try
+        {
+            bool updated = false;
+            void OnHandsUpdated(XRHandSubsystem.UpdateSuccessFlags successFlags, XRHandSubsystem.UpdateType updateType) => updated = true;
+            subsystem.handsUpdated += OnHandsUpdated;
 
-        bool updated = false;
-        void OnHandsUpdated(XRHandSubsystem.UpdateSuccessFlags successFlags, XRHandSubsystem.UpdateType updateType) => updated = true;
-        subsystem.handsUpdated += OnHandsUpdated;
+            subsystem.Start();
+            updater.Start();
 
-        subsystem.Start();
-        updater.Start();
+            yield return null;
+            Assert.IsTrue(updated);
+        }
+        finally
+        {
+            updater.Stop();
+            updater.Destroy();
+            subsystem.Destroy();
+        }
+    }
 
-        yield return null;
-        Assert.IsTrue(updated);
+    [UnityTest]
+    public IEnumerator HandTrackingEventCallbacks()
+    {
+        var subsystem = CreateTestSubsystem();
+        var updater = new XRHandProviderUtility.SubsystemUpdater(subsystem);
+        var provider = (TestHandProvider)subsystem.GetProvider();
+        var go = new GameObject("TestHandTrackingEvents");
 
-        updater.Stop();
-        updater.Destroy();
-        subsystem.Destroy();
+        try
+        {
+            subsystem.Start();
+            updater.Start();
+            yield return null;
+
+            var rightHandTrackingEvents = go.AddComponent<XRHandTrackingEvents>();
+            rightHandTrackingEvents.handedness = Handedness.Right;
+            rightHandTrackingEvents.updateType = XRHandTrackingEvents.UpdateTypes.Dynamic;
+            bool jointsUpdated = false, poseUpdated = false, trackingAcquired = false, trackingLost = false, trackingStateChanged = false;
+            var jointsUpdateCallbackCount = 0;
+
+            rightHandTrackingEvents.trackingAcquired.AddListener(() => trackingAcquired = true);
+            rightHandTrackingEvents.trackingLost.AddListener(() => trackingLost = true);
+            rightHandTrackingEvents.trackingChanged.AddListener(isTracked => trackingStateChanged = true);
+            rightHandTrackingEvents.jointsUpdated.AddListener(handRef =>
+            {
+                jointsUpdateCallbackCount++;
+                jointsUpdated = true;
+            });
+
+            rightHandTrackingEvents.poseUpdated.AddListener(pose =>
+            {
+                poseUpdated = true;
+            });
+
+            rightHandTrackingEvents.SetSubsystem(subsystem);
+            yield return null;
+
+            // First acquire and first update
+            Assert.AreEqual(1, jointsUpdateCallbackCount);
+            Assert.IsTrue(rightHandTrackingEvents.handIsTracked);
+            Assert.IsTrue(trackingAcquired);
+            Assert.IsFalse(trackingLost);
+            Assert.IsTrue(trackingStateChanged);
+            Assert.IsTrue(jointsUpdated);
+            Assert.IsTrue(poseUpdated);
+
+            trackingStateChanged = false;
+            yield return null;
+
+            // Second update, no change to tracking state
+            Assert.AreEqual(2, jointsUpdateCallbackCount);
+            Assert.IsTrue(rightHandTrackingEvents.handIsTracked);
+            Assert.IsFalse(trackingStateChanged);
+
+            jointsUpdated = poseUpdated = trackingAcquired = trackingLost = trackingStateChanged = false;
+
+            provider.rightHandIsTracked = false;
+
+            yield return null;
+
+            // Tracking changed (lost) no joints updated
+            Assert.AreEqual(2, jointsUpdateCallbackCount);
+            Assert.IsFalse(rightHandTrackingEvents.handIsTracked);
+            Assert.IsTrue(trackingLost);
+            Assert.IsTrue(trackingStateChanged);
+            Assert.IsFalse(trackingAcquired);
+            Assert.IsFalse(jointsUpdated);
+            Assert.IsFalse(poseUpdated);
+
+            jointsUpdated = poseUpdated = trackingAcquired = trackingLost = trackingStateChanged = false;
+            provider.rightHandIsTracked = true;
+            yield return null;
+
+            // Tracking changed (acquired) and updated again
+            Assert.AreEqual(3, jointsUpdateCallbackCount);
+            Assert.IsTrue(rightHandTrackingEvents.handIsTracked);
+            Assert.IsTrue(trackingAcquired);
+            Assert.IsFalse(trackingLost);
+            Assert.IsTrue(trackingStateChanged);
+            Assert.IsTrue(jointsUpdated);
+            Assert.IsTrue(poseUpdated);
+
+            // Stopping tracking on the left hand does not affect the right hand
+            jointsUpdated = poseUpdated = trackingAcquired = trackingLost = trackingStateChanged = false;
+            provider.leftHandIsTracked = false;
+            yield return null;
+
+            Assert.AreEqual(4, jointsUpdateCallbackCount);
+            Assert.IsTrue(rightHandTrackingEvents.handIsTracked);
+            Assert.IsFalse(trackingAcquired);
+            Assert.IsFalse(trackingLost);
+            Assert.IsFalse(trackingStateChanged);
+            Assert.IsTrue(jointsUpdated);
+            Assert.IsTrue(poseUpdated);
+        }
+        finally
+        {
+            Object.DestroyImmediate(go);
+            updater.Stop();
+            updater.Destroy();
+            subsystem.Destroy();
+        }
     }
 
     static void EnsureTestSubsystemDescriptorRegistered()

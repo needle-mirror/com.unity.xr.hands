@@ -1,5 +1,5 @@
 {
     "displayName": "HandVisualizer",
-    "description": "Basic sample showing how to visualize hands.",
+    "description": "Basic sample showing how to visualize and pre-process hands.",
     "createSeparatePackage": false
 }

@@ -6,7 +6,7 @@ uid: xrhands-edit-your-project-manifest
 You can edit the [project manifest](https://docs.unity3d.com/Manual/upm-manifestPrj.html) to add the XR Hands package to your project. The project manifest identifies which packages Unity should use for the project.
 
 > [!TIP]
-> XR Hands 1.0 is compatible with Unity Editor versions 2020.3 and newer, but it does not appear in the Package Manager window before 2023.1. 
+> XR Hands 1.2 is compatible with Unity Editor versions 2021.3 and newer, but it does not appear in the Package Manager window before 2023.1. 
 
 Follow the steps below to manually edit your project manifest file:
 
@@ -16,9 +16,9 @@ Follow the steps below to manually edit your project manifest file:
 
 3. Under "dependencies", add:
 
-   `"com.unity.xr.hands": "1.0.0-pre-2"`
+   `"com.unity.xr.hands": "1.2.0"`
 
-	![A sample project manifest is shown in a text editor. The line containing "com.unity.xr.xr.hands" is called out.](../images/project-manifest.png)<br />*A typical manifest with the XR Hands package version 1.0.0-pre-2 added*
+	![A sample project manifest is shown in a text editor. The line containing "com.unity.xr.xr.hands" is called out.](../images/project-manifest.png)<br />*A typical manifest with the XR Hands package version 1.2.0 added*
 
    All edits must use correct JSON syntax.
 

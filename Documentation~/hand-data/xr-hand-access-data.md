@@ -2,71 +2,100 @@
 uid: xrhands-access-data
 ---
 
-# Access hand data
+# Access hand data from Unity components in the scene
+
+Access hand-tracking data from Unity components in the scene. 
+
+The [XRHandTrackingEvents](xref:UnityEngine.XR.Hands.XRHandTrackingEvents) component can be added to a GameObject in the scene to subscribe to hand-tracking events for a particular hand chosen by the Handedness property.
+This component subscribes to the [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem) and dispatches events when the hand data is updated.
+Callbacks to these events can either be added via script, or from the Inspector window.
+
+There are also standard components to drive a Skinned Mesh Renderer component and its skeleton from these events which is outlined in the [Hand Visuals](xref:xrhands-visuals) section.
+
+# Access hand data from the XR Hand Subsystem
 
 Access hand tracking data from the [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem). 
 
-The [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem) updates hands twice per frame. The first update occurs as close as possible to the frame [Update](xref:ExecutionOrder) event. Use the data in this update to perform game logic, such as interactions, that depend on the hand data. The second update occurs just before rendering, as close as possible to the [Application.onBeforeRender](https://docs.unity3d.com/2021.3/Documentation/ScriptReference/Application-onBeforeRender.html) event. Use the data in this event to position game objects or other visual representations of the hands. This second update provides the lowest latency between hand motion and rendering.
+The [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem) updates hands twice per frame. The first update occurs as close as possible to the frame [Update](xref:ExecutionOrder) event. Use the data in this update to perform game logic, such as interactions, that depend on the hand data. The second update occurs just before rendering, as close as possible to the [Application.onBeforeRender](https://docs.unity3d.com/ScriptReference/Application-onBeforeRender.html) event. Use the data in this event to position game objects or other visual representations of the hands. This second update provides the lowest latency between hand motion and rendering.
 
 The best way to access the data is through the [updatedHands](xref:UnityEngine.XR.Hands.XRHandSubsystem.updatedHands) callback, which is dispatched twice a frame when the hand data is updated. Getting the data in response to the callback provides the lowest latency and guarantees that you are using the latest data. Refer to [Subscribe to hand update events](#subscribe) for more information.
 
 You can also access [XRHand](xref:UnityEngine.XR.Hands.XRHand) objects directly from the [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem) without waiting for the [updatedHands](xref:UnityEngine.XR.Hands.XRHandSubsystem.updatedHands) callback to be invoked. The [XRHand](xref:UnityEngine.XR.Hands.XRHand) objects reflect the data as of the latest successful update event. This might be from a previous frame.
 
 > [!NOTE]
-> The XRHandSubsystem does not supply data to the UnityEngine [XR.Hand] or [XR.Bone] structs.  
+> The `XRHandSubsystem` does not supply data to the UnityEngine [XR.Hand](https://docs.unity3d.com/ScriptReference/XR.Hand.html) or [XR.Bone](https://docs.unity3d.com/ScriptReference/XR.Bone.html) structs.
 
 <a id="get-instance"></a>
 ## Get the XRHandSubsystem instance
 
-Get the hand subsystem from the [active XR loader]:
+Get the hand subsystem from the active XR loader using [`SubsystemManager.GetSubsystems`](https://docs.unity3d.com/ScriptReference/SubsystemManager.GetSubsystems.html):
 
 ``` csharp
-XRHandSubsystem m_Subsystem = 
-    XRGeneralSettings.Instance?
-        .Manager?
-        .activeLoader?
-        .GetLoadedSubsystem<XRHandSubsystem>();
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.XR.Hands;
+
+// ...
+
+var handSubsystems = new List<XRHandSubsystem>();
+SubsystemManager.GetSubsystems(handSubsystems);
 ```
 
-You can get the subsystem after the XR system has finished initialization. By default, initialization occurs before any MonoBehaviour [Start](xref:ExecutionOrder) methods are called. However, if your project initializes XR manually, you must wait for your code to finish loading the subsystem. 
+You can get the subsystem after the XR system has finished initialization. By default, initialization occurs before any MonoBehaviour [Start](xref:ExecutionOrder) methods are called. However, if your project initializes XR manually, you must wait for your code to finish loading the subsystem.
 
 <a id="subscribe"></a>
 ## Subscribe to hand update events
 
 To subscribe to the hand update event, assign an [Action](xref:System.Action) delegate function to the [XRHandSubsystem.updatedHands](xref:UnityEngine.XR.Hands.XRHandSubsystem.updatedHands) property. When a hand update occurs, the `XRHandSubsystem` calls your delegate function.
 
-``` csharp
-void Start()
-{
-    XRHandSubsystem m_Subsystem = 
-        XRGeneralSettings.Instance?
-            .Manager?
-            .activeLoader?
-            .GetLoadedSubsystem<XRHandSubsystem>();
-
-    if (m_Subsystem != null)
-        m_Subsystem.updatedHands += OnHandUpdate;
-}
-```
-
-Use the [updateType](xref:UnityEngine.XR.Hands.XRHandSubsystem.updatedHands) parameter to determine whether the update event is "Dynamic," which occurs near the MonoBehaviour `Update` event, or "BeforeRender," which occurs just before rendering begins.
+Use the [updateType](xref:UnityEngine.XR.Hands.XRHandSubsystem.updatedHands) parameter to determine whether the update event is "Dynamic" which occurs near the MonoBehaviour `Update` event, or "BeforeRender" which occurs just before rendering begins.
 
 ``` csharp
-void OnHandUpdate(XRHandSubsystem subsystem,
-                  XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags,
-                  XRHandSubsystem.UpdateType updateType)
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.XR.Hands;
+
+public class HandsExample : MonoBehaviour
 {
-    switch (updateType)
+    XRHandSubsystem m_HandSubsystem;
+
+    void Start()
     {
-        case XRHandSubsystem.UpdateType.Dynamic:
-            // Update game logic that uses hand data
-            break;
-        case XRHandSubsystem.UpdateType.BeforeRender: 
-            // Update visual objects that use hand data
-            break;
+        var handSubsystems = new List<XRHandSubsystem>();
+        SubsystemManager.GetSubsystems(handSubsystems);
+
+        for (var i = 0; i < handSubsystems.Count; ++i)
+        {
+            var handSubsystem = handSubsystems[i];
+            if (handSubsystem.running)
+            {
+                m_HandSubsystem = handSubsystem;
+                break;
+            }
+        }
+
+        if (m_HandSubsystem != null)
+            m_HandSubsystem.updatedHands += OnUpdatedHands;
+    }
+
+    void OnUpdatedHands(XRHandSubsystem subsystem,
+        XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags,
+        XRHandSubsystem.UpdateType updateType)
+    {
+        switch (updateType)
+        {
+            case XRHandSubsystem.UpdateType.Dynamic:
+                // Update game logic that uses hand data
+                break;
+            case XRHandSubsystem.UpdateType.BeforeRender:
+                // Update visual objects that use hand data
+                break;
+        }
     }
 }
 ```
+
+For a complete code example including how to handle late initialization, refer to the `HandVisualizer` component in the [HandVisualizer sample](index.md#samples).
 
 ## Get joint data
 
