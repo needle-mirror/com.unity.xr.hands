@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.hands",
   "displayName": "XR Hands",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "unity": "2021.3",
   "description": "Surfaces the cross-platform subsystem API for hand-tracking. Implementations of providers will be found in the package for that platform.",
   "keywords": [
@@ -28,15 +28,15 @@
     }
   ],
   "_upm": {
-    "changelog": "### Added\n\n- Added `IXRHandProcessor` interface that intercepts and allows post-processing joint data before being used by other scripts. More information can be found on the [XR Hands Joint Processing](../manual/process-joints.md) manual page.\n- Added two samples to the Hand Visualizer sample for how to use the new Joint Processing feature to change the visual output of hand tracking.\n- `XRHand` and `XRHandJoint` both now implement `IEquatable`, and have `Equals`, `GetHashCode`, and the `==` and `!=` operators overloaded.\n- Added `XRHandTrackingEvents` component that subscribes to hand tracking events for a specific hand and surfaces Unity Events when the hand updates or tracking state changes.\n- Added `XRHandMeshController` component that subscribes to events from a `XRHandTrackingEvents` and can optionally show or hide a mesh.\n- Added `XRHandSkeletonDriver` component that subscribes to events from a `XRHandTrackingEvents` and updates a hierarchy of Transforms for each `XRHandJoint`.\n\n### Changed\n- Minimum supported Unity Editor version has changed to 2021.3.\n\n### Fixed\n\n- Fixed Hand Visualizer component so it will use another running `XRHandSubsystem` if the first is stopped.\n- Fixed exception in Hand Visualizer component when a joint is invalid.\n- Fixed rendering of lines that connect joints in `HandVisualizer` sample when used with the device simulator. Also removed the Origin property from the component since it was no longer used."
+    "changelog": "### Fixed\n- Fixed build pipeline that caused `UnityOpenXRHands` assembly to get skipped."
   },
   "upmCi": {
-    "footprint": "f2cb3aa2052ca937bb96e96012cf466b3a245898"
+    "footprint": "07b78b2d1075836984b7992eff696faf21517d94"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.2/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.xr.hands.git",
     "type": "git",
-    "revision": "3a2c98b05912caa06a643511c97a542eb868e8a9"
+    "revision": "1747736627634d3431597c1ae3d1ee7bc9cf1901"
   }
 }

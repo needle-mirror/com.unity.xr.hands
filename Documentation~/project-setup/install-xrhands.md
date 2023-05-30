@@ -14,7 +14,7 @@ To install this package in Unity 2021.2+:
 
    ![](../images/install.png)
 
-3. (Optional) Enter the full version number, such as `1.2.0`, to install. If left blank, Unity chooses the "best" version -- typically the latest, release version for the current Unity Editor.  See the [Changelog](xref:xrhands-changelog) for a list of versions available at the time this documentation page was published.
+3. (Optional) Enter the full version number, such as `1.2.1`, to install. If left blank, Unity chooses the "best" version -- typically the latest, release version for the current Unity Editor.  See the [Changelog](xref:xrhands-changelog) for a list of versions available at the time this documentation page was published.
 4. Click **Add**.
 
 To install the XR Hands package to a project in earlier versions of Unity, see [Edit the manifest](xref:xrhands-edit-your-project-manifest).
