@@ -93,6 +93,20 @@ namespace UnityEngine.XR.Hands
         protected NativeArray<Pose> m_JointLocalPoses;
 
         /// <summary>
+        /// Offset translation applied to hand root position.
+        /// </summary>
+        protected virtual Vector3 rootOffset => m_RootOffset;
+        
+        Vector3 m_RootOffset = Vector3.zero;
+
+        /// <summary>
+        /// Bool tracking whether the root requires an offset to be applied to it.
+        /// </summary>
+        protected virtual bool hasRootOffset => m_HasRootOffset;
+        
+        bool m_HasRootOffset;
+
+        /// <summary>
         /// The serialized list of <see cref="XRHandJointID"/> with a reference to a transform to drive.
         /// After this list is finished being assigned or modified, use the method
         /// <see cref="InitializeFromSerializedReferences"/> to update the runtime
@@ -186,6 +200,7 @@ namespace UnityEngine.XR.Hands
                 m_JointLocalPoses.Dispose();
 
             UnsubscribeFromHandTrackingEvents();
+            ResetRootPoseOffset();
         }
 
         void UnsubscribeFromHandTrackingEvents()
@@ -207,6 +222,28 @@ namespace UnityEngine.XR.Hands
         }
 
         /// <summary>
+        /// Applies an offset to the root pose of the hand skeleton.
+        /// This can be used to adjust the position of the hand in situations where you want the hand visual to stop moving when interacting with an object. 
+        /// The offset is applied in the local space of the hand's root transform.
+        /// </summary>
+        /// <param name="rootPoseOffset">A Vector3 representing the offset to apply to the root pose of the hand skeleton.</param>
+        public void ApplyRootPoseOffset(Vector3 rootPoseOffset)
+        {
+            m_RootOffset = m_RootTransform.parent.InverseTransformDirection(rootPoseOffset);
+            m_HasRootOffset = true;
+        }
+
+        /// <summary>
+        /// Resets the offset of the root pose of the hand skeleton back to zero.
+        /// This can be used to remove any previously applied offset, restoring the hand's root pose to its original position.
+        /// </summary>
+        public void ResetRootPoseOffset()
+        {
+            m_RootOffset = Vector3.zero;
+            m_HasRootOffset = false;
+        }
+
+        /// <summary>
         /// Update the <see cref="rootTransform"/>'s local position and rotation with the hand's root pose.
         /// </summary>
         /// <param name="rootPose">The root pose of the hand.</param>
@@ -218,7 +255,11 @@ namespace UnityEngine.XR.Hands
             if (!m_HasRootTransform)
                 return;
 
-            m_RootTransform.localPosition = rootPose.position;
+            if (hasRootOffset)
+                m_RootTransform.localPosition = rootPose.position + rootOffset;
+            else
+                m_RootTransform.localPosition = rootPose.position;
+
             m_RootTransform.localRotation = rootPose.rotation;
         }
 

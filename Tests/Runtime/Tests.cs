@@ -38,6 +38,7 @@ class Tests
         var subsystem = CreateTestSubsystem();
 
         var testProvider = subsystem.GetProvider() as TestHandProvider;
+        Assert.IsNotNull(testProvider);
         Assert.AreEqual(1, testProvider.numGetHandLayoutCalls);
 
         subsystem.Destroy();
@@ -47,7 +48,7 @@ class Tests
     public void SubsystemWontAskProviderForHandDataWithoutStarting()
     {
         var subsystem = CreateTestSubsystem();
-        for (int call = 0; call < 10; ++call)
+        for (var call = 0; call < 10; ++call)
         {
             var flags = subsystem.TryUpdateHands(
                 ((call & 1) != 0)
@@ -57,6 +58,7 @@ class Tests
         }
 
         var testProvider = subsystem.GetProvider() as TestHandProvider;
+        Assert.IsNotNull(testProvider);
         Assert.AreEqual(0, testProvider.numTryUpdateHandsCalls);
 
         subsystem.Destroy();
@@ -65,11 +67,11 @@ class Tests
     [Test]
     public void SubsystemAsksForHandsDataIfRunning()
     {
-        const int k_NumUpdates = 10;
+        const int numUpdates = 10;
         var subsystem = CreateTestSubsystem();
         subsystem.Start();
 
-        for (int call = 0; call < k_NumUpdates; ++call)
+        for (var call = 0; call < numUpdates; ++call)
         {
             var flags = subsystem.TryUpdateHands(
                 ((call & 1) != 0)
@@ -79,7 +81,8 @@ class Tests
         }
 
         var testProvider = subsystem.GetProvider() as TestHandProvider;
-        Assert.AreEqual(k_NumUpdates, testProvider.numTryUpdateHandsCalls);
+        Assert.IsNotNull(testProvider);
+        Assert.AreEqual(numUpdates, testProvider.numTryUpdateHandsCalls);
 
         subsystem.Destroy();
     }
@@ -103,6 +106,7 @@ class Tests
         subsystem.Destroy();
 
         var testProvider = subsystem.GetProvider() as TestHandProvider;
+        Assert.IsNotNull(testProvider);
         Assert.AreEqual(1, testProvider.numStartCalls);
         Assert.AreEqual(1, testProvider.numStopCalls);
         Assert.AreEqual(1, testProvider.numDestroyCalls);
@@ -287,6 +291,7 @@ class Tests
         subsystem.Start();
 
         subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic);
+        Assert.IsNotNull(testProvider);
         Assert.AreEqual(XRHandSubsystem.UpdateType.Dynamic, testProvider.mostRecentUpdateType);
 
         subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.BeforeRender);
@@ -299,10 +304,10 @@ class Tests
     public void HandsUpdatedCallbackWorks()
     {
         var flags = XRHandSubsystem.UpdateSuccessFlags.None;
-        void OnHandsUpdated(XRHandSubsystem.UpdateSuccessFlags successFlags, XRHandSubsystem.UpdateType updateType) => flags = successFlags;
+        void OnUpdatedHands(XRHandSubsystem xrHandSubsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateType) => flags = updateSuccessFlags;
 
         var subsystem = CreateTestSubsystem();
-        subsystem.handsUpdated += OnHandsUpdated;
+        subsystem.updatedHands += OnUpdatedHands;
         subsystem.Start();
 
         subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic);
@@ -395,8 +400,8 @@ class Tests
         try
         {
             bool updated = false;
-            void OnHandsUpdated(XRHandSubsystem.UpdateSuccessFlags successFlags, XRHandSubsystem.UpdateType updateType) => updated = true;
-            subsystem.handsUpdated += OnHandsUpdated;
+            void OnUpdatedHands(XRHandSubsystem xrHandSubsystem, XRHandSubsystem.UpdateSuccessFlags successFlags, XRHandSubsystem.UpdateType updateType) => updated = true;
+            subsystem.updatedHands += OnUpdatedHands;
 
             subsystem.Start();
             updater.Start();
@@ -434,14 +439,14 @@ class Tests
 
             rightHandTrackingEvents.trackingAcquired.AddListener(() => trackingAcquired = true);
             rightHandTrackingEvents.trackingLost.AddListener(() => trackingLost = true);
-            rightHandTrackingEvents.trackingChanged.AddListener(isTracked => trackingStateChanged = true);
-            rightHandTrackingEvents.jointsUpdated.AddListener(handRef =>
+            rightHandTrackingEvents.trackingChanged.AddListener(_ => trackingStateChanged = true);
+            rightHandTrackingEvents.jointsUpdated.AddListener(_ =>
             {
                 jointsUpdateCallbackCount++;
                 jointsUpdated = true;
             });
 
-            rightHandTrackingEvents.poseUpdated.AddListener(pose =>
+            rightHandTrackingEvents.poseUpdated.AddListener(_ =>
             {
                 poseUpdated = true;
             });

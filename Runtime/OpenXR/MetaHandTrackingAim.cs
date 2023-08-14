@@ -41,7 +41,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         BuildTargetGroups = new[] { BuildTargetGroup.Standalone, BuildTargetGroup.Android },
         Company = "Unity",
         Desc = "Allows for mapping input to the aim pose extension data. Will create an InputDevice for each hand if this and HandTracking are enabled.",
-        DocumentationLink = "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.0/manual/features/metahandtrackingaim.html",
+        DocumentationLink = XRHelpURLConstants.k_CurrentManualDocsBaseUrl + "features/metahandtrackingaim.html",
         Version = "0.0.1",
         OpenxrExtensionStrings = extensionString,
         Category = UnityEditor.XR.OpenXR.Features.FeatureCategory.Feature,

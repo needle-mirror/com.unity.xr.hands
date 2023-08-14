@@ -3,17 +3,34 @@ using UnityEngine.XR.Hands.Processing;
 
 namespace UnityEngine.XR.Hands.Samples.VisualizerSample
 {
-    // Example hand processor that applies transformations on the root poses to
-    // modify the hands skeleton. Note it is possible to modify the bones
-    // directly for more advanced use cases that are not shown here.
+    /// <summary>
+    /// Example hand processor that applies transformations on the root poses to
+    /// modify the hands skeleton. Note it is possible to modify the bones
+    /// directly for more advanced use cases that are not shown here.
+    /// </summary>
     public class HandProcessor : MonoBehaviour, IXRHandProcessor
     {
+        /// <inheritdoc />
         public int callbackOrder => 0;
 
+        /// <summary>
+        /// The mode to use for the sample processor.
+        /// </summary>
         public enum ProcessorExampleMode
         {
+            /// <summary>
+            /// No processing is applied.
+            /// </summary>
             None,
+
+            /// <summary>
+            /// Smooths the hand root pose of the left and right hands with interpolated positions
+            /// </summary>
             Smoothing,
+
+            /// <summary>
+            /// Inverts the left and right hands.
+            /// </summary>
             Invert
         }
 
@@ -29,6 +46,9 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
         ProcessorExampleMode m_ProcessorExampleMode = ProcessorExampleMode.Smoothing;
         ProcessorExampleMode m_LastProcessorExampleMode = ProcessorExampleMode.None;
 
+        /// <summary>
+        /// The <see cref="ProcessorExampleMode"/> to use for the sample processor.
+        /// </summary>
         public ProcessorExampleMode processorExampleMode
         {
             get => m_ProcessorExampleMode;
@@ -45,6 +65,7 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
         [Tooltip("The smoothing factor to use when smoothing the root of the right hand in the sample processor. Use 0 for no smoothing.")]
         float m_RightHandSmoothingFactor = 16f;
 
+        /// <inheritdoc />
         public void ProcessJoints(XRHandSubsystem subsystem, XRHandSubsystem.UpdateSuccessFlags successFlags, XRHandSubsystem.UpdateType updateType)
         {
             switch (m_ProcessorExampleMode)

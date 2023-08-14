@@ -21,6 +21,9 @@ namespace UnityEngine.XR.Hands.Processing
         /// <see cref="XRHand"/>, and <see cref="XRHandJoint"/> in
         /// <see cref="XRHandProcessingUtility"/> to modify hand and joint data.
         /// </summary>
+        /// <param name="subsystem">The <see cref="XRHandSubsystem"/> that invoked this callback.</param>
+        /// <param name="successFlags">The current frame <see cref="XRHandSubsystem.UpdateSuccessFlags"/> that can be set depending on the result of processing joint data.</param>
+        /// <param name="updateType">The <see cref="XRHandSubsystem.UpdateType"/> for the current frame.</param>
         void ProcessJoints(XRHandSubsystem subsystem, XRHandSubsystem.UpdateSuccessFlags successFlags, XRHandSubsystem.UpdateType updateType);
     }
 }

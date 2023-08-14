@@ -322,6 +322,9 @@ namespace UnityEngine.XR.Hands
         /// <param name="processor">
         /// The processor to register for this <see cref="XRHandSubsystem"/>.
         /// </param>
+        /// <typeparam name="TProcessor">
+        /// The type of the processor to register.
+        /// </typeparam>
         public void RegisterProcessor<TProcessor>(TProcessor processor)
             where TProcessor : class, IXRHandProcessor
         {
@@ -338,6 +341,9 @@ namespace UnityEngine.XR.Hands
         /// <param name="processor">
         /// The processor to unregister from this <see cref="XRHandSubsystem"/>.
         /// </param>
+        /// <typeparam name="TProcessor">
+        /// The type of the processor to register.
+        /// </typeparam>
         public void UnregisterProcessor<TProcessor>(TProcessor processor)
             where TProcessor : class, IXRHandProcessor
         {

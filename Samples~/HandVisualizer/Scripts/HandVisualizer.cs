@@ -3,12 +3,29 @@ using System.Collections.Generic;
 
 namespace UnityEngine.XR.Hands.Samples.VisualizerSample
 {
+    /// <summary>
+    /// This component visualizes the hand joints and mesh for the left and right hands.
+    /// </summary>
     public class HandVisualizer : MonoBehaviour
     {
+        /// <summary>
+        /// The type of velocity to visualize.
+        /// </summary>
         public enum VelocityType
         {
+            /// <summary>
+            /// Visualize the linear velocity of the joint.
+            /// </summary>
             Linear,
+
+            /// <summary>
+            /// Visualize the angular velocity of the joint.
+            /// </summary>
             Angular,
+
+            /// <summary>
+            /// Do not visualize velocity.
+            /// </summary>
             None,
         }
 
@@ -28,6 +45,14 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
         [Tooltip("(Optional) If this is set, the hand meshes will be assigned this material.")]
         Material m_HandMeshMaterial;
 
+        [SerializeField]
+        [Tooltip("Tells the Hand Visualizer to draw the meshes for the hands.")]
+        bool m_DrawMeshes;
+        bool m_PreviousDrawMeshes;
+
+        /// <summary>
+        /// Tells the Hand Visualizer to draw the meshes for the hands.
+        /// </summary>
         public bool drawMeshes
         {
             get => m_DrawMeshes;
@@ -35,12 +60,17 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
         }
 
         [SerializeField]
-        bool m_DrawMeshes;
-        bool m_PreviousDrawMeshes;
-
-        [SerializeField]
+        [Tooltip("The prefab that will be used to visualize the joints for debugging.")]
         GameObject m_DebugDrawPrefab;
 
+        [SerializeField]
+        [Tooltip("Tells the Hand Visualizer to draw the debug joints for the hands.")]
+        bool m_DebugDrawJoints;
+        bool m_PreviousDebugDrawJoints;
+
+        /// <summary>
+        /// Tells the Hand Visualizer to draw the debug joints for the hands.
+        /// </summary>
         public bool debugDrawJoints
         {
             get => m_DebugDrawJoints;
@@ -48,27 +78,33 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
         }
 
         [SerializeField]
-        bool m_DebugDrawJoints;
-        bool m_PreviousDebugDrawJoints;
-
-        [SerializeField]
+        [Tooltip("Prefab to use for visualizing the velocity.")]
         GameObject m_VelocityPrefab;
 
+        [SerializeField]
+        [Tooltip("The type of velocity to visualize.")]
+        VelocityType m_VelocityType;
+        VelocityType m_PreviousVelocityType;
+
+        /// <summary>
+        /// The type of velocity to visualize.
+        /// </summary>
         public VelocityType velocityType
         {
             get => m_VelocityType;
             set => m_VelocityType = value;
         }
 
-        [SerializeField]
-        VelocityType m_VelocityType;
-        VelocityType m_PreviousVelocityType;
 
         XRHandSubsystem m_Subsystem;
         HandGameObjects m_LeftHandGameObjects;
         HandGameObjects m_RightHandGameObjects;
 
         static readonly List<XRHandSubsystem> s_SubsystemsReuse = new List<XRHandSubsystem>();
+
+        /// <summary>
+        /// See <see cref="MonoBehaviour"/>.
+        /// </summary>
         protected void Awake()
         {
 #if ENABLE_INPUT_SYSTEM
@@ -77,6 +113,9 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
 #endif // ENABLE_INPUT_SYSTEM
         }
 
+        /// <summary>
+        /// See <see cref="MonoBehaviour"/>.
+        /// </summary>
         protected void OnEnable()
         {
             if (m_Subsystem == null)
@@ -86,6 +125,9 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
             UpdateRenderingVisibility(m_RightHandGameObjects, m_Subsystem.rightHand.isTracked);
         }
 
+        /// <summary>
+        /// See <see cref="MonoBehaviour"/>.
+        /// </summary>
         protected void OnDisable()
         {
             if (m_Subsystem != null)
@@ -100,6 +142,9 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
             UpdateRenderingVisibility(m_RightHandGameObjects, false);
         }
 
+        /// <summary>
+        /// See <see cref="MonoBehaviour"/>.
+        /// </summary>
         protected void OnDestroy()
         {
             if (m_LeftHandGameObjects != null)
@@ -115,6 +160,9 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
             }
         }
 
+        /// <summary>
+        /// See <see cref="MonoBehaviour"/>.
+        /// </summary>
         protected void Update()
         {
             if (m_Subsystem != null && m_Subsystem.running)

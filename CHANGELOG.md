@@ -7,6 +7,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2023-08-14
+
+### Added
+- Added a root pose offset to the `XRHandSkeletonDriver` that allows an additional offset to the root pose (typically the wrist). This is useful for situations where you want the visual hand representation to stop while interacting with objects in a scene.
+- Added missing sample script API documentation to make it easier to understand and build from.
+
+### Fixed
+- Fixed documentation links for OpenXR features to point at latest documentation version.
+
 ## [1.2.1] - 2023-05-30
 
 ### Fixed

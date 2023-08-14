@@ -25,6 +25,11 @@
         },
         {
             "name": "com.unity.xr.openxr",
+            "expression": "1.2.0",
+            "define": "UNITY_OPENXR_PACKAGE_1_2"
+        },
+        {
+            "name": "com.unity.xr.openxr",
             "expression": "1.6.0",
             "define": "UNITY_OPENXR_PACKAGE_1_6"
         },

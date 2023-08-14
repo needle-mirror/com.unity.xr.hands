@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.hands",
   "displayName": "XR Hands",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "unity": "2021.3",
   "description": "Surfaces the cross-platform subsystem API for hand-tracking. Implementations of providers will be found in the package for that platform.",
   "keywords": [
@@ -15,10 +15,22 @@
     "subsystem"
   ],
   "dependencies": {
-    "com.unity.inputsystem": "1.4.3",
+    "com.unity.inputsystem": "1.3.0",
     "com.unity.modules.xr": "1.0.0",
     "com.unity.xr.core-utils": "2.2.0",
     "com.unity.xr.management": "4.0.1"
+  },
+  "_upm": {
+    "changelog": "### Added\n- Added a root pose offset to the `XRHandSkeletonDriver` that allows an additional offset to the root pose (typically the wrist). This is useful for situations where you want the visual hand representation to stop while interacting with objects in a scene.\n- Added missing sample script API documentation to make it easier to understand and build from.\n\n### Fixed\n- Fixed documentation links for OpenXR features to point at latest documentation version."
+  },
+  "upmCi": {
+    "footprint": "0bbae55093ac58c7fd5d935ba6abc59f0dd7f844"
+  },
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.3/manual/index.html",
+  "repository": {
+    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.xr.hands.git",
+    "type": "git",
+    "revision": "3c7b72f0abeabbe733ac0f37b40f5560a732ceda"
   },
   "samples": [
     {
@@ -26,17 +38,5 @@
       "description": "Basic sample showing how visualize hands.",
       "path": "Samples~/HandVisualizer"
     }
-  ],
-  "_upm": {
-    "changelog": "### Fixed\n- Fixed build pipeline that caused `UnityOpenXRHands` assembly to get skipped."
-  },
-  "upmCi": {
-    "footprint": "07b78b2d1075836984b7992eff696faf21517d94"
-  },
-  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.2/manual/index.html",
-  "repository": {
-    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.xr.hands.git",
-    "type": "git",
-    "revision": "1747736627634d3431597c1ae3d1ee7bc9cf1901"
-  }
+  ]
 }

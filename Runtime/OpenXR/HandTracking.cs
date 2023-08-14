@@ -14,7 +14,7 @@ using UnityEditor;
 using UnityEditor.XR.Management;
 #endif
 
-#if !UNITY_OPENXR_PACKAGE_1_6
+#if UNITY_OPENXR_PACKAGE_1_2 && !UNITY_OPENXR_PACKAGE_1_6
 using UnityEngine.XR.OpenXR.Features.OculusQuestSupport;
 #endif
 
@@ -38,7 +38,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         BuildTargetGroups = new[] { BuildTargetGroup.Standalone, BuildTargetGroup.WSA, BuildTargetGroup.Android },
         Company = "Unity",
         Desc = "Creates and manages an XRHandSubsystem.",
-        DocumentationLink = "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.1/manual/features/handtracking.html",
+        DocumentationLink = XRHelpURLConstants.k_CurrentManualDocsBaseUrl + "features/handtracking.html",
         Version = "0.0.1",
         OpenxrExtensionStrings = extensionString,
         Category = UnityEditor.XR.OpenXR.Features.FeatureCategory.Feature,
@@ -170,7 +170,7 @@ namespace UnityEngine.XR.Hands.OpenXR
 #if UNITY_EDITOR
         protected override void GetValidationChecks(List<ValidationRule> results, BuildTargetGroup targetGroup)
         {
-#if !UNITY_OPENXR_PACKAGE_1_6
+#if UNITY_OPENXR_PACKAGE_1_2 && !UNITY_OPENXR_PACKAGE_1_6
             results.Add(new ValidationRule(this)
             {
                 message = "Hand-tracking does not work on a Quest device at runtime without a version of the OpenXR package at version 1.6.0 or newer.",

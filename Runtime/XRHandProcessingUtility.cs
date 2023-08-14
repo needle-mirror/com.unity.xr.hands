@@ -63,6 +63,9 @@ namespace UnityEngine.XR.Hands.Processing
         /// The invoking hand for this extension method. To call this method,
         /// call <c>.SetRootPose(modifiedRootPose)</c> on an <see cref="XRHand"/>.
         /// </param>
+        /// <param name="rootPose">
+        /// The root <see cref="Pose"/> to set for the <paramref name="hand"/>.
+        /// </param> 
         /// <remarks>
         /// Be sure to follow this with a call to <c>yourHandSubsystem.SetCorrespondingHand(modifiedHand)</c>,
         /// or you will only update the root pose of a copy of a hand.
@@ -96,6 +99,9 @@ namespace UnityEngine.XR.Hands.Processing
         /// The invoking joint for this extension method. To call this method,
         /// call <c>.SetPose(modifiedPose)</c> on an <see cref="XRHandJoint"/>.
         /// </param>
+        /// <param name="pose">
+        /// The <see cref="Pose"/> to set for the <paramref name="joint"/>.
+        /// </param> 
         /// <remarks>
         /// After manipulating data for a particular joint, be sure to assign it
         /// back to the array you got it from, as you can only manipulate copies
@@ -118,6 +124,9 @@ namespace UnityEngine.XR.Hands.Processing
         /// The invoking joint for this extension method. To call this method,
         /// call <c>.SetLinearVelocity(modifiedVelocity)</c> on an <see cref="XRHandJoint"/>.
         /// </param>
+        /// <param name="linearVelocity">
+        /// The linear velocity to set for the <paramref name="joint"/>.
+        /// </param>
         /// <remarks>
         /// After manipulating data for a particular joint, be sure to assign it
         /// back to the array you got it from, as you can only manipulate copies
@@ -139,6 +148,9 @@ namespace UnityEngine.XR.Hands.Processing
         /// <param name="joint">
         /// The invoking joint for this extension method. To call this method,
         /// call <c>.SetAngularVelocity(modifiedVelocity)</c> on an <see cref="XRHandJoint"/>.
+        /// </param>
+        /// <param name="angularVelocity">
+        /// The angular velocity to set for the <paramref name="joint"/>.
         /// </param>
         /// <remarks>
         /// After manipulating data for a particular joint, be sure to assign it

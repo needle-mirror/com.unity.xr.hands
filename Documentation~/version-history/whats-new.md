@@ -1,6 +1,20 @@
 ---
 uid: xrhands-whats-new
 ---
+# What's new in version 1.3
+
+Summary of changes in XR Hands package version 1.3.
+
+The main updates in this release include:
+
+**Added**
+- Added a root pose offset to the `XRHandSkeletonDriver` that allows an additional offset to the root pose (typically the wrist). This is useful for situations where you want the visual hand representation to stop while interacting with objects in a scene.
+- Added missing sample script API documentation to make it easier to understand and build off of.
+
+**Fixed**
+- Fixed documentation links for OpenXR features to point at latest documentation version.
+
+---
 # What's new in version 1.2
 
 Summary of changes in XR Hands package version 1.2.
