@@ -1,17 +1,29 @@
 ---
 uid: xrhands-whats-new
 ---
+# What's new in version 1.4
+
+Summary of changes in XR Hands package version 1.4.
+
+The main updates in this release include:
+
+## Added
+
+- Added support for custom gestures. For additional information, refer to the [manual documentation](xref:xrhands-custom-gestures).
+
+---
 # What's new in version 1.3
 
 Summary of changes in XR Hands package version 1.3.
 
 The main updates in this release include:
 
-**Added**
+## Added
+
 - Added a root pose offset to the `XRHandSkeletonDriver` that allows an additional offset to the root pose (typically the wrist). This is useful for situations where you want the visual hand representation to stop while interacting with objects in a scene.
 - Added missing sample script API documentation to make it easier to understand and build off of.
 
-**Fixed**
+## Fixed
 - Fixed documentation links for OpenXR features to point at latest documentation version.
 
 ---
@@ -21,7 +33,7 @@ Summary of changes in XR Hands package version 1.2.
 
 The main updates in this release include:
 
-**Added**
+## Added
 - Added `IXRHandProcessor` interface that intercepts and allows post-processing joint data before being used by other scripts. More information can be found on the [XR Hands Joint Processing](../process-joints.md) manual page.
 - Added two samples to the Hand Visualizer sample for how to use the new Joint Processing feature to change the visual output of hand tracking.
 - `XRHand` and `XRHandJoint` both now implement `IEquatable`, and have `Equals`, `GetHashCode`, and the `==` and `!=` operators overloaded.
@@ -29,10 +41,10 @@ The main updates in this release include:
 - Added `XRHandMeshController` component that subscribes to events from a `XRHandTrackingEvents` and can optionally show or hide a mesh.
 - Added `XRHandSkeletonDriver` component that subscribes to events from a `XRHandTrackingEvents` and updates a hierarchy of Transforms for each `XRHandJoint`.
 
-**Changed**
+## Changed
 - Minimum supported Unity Editor version has changed to 2021.3.
 
-**Fixed**
+## Fixed
 
 - Fixed Hand Visualizer component so it will use another running `XRHandSubsystem` if the first is stopped.
 - Fixed exception in Hand Visualizer component when a joint is invalid.
@@ -46,7 +58,7 @@ Summary of changes in XR Hands package version 1.0.
 
 The main updates in this release include:
 
-**Added**
+## Added
 
 Added subsystem for cross-platform hand-tracking and accompanying types.
 

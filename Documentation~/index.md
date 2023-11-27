@@ -5,7 +5,7 @@ uid: xrhands-manual
 
 The XR Hands package defines an API that allows you to access hand tracking data from devices that support hand tracking. To access hand tracking data, you must also enable a provider plug-in that implements the XR hand tracking subsystem.
 
-![image alt text](images/hand-tracking.jpg)<br />*Hand-tracking*
+![Hand tracking cover image](images/cover_image.png)<br />*Hand-tracking*
 
 The XR Hand package provides:
 
@@ -16,7 +16,7 @@ The XR Hand package provides:
 * [XRHandJoint struct](xref:UnityEngine.XR.Hands.XRHandJoint): the data for an individual joint or other tracked point of the hand.
 * [MetaAimHand class](xref:UnityEngine.XR.Hands.MetaAimHand): the pinch and aim gesture data from the Meta Aim hand OpenXR feature.
 
-Refer to [Hand tracking data](xref:xrhands-tracking-data) for more information about using hand data in an application.
+Refer to [Hand tracking data](xref:xrhands-tracking-data) and [Hand Gestures](xref:xrhands-custom-gestures) for more information about using hand data in an application.
 
 > [!NOTE]
 > If you are implementing hand tracking for a Unity provider plug-in, see [Implement a provider](xref:xrhands-implement-a-provider). If you are intercepting hand tracking data to filter or process it before it's reported to the caller, see [Process joints](xref:xrhands-process-joints).

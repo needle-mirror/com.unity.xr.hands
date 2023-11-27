@@ -78,7 +78,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// <summary>See <see cref="OpenXRFeature.OnSubsystemStart"/>.</summary>
         protected override void OnSubsystemStart()
         {
-            if (UnityOpenXRHands_ToggleMetaAim(true))
+            if (NativeApi.ToggleMetaAim(true))
             {
                 CreateHands();
                 var subsystem = XRGeneralSettings.Instance?.Manager?.activeLoader?.GetLoadedSubsystem<XRHandSubsystem>();
@@ -94,7 +94,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// <summary>See <see cref="OpenXRFeature.OnSubsystemStop"/>.</summary>
         protected override void OnSubsystemStop()
         {
-            UnityOpenXRHands_ToggleMetaAim(false);
+            NativeApi.ToggleMetaAim(false);
 
             var subsystem = XRGeneralSettings.Instance?.Manager?.activeLoader?.GetLoadedSubsystem<XRHandSubsystem>();
             if (subsystem != null)
@@ -135,8 +135,11 @@ namespace UnityEngine.XR.Hands.OpenXR
                 Hands.MetaAimHand.right.UpdateHand(false, (successFlags & XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose) != 0);
         }
 
-        [DllImport("UnityOpenXRHands")]
-        static extern bool UnityOpenXRHands_ToggleMetaAim(bool enable);
+        static class NativeApi
+        {
+            [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_ToggleMetaAim")]
+            static internal extern bool ToggleMetaAim(bool enable);
+        }
     }
 }
 

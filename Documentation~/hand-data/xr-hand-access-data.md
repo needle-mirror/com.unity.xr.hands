@@ -95,7 +95,7 @@ public class HandsExample : MonoBehaviour
 }
 ```
 
-For a complete code example including how to handle late initialization, refer to the `HandVisualizer` component in the [HandVisualizer sample](index.md#samples).
+For a complete code example including how to handle late initialization, refer to the `HandVisualizer` component in the [HandVisualizer sample](xref:xrhands-manual#samples).
 
 ## Get joint data
 

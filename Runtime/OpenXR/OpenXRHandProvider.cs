@@ -20,29 +20,22 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// <summary>
         /// See <see cref="UnityEngine.SubsystemsImplementation.SubsystemProvider{T}.Start"/>.
         /// </summary>
-        public override void Start()
-        {
-        }
+        public override void Start() {}
 
         /// <summary>
         /// See <see cref="UnityEngine.SubsystemsImplementation.SubsystemProvider{T}.Stop"/>.
         /// </summary>
-        public override void Stop()
-        {
-        }
+        public override void Stop() {}
 
         /// <summary>
         /// See <see cref="UnityEngine.SubsystemsImplementation.SubsystemProvider{T}.Destroy"/>.
         /// </summary>
-        public override void Destroy()
-        {
-            UnityOpenXRHands_Destroy();
-        }
+        public override void Destroy() => NativeApi.Destroy();
 
         /// <inheritdoc/>
         public override void GetHandLayout(NativeArray<bool> handJointsInLayout)
         {
-            if (!UnityOpenXRHands_TryInitialize())
+            if (!NativeApi.TryInitialize())
             {
                 Debug.LogError("OpenXR hand provider failed to initialize - no data will be tracked or surfaced!");
                 return;
@@ -94,7 +87,7 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (!m_IsValid)
                 return XRHandSubsystem.UpdateSuccessFlags.None;
 
-            return UnityOpenXRHands_TryUpdateHands(
+            return NativeApi.TryUpdateHands(
                 updateType,
                 ref leftHandRootPose,
                 leftHandJoints.GetUnsafePtr(),
@@ -127,19 +120,22 @@ namespace UnityEngine.XR.Hands.OpenXR
             }
         }
 
-        [DllImport("UnityOpenXRHands")]
-        static extern bool UnityOpenXRHands_TryInitialize();
+        static class NativeApi
+        {
+            [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_TryInitialize")]
+            internal static extern bool TryInitialize();
 
-        [DllImport("UnityOpenXRHands")]
-        static extern void UnityOpenXRHands_Destroy();
+            [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_Destroy")]
+            internal static extern void Destroy();
 
-        [DllImport("UnityOpenXRHands")]
-        static unsafe extern XRHandSubsystem.UpdateSuccessFlags UnityOpenXRHands_TryUpdateHands(
-            XRHandSubsystem.UpdateType updateType,
-            ref Pose leftRootPose,
-            void* leftHandJoints,
-            ref Pose rightRootPose,
-            void* rightHandJoints);
+            [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_TryUpdateHands")]
+            internal static unsafe extern XRHandSubsystem.UpdateSuccessFlags TryUpdateHands(
+                XRHandSubsystem.UpdateType updateType,
+                ref Pose leftRootPose,
+                void* leftHandJoints,
+                ref Pose rightRootPose,
+                void* rightHandJoints);
+        }
     }
 }
 

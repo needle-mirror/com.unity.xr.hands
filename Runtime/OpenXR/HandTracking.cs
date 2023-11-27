@@ -72,7 +72,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         protected override void OnSystemChange(ulong xrSystem)
         {
             base.OnSystemChange(xrSystem);
-            UnityOpenXRHands_OnSystemChange(xrSystem);
+            NativeApi.OnSystemChange(xrSystem);
         }
 
         /// <summary>See <see cref="OpenXRFeature.OnInstanceCreate(ulong)"/>.</summary>
@@ -81,14 +81,14 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (!base.OnInstanceCreate(xrInstance))
                 return false;
 
-            return UnityOpenXRHands_OnInstanceCreate(xrInstance, xrGetInstanceProcAddr);
+            return NativeApi.OnInstanceCreate(xrInstance, xrGetInstanceProcAddr);
         }
 
         /// <summary>See <see cref="OpenXRFeature.OnAppSpaceChange(ulong)"/>.</summary>
         protected override void OnAppSpaceChange(ulong xrSpace)
         {
             base.OnAppSpaceChange(xrSpace);
-            UnityOpenXRHands_OnAppSpaceChange(xrSpace);
+            NativeApi.OnAppSpaceChange(xrSpace);
         }
 
         /// <summary>
@@ -100,8 +100,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         protected override void OnSessionCreate(ulong xrSession)
         {
             base.OnSessionCreate(xrSession);
-
-            UnityOpenXRHands_OnSessionCreate(xrSession);
+            NativeApi.OnSessionCreate(xrSession);
 
             var descriptors = new List<XRHandSubsystemDescriptor>();
             SubsystemManager.GetSubsystemDescriptors(descriptors);
@@ -118,6 +117,27 @@ namespace UnityEngine.XR.Hands.OpenXR
             }
 
             m_Updater = new XRHandProviderUtility.SubsystemUpdater(s_Subsystem);
+        }
+
+        /// <summary>See <see cref="OpenXRFeature.OnAppSpaceChange(ulong)"/>.</summary>
+        protected override void OnSessionDestroy(ulong xrSpace)
+        {
+            base.OnSessionDestroy(xrSpace);
+            NativeApi.OnSessionDestroy(xrSpace);
+        }
+
+        /// <summary>See <see cref="OpenXRFeature.OnInstanceDestroy(ulong)"/>.</summary>
+        protected override void OnInstanceDestroy(ulong xrInstance)
+        {
+            base.OnInstanceDestroy(xrInstance);
+            NativeApi.OnInstanceDestroy(xrInstance);
+        }
+
+        /// <summary>See <see cref="OpenXRFeature.OnInstanceLossPending(ulong)"/>.</summary>
+        protected override void OnInstanceLossPending(ulong xrInstance)
+        {
+            base.OnInstanceLossPending(xrInstance);
+            NativeApi.OnInstanceLossPending(xrInstance);
         }
 
         /// <summary>
@@ -165,7 +185,7 @@ namespace UnityEngine.XR.Hands.OpenXR
 
         /// <see cref="OpenXRFeature.HookGetInstanceProcAddr(IntPtr)"/>
         protected override IntPtr HookGetInstanceProcAddr(IntPtr func)
-            => UnityOpenXRHands_intercept_xrWaitFrame_xrGetInstanceProcAddr(func);
+            => NativeApi.Intercept_xrGetInstanceProcAddr(func);
 
 #if UNITY_EDITOR
         protected override void GetValidationChecks(List<ValidationRule> results, BuildTargetGroup targetGroup)
@@ -189,20 +209,34 @@ namespace UnityEngine.XR.Hands.OpenXR
         }
 #endif // UNITY_EDITOR
 
-        [DllImport("UnityOpenXRHands")]
-        static extern void UnityOpenXRHands_OnSystemChange(ulong xrSystem);
+        internal const string k_LibraryName = "UnityOpenXRHands";
 
-        [DllImport("UnityOpenXRHands")]
-        static extern bool UnityOpenXRHands_OnInstanceCreate(ulong xrInstance, IntPtr xrGetInstanceProcAddr);
+        static class NativeApi
+        {
+            [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnSystemChange")]
+            static internal extern void OnSystemChange(ulong xrSystem);
 
-        [DllImport("UnityOpenXRHands")]
-        static extern void UnityOpenXRHands_OnAppSpaceChange(ulong xrSpace);
+            [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnInstanceCreate")]
+            static internal extern bool OnInstanceCreate(ulong xrInstance, IntPtr xrGetInstanceProcAddr);
 
-        [DllImport("UnityOpenXRHands")]
-        static extern void UnityOpenXRHands_OnSessionCreate(ulong xrSession);
+            [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnAppSpaceChange")]
+            static internal extern void OnAppSpaceChange(ulong xrSpace);
 
-        [DllImport("UnityOpenXRHands")]
-        private static extern IntPtr UnityOpenXRHands_intercept_xrWaitFrame_xrGetInstanceProcAddr(IntPtr func);
+            [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnSessionCreate")]
+            static internal extern void OnSessionCreate(ulong xrSession);
+
+            [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnSessionDestroy")]
+            static internal extern void OnSessionDestroy(ulong xrSession);
+
+            [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnInstanceDestroy")]
+            static internal extern void OnInstanceDestroy(ulong xrInstance);
+
+            [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnInstanceLossPending")]
+            static internal extern void OnInstanceLossPending(ulong xrInstance);
+
+            [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_intercept_xrGetInstanceProcAddr")]
+            static internal extern IntPtr Intercept_xrGetInstanceProcAddr(IntPtr func);
+        }
 
 #if UNITY_EDITOR
         internal static bool OpenXRLoaderEnabledForEditorPlayMode()
@@ -210,16 +244,14 @@ namespace UnityEngine.XR.Hands.OpenXR
             var settings = XRGeneralSettings.Instance?.AssignedSettings ?? (XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Standalone)?.AssignedSettings);
             if (!settings)
                 return false;
-            bool loaderFound = false;
+
             foreach (var activeLoader in settings.activeLoaders)
             {
-                if (activeLoader as OpenXRLoader != null)
-                {
-                    loaderFound = true;
-                    break;
-                }
+                if (activeLoader is OpenXRLoader)
+                    return true;
             }
-            return loaderFound;
+
+            return false;
         }
 #endif
 

@@ -9,7 +9,7 @@ For this extension to be available, you must install the [OpenXR package](https:
 
 For this extension to work when deployed to a Meta Quest device, your OpenXR package must be set to at least version 1.6.0.
 
-You can either use the Unity Input System drop-down menus in the editing UI for Input Action Assets, or directly enter bindings like below.
+You can either use the Unity Input System drop-down menus in the editing UI for Input Action Assets, or directly enter bindings as shown below.
 
 |**Data**|**Generic Binding Path**|
 |--------|------------|

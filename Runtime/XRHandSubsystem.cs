@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.SubsystemsImplementation;
+using UnityEngine.XR.Hands.Gestures;
 using UnityEngine.XR.Hands.Processing;
 using UnityEngine.XR.Hands.ProviderImplementation;
 
@@ -13,7 +14,7 @@ namespace UnityEngine.XR.Hands
     /// joint pose data.
     /// </summary>
     /// <remarks>
-    /// The <c>XRHandSystem</c> class is the main entry point for accessing hand tracking data
+    /// The <c>XRHandSubsystem</c> class is the main entry point for accessing hand tracking data
     /// provided by an XR device. A provider implementation that reads tracking data from the
     /// user's device and provides updates to this subsystem must also be available. The XR
     /// Hands package includes a provider implementation for OpenXR.
@@ -277,6 +278,9 @@ namespace UnityEngine.XR.Hands
                 ref m_RightHand.m_RootPose,
                 m_RightHand.m_Joints);
 
+            XRFingerShapeMath.ClearFingerStateCache(Handedness.Left);
+            XRFingerShapeMath.ClearFingerStateCache(Handedness.Right);
+
             var wasLeftHandTracked = m_LeftHand.isTracked;
             var success = UpdateSuccessFlags.LeftHandRootPose | UpdateSuccessFlags.LeftHandJoints;
             m_LeftHand.isTracked = (updateSuccessFlags & success) == success;
@@ -378,6 +382,9 @@ namespace UnityEngine.XR.Hands
                         Pose.identity);
                 }
             }
+
+            for (var fingerID = XRHandFingerID.Thumb; fingerID <= XRHandFingerID.Little; ++fingerID)
+                XRFingerShapeMath.SetDefaultFingerShapeConfiguration(fingerID, provider.GetFingerShapeConfiguration(fingerID));
         }
 
         /// <summary>

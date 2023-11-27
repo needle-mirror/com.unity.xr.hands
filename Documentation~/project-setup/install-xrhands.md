@@ -5,7 +5,7 @@ uid: xrhands-install
 
 XR Hands is an official Unity package available via the [Package Manager](https://learn.unity.com/tutorial/the-package-manager).
 
-To install this package in Unity 2021.2+:
+To install this package in Unity 2021.3+:
 
 1. Open the project that you plan to use.
 2. Click the following link: [com.unity.xr.hands](com.unity3d.kharma:upmpackage/com.unity.xr.hands).
@@ -27,10 +27,10 @@ To install the XR Hands package to a project in earlier versions of Unity, see [
 
 ## Editor compatibility
 
-XR Hands 1.3 is compatible with Unity 2021.3 and later.
+XR Hands 1.4 is compatible with Unity 2021.3 and later.
 
 > [!NOTE]
-> XR Hands 1.3 is compatible with Unity 2021.3 and up, but it does not appear in the Package Manager window before [2021.3.23f1](https://unity.com/releases/editor/whats-new/2021.3.23).
+> XR Hands 1.4 is compatible with Unity 2021.3 and up, but it does not appear in the Package Manager window.
 
 # Required packages
 

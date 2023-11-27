@@ -112,7 +112,7 @@ namespace UnityEngine.XR.Hands
         /// <summary>
         /// Whether the hand is currently being tracked
         /// </summary>
-        public bool handIsTracked => m_HandIsTracked.Value;
+        public bool handIsTracked => m_Subsystem != null && m_Subsystem.running && m_HandIsTracked.Value;
 
         /// <summary>
         /// The root pose of the hand.
@@ -148,7 +148,7 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         public UnityEvent<bool> trackingChanged => m_TrackingChanged;
 
-        static readonly List<XRHandSubsystem> s_SubsystemsReuse = new List<XRHandSubsystem>();
+        static readonly List<XRHandSubsystem> k_SubsystemsReuse = new List<XRHandSubsystem>();
         readonly BindableVariable<bool> m_HandIsTracked = new BindableVariable<bool>();
 
         XRHandSubsystem m_Subsystem;
@@ -162,10 +162,10 @@ namespace UnityEngine.XR.Hands
             if (m_Subsystem != null && m_Subsystem.running)
                 return;
 
-            SubsystemManager.GetSubsystems(s_SubsystemsReuse);
-            for (var i = 0; i < s_SubsystemsReuse.Count; ++i)
+            SubsystemManager.GetSubsystems(k_SubsystemsReuse);
+            for (var i = 0; i < k_SubsystemsReuse.Count; ++i)
             {
-                var handSubsystem = s_SubsystemsReuse[i];
+                var handSubsystem = k_SubsystemsReuse[i];
                 if (handSubsystem.running)
                 {
                     SetSubsystem(handSubsystem);
@@ -219,17 +219,13 @@ namespace UnityEngine.XR.Hands
         void OnTrackingAcquired(XRHand hand)
         {
             if (hand.handedness == m_Handedness)
-            {
                 TrackingAcquiredOrLost(true);
-            }
         }
 
         void OnTrackingLost(XRHand hand)
         {
             if (hand.handedness == m_Handedness)
-            {
                 TrackingAcquiredOrLost(false);
-            }
         }
 
         void TrackingAcquiredOrLost(bool isTracked)

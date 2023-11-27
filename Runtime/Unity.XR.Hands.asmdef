@@ -8,7 +8,8 @@
         "Unity.XR.Management",
         "Unity.XR.Management.Editor",
         "Unity.XR.OpenXR",
-        "Unity.XR.OpenXR.Features.OculusQuestSupport"
+        "Unity.XR.OpenXR.Features.OculusQuestSupport",
+        "Unity.Mathematics"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
