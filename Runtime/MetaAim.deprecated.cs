@@ -1,3 +1,5 @@
+#if ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION
+
 using System;
 using UnityEngine.InputSystem;
 
@@ -48,3 +50,5 @@ namespace UnityEngine.XR.Hands
         }
     }
 }
+
+#endif // ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION

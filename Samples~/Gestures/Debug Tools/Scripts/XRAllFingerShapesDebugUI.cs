@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine.XR.Hands.Gestures;
 
 namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools

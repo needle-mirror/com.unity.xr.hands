@@ -1,3 +1,5 @@
+#if ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -513,3 +515,5 @@ namespace UnityEngine.XR.Hands
         bool m_WasLittlePressed;
     }
 }
+
+#endif // ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION

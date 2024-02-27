@@ -1,3 +1,5 @@
+#if ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION
+
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
@@ -258,3 +260,5 @@ namespace UnityEngine.XR.Hands
         bool m_WasValid;
     }
 }
+
+#endif // ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION

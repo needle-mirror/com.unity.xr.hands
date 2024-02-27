@@ -1,5 +1,3 @@
-using System;
-
 namespace UnityEngine.XR.Hands.Gestures
 {
     /// <summary>

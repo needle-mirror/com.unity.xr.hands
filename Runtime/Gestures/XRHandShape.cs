@@ -1,7 +1,7 @@
-using System;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Profiling;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace UnityEngine.XR.Hands.Gestures
 {
@@ -15,8 +15,8 @@ namespace UnityEngine.XR.Hands.Gestures
 
         [SerializeField]
         [Tooltip("The finger shape conditions that must be met for this hand shape to be considered detected. " +
-            "The conditions are checked in order, ending at the first false condition. " +
-            "Usually the thumb and index should be first to rule out many other hand shapes.")]
+                 "The conditions are checked in order, ending at the first false condition. " +
+                 "Usually the thumb and index should be first to rule out many other hand shapes.")]
         List<XRFingerShapeCondition> m_FingerShapeConditions = new List<XRFingerShapeCondition>();
 
         /// <summary>
@@ -64,6 +64,22 @@ namespace UnityEngine.XR.Hands.Gestures
             for (var index = 0; index < m_FingerShapeConditions.Count; ++index)
             {
                 var condition = m_FingerShapeConditions[index];
+                for (int i = 0; i < condition.targets.Length; ++i)
+                {
+                    // Upgrade any deprecated single tolerance range values to support separate upper and lower tolerances
+                    var target = condition.targets[i];
+#pragma warning disable 618
+                    if (target.tolerance != 0f)
+                    {
+                        var targetCopy = target;
+                        targetCopy.tolerance = target.tolerance;
+                        condition.targets[i] = targetCopy;
+                        EditorUtility.SetDirty(this);
+                        AssetDatabase.SaveAssets();
+                    }
+#pragma warning restore 618
+                }
+
                 condition.UpdateTypesNeededIfDirty();
             }
         }
@@ -75,7 +91,10 @@ namespace UnityEngine.XR.Hands.Gestures
             {
                 var condition = m_FingerShapeConditions[index];
                 for (var i = 0; i < condition.targets.Length; i++)
-                    condition.targets[i].tolerance = k_DefaultShapeTolerance;
+                {
+                    condition.targets[i].upperTolerance = k_DefaultShapeTolerance;
+                    condition.targets[i].lowerTolerance = k_DefaultShapeTolerance;
+                }
             }
         }
 #endif

@@ -3,13 +3,32 @@ uid: xrhands-whats-new
 ---
 # What's new in version 1.4
 
-Summary of changes in XR Hands package version 1.4.
-
-The main updates in this release include:
+Summary of changes in XR Hands package version 1.4. The main updates in this release include:
 
 ## Added
 
-- Added support for custom gestures. For additional information, refer to the [manual documentation](xref:xrhands-custom-gestures).
+### Hand shape and static gesture detection
+
+The XR Hands package now enables detection of static hand gestures such as thumbs up, thumbs down, or pointing. The static hand gestures are the combination of a specific hand shape with an optional orientation applied. There are some hand gestures included in the Gestures sample, along with other tools to get you started.
+
+For additional information, refer to the [custom gesture documentation](xref:xrhands-custom-gestures).
+
+### Upper and lower tolerance range for finger shapes
+![Tolerance ranges](../images/upper-lower-tolerance.png)
+
+The ability to specify lower and upper tolerance limits for individual finger shapes when defining a hand shape is now available. Each finger shape behaves differently on specific fingers or hands based on various factors. Adding specific tolerance ranges increases the chances of detecting a gesture.
+
+### Intermediate grab pose
+![Intermediate grab pose](../images/intermediate-grab-pose.png)
+
+Grab is one of the more nuanced interactions in XR. Providing an intermediate grab pose with upper and lower tolerances for the finger shapes speeds up the process for implementing grab interactions.
+
+## Updates
+
+### Debugging menu with prebuilt hand poses images
+![Debug hand poses](../images/debug-hand-poses.png)
+
+Text-based tiles for hand poses are now visually enhanced with drawings to illustrate the meaning of each prebuilt pose. You can still add a tile to detect your own hand pose, which will appear as a text-based tile. The Finger State UI elements have been rebuilt, and enhanced with support for displaying upper and lower tolerance ranges, along with additional UI changes that help to display the state of the currently detected gesture input.
 
 ---
 # What's new in version 1.3

@@ -45,10 +45,10 @@ To edit a hand shape:
       * Click the + and - buttons under the **Targets** list to add or remove elements.
    c. Choose the **State** type. Refer to [finger shape](xref:xrhands-finger-shapes) for a description of each type.
    d. Set the **Target Value**.
-   e. Set the **Tolerance**.
+   e. Set the **Upper Tolerance** and **Lower Tolerance** values.
    
 > [!TIP]
-> The conditions and targets in the list are evaluated in order. Evaluation stops as soon as the first value is outside the required tolerance. You can reorder the elements within both the **Finger State Conditions** list and within each individual **Targets** list.
+> The conditions and targets in the list are evaluated in order. Evaluation stops as soon as the first value is outside the required tolerance range. You can reorder the elements within both the **Finger State Conditions** list and within each individual **Targets** list.
  
 ### XR Hand Shape properties
  

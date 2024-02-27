@@ -6,6 +6,9 @@ uid: xrhands-static-gesture-component
 
 The **Static Hand Gesture** component compares the tracking data for a user's hand to a defined hand shape or pose and dispatches an event when the two match within the specified tolerances. 
 
+> [!IMPORTANT]
+> You must import the **Gestures** sample provided by the XR Hands package to use the **Static Hand Gesture** component. Refer to [Samples](xref:xrhands-manual#samples) for instructions.
+
 ![Inspector for the Static Hand Gesture component](../images/gestures/static-hand-gesture.png)<br/>*Inspector for the Static Hand Gesture component*
 
 | Property | Description |

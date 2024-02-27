@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
 using UnityEngine.XR.Hands.Gestures;
 
 namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
@@ -12,38 +10,52 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
     public class XRHandShapeDebugUI : MonoBehaviour
     {
         [SerializeField]
-        [Tooltip("The hand shape that will be displayed on the debug UI.")]
-        XRHandShape m_HandShape;
-
-        [SerializeField]
         [Tooltip("The debug UI that will be used to display the finger states.")]
         XRAllFingerShapesDebugUI m_XRAllFingerShapesDebugUI;
 
-        [SerializeField]
-        [Tooltip("The label that will be used to display the name of the hand shape.")]
-        TextMeshProUGUI m_HandShapeNameLabel;
+        XRHandShape m_HandShape;
 
-        static readonly List<XRFingerShapeDebugBar> k_ReusableBarsToHide = new List<XRFingerShapeDebugBar>();
+        bool m_HandShapeDetected;
+
+        readonly List<XRFingerShapeDebugBar> k_ReusableBarsToHide = new List<XRFingerShapeDebugBar>();
+
+        readonly List<XRFingerShapeDebugBar> k_Bars = new List<XRFingerShapeDebugBar>();
 
         /// <summary>
         /// The hand shape that will be displayed in the debug UI.
         /// </summary>
-        public XRHandShape handShape
+        public ScriptableObject handShapeOrPose
         {
             get => m_HandShape;
             set
             {
-                m_HandShape = value;
-                UpdateShapeNameLabel();
+                var handPose = value as XRHandPose;
+
+                m_HandShape = handPose != null ? handPose.handShape : value as XRHandShape;
+
+                m_HandShapeDetected = m_HandShape != null;
+                foreach (var bar in k_Bars)
+                    bar.handShapeDetected = m_HandShapeDetected;
+
+                if (m_HandShapeDetected)
+                {
+                    // Hide previously enabled bars
+                    foreach (var bar in k_Bars)
+                        bar.HideTargetAndTolerance();
+                }
             }
         }
 
-        void Start() => UpdateShapeNameLabel();
-
-        void UpdateShapeNameLabel()
+        void Awake()
         {
-            if (m_HandShapeNameLabel != null)
-                m_HandShapeNameLabel.text = m_HandShape.name;
+            if (k_Bars.Count == 0)
+            {
+                foreach (var graph in m_XRAllFingerShapesDebugUI.xrFingerShapeDebugGraphs)
+                {
+                    foreach (var bar in graph.bars)
+                        k_Bars.Add(bar);
+                }
+            }
         }
 
         void Update()
@@ -53,19 +65,27 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             foreach (var graph in m_XRAllFingerShapesDebugUI.xrFingerShapeDebugGraphs)
                 k_ReusableBarsToHide.AddRange(graph.bars);
 
-            foreach(var condition in m_HandShape.fingerShapeConditions)
+            if (m_HandShapeDetected)
             {
-                foreach (var shapeCondition in condition.targets)
+                foreach (var condition in m_HandShape.fingerShapeConditions)
                 {
-                    var xrFingerShapeDebugGraph = m_XRAllFingerShapesDebugUI.xrFingerShapeDebugGraphs[(int)condition.fingerID];
-                    var bar = xrFingerShapeDebugGraph.bars[(int)shapeCondition.shapeType];
-                    bar.SetTargetAndTolerance(shapeCondition.desired, shapeCondition.tolerance);
-                    k_ReusableBarsToHide.Remove(bar);
+                    foreach (var shapeCondition in condition.targets)
+                    {
+                        var xrFingerShapeDebugGraph = m_XRAllFingerShapesDebugUI.xrFingerShapeDebugGraphs[(int)condition.fingerID];
+                        var bar = xrFingerShapeDebugGraph.bars[(int)shapeCondition.shapeType];
+                        bar.SetTargetAndTolerances(shapeCondition.desired, shapeCondition.upperTolerance, shapeCondition.lowerTolerance);
+                        k_ReusableBarsToHide.Remove(bar);
+                    }
                 }
             }
+        }
 
-            foreach (var hiddenBar in k_ReusableBarsToHide)
-                hiddenBar.HideTargetAndTolerance();
+        /// <summary>
+        /// Clear the detected handshape reference inorder to stop displaying any corresponding UI
+        /// </summary>
+        public void ClearDetectedHandShape()
+        {
+            handShapeOrPose = null;
         }
     }
 }

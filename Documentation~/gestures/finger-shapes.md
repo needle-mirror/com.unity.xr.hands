@@ -20,7 +20,7 @@ You can specify values for the following shape aspects:
 
 When describing a hand shape, you assign a normalized target value between 0 and 1 to one or more finger shapes. A value of 1 indicates that the specified finger is fully in that shape. For example, if you set Full Curl equal to 1 for a finger, that finger must be fully curled for the custom gesture to be recognized. Conversely, if you set Full Curl equal to 0, then the finger must be straight. You can set multiple shape values for the same finger. 
 
-In addition to a normalized target value for a finger shape, you set a tolerance value. The tolerance specifies how close the current measurement of the shape must be to the target value for the gesture to be recognized. For example, if you set a target value of .75 and a tolerance of 0.1, then the gesture can be recognized when the current, measured value is between .65 and .85. Tolerances allow you to make gestures easier to perform as well as accomodate for varying hand geometries and ranges of motions across your user base.
+In addition to a normalized target value for a finger shape, you set upper and lower tolerance values. The tolerance specifies how close the current measurement of the shape must be to the target value for the gesture to be recognized. For example, if you set a target value of .75 with an upper and lower tolerance of 0.05, then the gesture can be recognized when the current, measured value is between .65 and .85. Tolerances allow you to make gestures easier to perform as well as accomodate for varying hand geometries and ranges of motions across your user base.
 
 > [!NOTE]
 > The thumb has no pinch value. The little finger has no spread value. If you specify values for these in a hand shape, the gesture will never be recognizable. 
@@ -84,7 +84,7 @@ Full Curl is calculated by averaging normalized angles at each of the three join
 
 Full Curl for the thumb is calculated slightly differently. The same value is report as with [Tip Curl](#tip-curl), since there are only those last two angles instead.
 
-Curl is calculated by averaging the angles of one or more joints of the finger. The difference between the three curl values is which joints are included. The angles are normalized to the range 0..1 based on predefined minimum and maximum angles. These minimum and maximum values are defined by <c>XRFingerShapeConfiguration</c>, and can be different between platforms. (You should never need to interact with <c>XRFingerShapeConfiguration</c> directly.)
+Curl is calculated by averaging the angles of one or more joints of the finger. The difference between the three curl values is which joints are included. The angles are normalized to the range 0..1 based on predefined minimum and maximum angles. These minimum and maximum values are defined by `XRFingerShapeConfiguration`, and can be different between platforms. (You should never need to interact with `XRFingerShapeConfiguration` directly.)
 
 ## Base Curl
 
@@ -170,7 +170,7 @@ The thumb has no pinch value. If you specify a pinch value for the thumb in a ha
 > [!TIP]
 > Pinch is a common gesture supported natively by many XR platforms and often used as part of system gestures. As such, you should exercise additional care when creating custom values that involve high pinch values to avoid duplicate gesture detection and conflicts with system gestures.
 
-Pinch is calculated as a linear interpolation between maximum and minimum distances for the finger, as defined by the ranges in <c>XRFingerShapeConfiguration</c>. If the distance between finger tip and thumb tip is greater than the maximum distance, the pinch strength is 0. If the distance between those two tips is lower than the minimum, the pinch strength is 1. Anything in between is linearly interpolated.
+Pinch is calculated as a linear interpolation between maximum and minimum distances for the finger, as defined by the ranges in `XRFingerShapeConfiguration`. If the distance between finger tip and thumb tip is greater than the maximum distance, the pinch strength is 0. If the distance between those two tips is lower than the minimum, the pinch strength is 1. Anything in between is linearly interpolated.
 
 ## Spread
 
@@ -195,4 +195,4 @@ Spread measures the angle between a finger and the next finger closer to the lit
     </tr>
 </table>
 
-If you were to orient the wrist such that it points along the z-axis, spread is calculated as the normalized horizontal angle between two fingers. The angle is normalized according to ranges defined in <c>XRFingerShapeConfiguration</c>. The vectors that define the angle that gets normalized are the proximal to intermediate joints of each finger - this is different for the thumb, which behaves the most consistently by using the index finger's metacarpal and proximal joints, and the thumbs's metacarpal and tip. If the fingers cross or start to cross, a spread value of 0 is reported, because spread represents the convergence, not the divergence, between these vectors.
+If you were to orient the wrist such that it points along the z-axis, spread is calculated as the normalized horizontal angle between two fingers. The angle is normalized according to ranges defined in `XRFingerShapeConfiguration`. The vectors that define the angle that gets normalized are the proximal to intermediate joints of each finger - this is different for the thumb, which behaves the most consistently by using the index finger's metacarpal and proximal joints, and the thumbs's metacarpal and tip. If the fingers cross or start to cross, a spread value of 0 is reported, because spread represents the convergence, not the divergence, between these vectors.

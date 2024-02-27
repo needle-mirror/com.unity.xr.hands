@@ -4,7 +4,7 @@ uid: xrhands-gesture-debugger
 
 # Gesture debugger
 
-The HandGestures sample provides a gesture debuging scene that you can use to help design and test gestures.
+The **Gestures** sample provides a gesture debugging scene that you can use to help design and test gestures.
 
 The debug visualizer in this scene shows:
 

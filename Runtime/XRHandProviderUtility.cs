@@ -235,7 +235,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
                 Stop();
                 m_Subsystem = null;
 
-#if ENABLE_INPUT_SYSTEM
+#if ENABLE_INPUT_SYSTEM && (ENABLE_VR || UNITY_GAMECORE)
                 if (XRHandDevice.leftHand != null)
                 {
                     InputSystem.InputSystem.RemoveDevice(XRHandDevice.leftHand);
@@ -247,7 +247,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
                     InputSystem.InputSystem.RemoveDevice(XRHandDevice.rightHand);
                     XRHandDevice.rightHand = null;
                 }
-#endif // ENABLE_INPUT_SYSTEM
+#endif // ENABLE_INPUT_SYSTEM && (ENABLE_VR || UNITY_GAMECORE)
             }
 
             void OnUpdate()
@@ -286,13 +286,13 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
             // subsystem)
             void EnsureDevicesCreated(XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateType)
             {
-#if ENABLE_INPUT_SYSTEM
+#if ENABLE_INPUT_SYSTEM && (ENABLE_VR || UNITY_GAMECORE)
                 if (XRHandDevice.leftHand == null)
                     XRHandDevice.leftHand = XRHandDevice.Create(m_Subsystem, Handedness.Left, updateSuccessFlags, updateType);
 
                 if (XRHandDevice.rightHand == null)
                     XRHandDevice.rightHand = XRHandDevice.Create(m_Subsystem, Handedness.Right, updateSuccessFlags, updateType);
-#endif // ENABLE_INPUT_SYSTEM
+#endif // ENABLE_INPUT_SYSTEM && (ENABLE_VR || UNITY_GAMECORE)
             }
 
             XRHandSubsystem m_Subsystem;

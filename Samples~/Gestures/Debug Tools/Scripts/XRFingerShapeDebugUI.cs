@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using TMPro;
-using Unity.XR.CoreUtils;
-using UnityEngine;
 
 namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 {

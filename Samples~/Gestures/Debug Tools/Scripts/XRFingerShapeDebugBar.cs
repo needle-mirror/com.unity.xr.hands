@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 {
@@ -24,10 +21,26 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         RectTransform m_TargetIndicator;
 
         [SerializeField]
-        [Tooltip("The range indicator that displays the range by being positioned in its anchored x position from the range center and with the width of the range, proportional to the bar container.")]
-        RectTransform m_RangeIndicator;
+        [Tooltip("The range indicator that displays the upper range by being positioned in its anchored x position from the range center and with the width of the range, proportional to the bar container.")]
+        RectTransform m_UpperRangeIndicator;
+
+        [SerializeField]
+        [Tooltip("The range indicator that displays the lower range by being positioned in its anchored x position from the range center and with the width of the range, proportional to the bar container.")]
+        RectTransform m_LowerRangeIndicator;
+
+        [SerializeField]
+        [Tooltip("The Image component that displays the upper range")]
+        Image m_UpperRangeImage;
+
+        [SerializeField]
+        [Tooltip("The Image component that displays the lower range")]
+        Image m_LowerRangeImage;
 
         float m_RangeRectHeight;
+
+        Color m_RangeActiveColor;
+
+        Color m_RangeDeactivatedColor;
 
         /// <summary>
         /// The container that determines the width of the max length bar, and holds the target and range indicators.
@@ -58,16 +71,61 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         }
 
         /// <summary>
-        /// The <see cref="RectTransform"/> that displays the range by being positioned in its anchored x position from
+        /// The <see cref="RectTransform"/> that displays the upper range by being positioned in its anchored x position from
         /// the range center and with the width of the range, proportional to the <see cref="barContainer"/>.
         /// </summary>
-        public RectTransform rangeIndicator
+        public RectTransform upperRangeIndicator
         {
-            get => m_RangeIndicator;
-            set => m_RangeIndicator = value;
+            get => m_UpperRangeIndicator;
+            set => m_UpperRangeIndicator = value;
         }
 
-        void Awake() => m_RangeRectHeight = m_RangeIndicator.rect.height;
+        /// <summary>
+        /// The <see cref="RectTransform"/> that displays the lower range by being positioned in its anchored x position from
+        /// the range center and with the width of the range, proportional to the <see cref="barContainer"/>.
+        /// </summary>
+        public RectTransform lowerRangeIndicator
+        {
+            get => m_LowerRangeIndicator;
+            set => m_LowerRangeIndicator = value;
+        }
+
+        /// <summary>
+        /// The Image component that displays the upper range
+        /// </summary>
+        public Image upperRangeImage
+        {
+            get => m_UpperRangeImage;
+            set => m_UpperRangeImage = value;
+        }
+
+        /// <summary>
+        /// The Image component that displays the lower range
+        /// </summary>
+        public Image lowerRangeImage
+        {
+            get => m_LowerRangeImage;
+            set => m_LowerRangeImage = value;
+        }
+
+        /// <summary>
+        /// Change the appearance of the bar based on a handshape being detected
+        /// </summary>
+        public bool handShapeDetected
+        {
+            set
+            {
+                m_UpperRangeImage.color = value ? m_RangeActiveColor : m_RangeDeactivatedColor;
+                m_LowerRangeImage.color = m_UpperRangeImage.color;
+            }
+        }
+
+        void Awake()
+        {
+            m_RangeRectHeight = m_UpperRangeIndicator.rect.height;
+            m_RangeActiveColor = m_UpperRangeImage.color;
+            m_RangeDeactivatedColor = new Color(m_RangeActiveColor.r, m_RangeActiveColor.g, m_RangeActiveColor.b, 0.35f);
+        }
 
         /// <summary>
         /// Set the value to display on the bar. This scales the <see cref="valueBar"/> in the X direction.
@@ -85,19 +143,19 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         /// on the target and extends out in both directions by the tolerance.
         /// </summary>
         /// <param name="target">The normalized target value.</param>
-        /// <param name="tolerance">The tolerance to show around the target value.</param>
-        public void SetTargetAndTolerance(float target, float tolerance)
+        /// <param name="upperTolerance">The upper tolerance to show around the target value.</param>
+        /// <param name="lowerTolerance">The lower tolerance to show around the target value.</param>
+        public void SetTargetAndTolerances(float target, float upperTolerance, float lowerTolerance)
         {
             m_TargetIndicator.gameObject.SetActive(true);
-            m_RangeIndicator.gameObject.SetActive(true);
+            m_UpperRangeIndicator.gameObject.SetActive(true);
+            m_LowerRangeIndicator.gameObject.SetActive(true);
             var containerWidth = m_BarContainer.rect.width;
             m_TargetIndicator.anchoredPosition = new Vector3(target * containerWidth, 0f, 0f);
-            var min = Mathf.Clamp01(target - tolerance);
-            var max = Mathf.Clamp01(target + tolerance);
-            var toleranceWidth = max - min;
-            var toleranceCenter = (min + max) / 2f;
-            m_RangeIndicator.anchoredPosition = new Vector2(toleranceCenter * containerWidth, 0f);
-            m_RangeIndicator.sizeDelta = new Vector2(toleranceWidth * containerWidth, m_RangeRectHeight);
+            m_UpperRangeIndicator.anchoredPosition = new Vector2(target * containerWidth, 0f);
+            m_UpperRangeIndicator.sizeDelta = new Vector2(upperTolerance * containerWidth, m_RangeRectHeight);
+            m_LowerRangeIndicator.anchoredPosition = new Vector2(target * containerWidth - 100f, 0f);
+            m_LowerRangeIndicator.sizeDelta = new Vector2(lowerTolerance * containerWidth, m_RangeRectHeight);
         }
 
         /// <summary>
@@ -106,7 +164,8 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         public void HideTargetAndTolerance()
         {
             m_TargetIndicator.gameObject.SetActive(false);
-            m_RangeIndicator.gameObject.SetActive(false);
+            m_UpperRangeIndicator.gameObject.SetActive(false);
+            m_LowerRangeIndicator.gameObject.SetActive(false);
         }
     }
 }

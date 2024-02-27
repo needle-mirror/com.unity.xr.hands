@@ -16,6 +16,10 @@ namespace UnityEngine.XR.Hands.Gestures
         [Serializable]
         public struct Target
         {
+            [SerializeField]
+            [Tooltip("The finger shape type that is being checked in this condition.")]
+            XRFingerShapeType m_ShapeType;
+
             /// <summary>
             /// The <see cref="XRFingerShapeType"/> that is being checked in
             /// this condition.
@@ -36,29 +40,63 @@ namespace UnityEngine.XR.Hands.Gestures
                 set => m_Desired = Mathf.Clamp01(value);
             }
 
+            [SerializeField]
+            [Range(0f, 1f)]
+            [Tooltip("The maximum the value can differ from the Desired value for the condition to be met.")]
+            float m_UpperTolerance;
+
             /// <summary>
             /// The maximum the value can differ from the <see cref="desired"/>
             /// for the condition to be met.
             /// </summary>
+            public float upperTolerance
+            {
+                get => m_UpperTolerance;
+                set => m_UpperTolerance = Mathf.Clamp01(value);
+            }
+
+            [Range(0f, 1f)]
+            [SerializeField]
+            [Tooltip("The minimum the value can differ from the Desired value for the condition to be met.")]
+            float m_LowerTolerance;
+
+            /// <summary>
+            /// The minimum the value can differ from the <see cref="desired"/>
+            /// for the condition to be met.
+            /// </summary>
+            public float lowerTolerance
+            {
+                get => m_LowerTolerance;
+                set => m_LowerTolerance = Mathf.Clamp01(value);
+            }
+
+            [HideInInspector, SerializeField, Obsolete("Deprecated. Use upperTolerance and lowerTolerance instead.")]
+            float m_Tolerance;
+
+            /// <summary>
+            /// The deprecated maximum the value can differ from the <see cref="desired"/>
+            /// for the condition to be met.
+            /// </summary>
+            [Obsolete("Deprecated. Use upperTolerance and lowerTolerance instead.")]
             public float tolerance
             {
                 get => m_Tolerance;
-                set => m_Tolerance = Mathf.Clamp01(value);
-            }
+                set
+                {
+                    Debug.LogWarning("Deprecated. Use upperTolerance and lowerTolerance instead. Both of those properties will be set via the deprecated tolerance value.");
+                    m_Tolerance = Mathf.Clamp01(value);
+                    upperTolerance = m_Tolerance;
+                    lowerTolerance = m_Tolerance;
 
-            [SerializeField]
-            [Tooltip("The finger shape type that is being checked in this condition.")]
-            XRFingerShapeType m_ShapeType;
+                    // Reset tolerance value to zero in order to prevent further deprecated upgrade functionality
+                    m_Tolerance = 0f;
+                }
+            }
 
             [Range(0f, 1f)]
             [SerializeField]
             [Tooltip("The desired value for the finger shape.")]
             float m_Desired;
-
-            [Range(0f, 1f)]
-            [SerializeField]
-            [Tooltip("The maximum the value can differ from the Desired value for the condition to be met.")]
-            float m_Tolerance;
         }
 
         [SerializeField]
@@ -151,8 +189,10 @@ namespace UnityEngine.XR.Hands.Gestures
                         throw new ArgumentOutOfRangeException($"Finger shape type {target.shapeType} is invalid for finger shape target condition.");
                 }
 
-                if (!hasValue || Math.Abs(value - target.desired) > target.tolerance)
+                if (!hasValue || Math.Abs(value - target.desired) > target.upperTolerance || target.lowerTolerance < Math.Clamp((target.desired - value), 0f, 1f))
+                {
                     return false;
+                }
             }
 
             return true;

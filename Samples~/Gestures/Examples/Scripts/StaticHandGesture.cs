@@ -1,6 +1,5 @@
-using System;
-using System.Collections;
 using UnityEngine.Events;
+using UnityEngine.UI;
 using UnityEngine.XR.Hands.Gestures;
 
 namespace UnityEngine.XR.Hands.Samples.GestureSample
@@ -23,6 +22,10 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample
         Transform m_TargetTransform;
 
         [SerializeField]
+        [Tooltip("The image component that draws the background for gesture icons.")]
+        Image m_Background;
+
+        [SerializeField]
         [Tooltip("The event fired when the gesture is performed.")]
         UnityEvent m_GesturePerformed;
 
@@ -38,8 +41,127 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample
         [Tooltip("The interval at which the gesture detection is performed.")]
         float m_GestureDetectionInterval = 0.1f;
 
+        [SerializeField]
+        [Tooltip("The image displayed when this gesture is performed.")]
+        Image m_Highlight;
+
+        [SerializeField]
+        [Tooltip("The static gestures associated with this gestures handedness.")]
+        StaticHandGesture[] m_StaticGestures;
+
         XRHandShape m_HandShape;
         XRHandPose m_HandPose;
+        bool m_WasDetected;
+        bool m_PerformedTriggered;
+        float m_TimeOfLastConditionCheck;
+        float m_HoldStartTime;
+        Color m_BackgroundDefaultColor;
+        Color m_BackgroundHiglightColor = new Color(0f, 0.627451f, 1f);
+
+        /// <summary>
+        /// The hand tracking events component to subscribe to receive updated joint data to be used for gesture detection.
+        /// </summary>
+        public XRHandTrackingEvents handTrackingEvents
+        {
+            get => m_HandTrackingEvents;
+            set => m_HandTrackingEvents = value;
+        }
+
+        /// <summary>
+        /// The hand shape or pose that must be detected for the gesture to be performed.
+        /// </summary>
+        public ScriptableObject handShapeOrPose
+        {
+            get => m_HandShapeOrPose;
+            set => m_HandShapeOrPose = value;
+        }
+
+        /// <summary>
+        /// The target Transform to user for target conditions in the hand shape or pose.
+        /// </summary>
+        public Transform targetTransform
+        {
+            get => m_TargetTransform;
+            set => m_TargetTransform = value;
+        }
+
+        /// <summary>
+        /// The image component that draws the background for gesture icons.
+        /// </summary>
+        public Image background
+        {
+            get => m_Background;
+            set => m_Background = value;
+        }
+
+        /// <summary>
+        /// The event fired when the gesture is performed.
+        /// </summary>
+        public UnityEvent gesturePerformed
+        {
+            get => m_GesturePerformed;
+            set => m_GesturePerformed = value;
+        }
+
+        /// <summary>
+        /// The event fired when the gesture is ended.
+        /// </summary>
+        public UnityEvent gestureEnded
+        {
+            get => m_GestureEnded;
+            set => m_GestureEnded = value;
+        }
+
+        /// <summary>
+        /// The minimum amount of time the hand must be held in the required shape and orientation for the gesture to be performed.
+        /// </summary>
+        public float minimumHoldTime
+        {
+            get => m_MinimumHoldTime;
+            set => m_MinimumHoldTime = value;
+        }
+
+        /// <summary>
+        /// The interval at which the gesture detection is performed.
+        /// </summary>
+        public float gestureDetectionInterval
+        {
+            get => m_GestureDetectionInterval;
+            set => m_GestureDetectionInterval = value;
+        }
+
+        /// <summary>
+        /// The image component that draws the highlight state visuals for gesture icons.
+        /// </summary>
+        public Image highlight
+        {
+            get => m_Highlight;
+            set => m_Highlight = value;
+        }
+
+        /// <summary>
+        ///  Show or hide any highlight-state related visual UI elements
+        /// </summary>
+        public bool highlighted
+        {
+            set
+            {
+                m_Highlight.enabled = value;
+            }
+        }
+
+        void Awake()
+        {
+            m_BackgroundDefaultColor = m_Background.color;
+        }
+
+        void Start()
+        {
+            foreach (var gesture in m_StaticGestures)
+            {
+                gesture.highlighted = false;
+            }
+        }
 
         void OnEnable()
         {
@@ -71,9 +193,11 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample
             {
                 m_PerformedTriggered = false;
                 m_GestureEnded?.Invoke();
+                m_Background.color = m_BackgroundDefaultColor;
             }
 
             m_WasDetected = detected;
+
             if (!m_PerformedTriggered && detected)
             {
                 var holdTimer = Time.timeSinceLevelLoad - m_HoldStartTime;
@@ -81,15 +205,18 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample
                 {
                     m_GesturePerformed?.Invoke();
                     m_PerformedTriggered = true;
+                    m_Background.color = m_BackgroundHiglightColor;
+                    m_Highlight.enabled = true;
+
+                    foreach (var gesture in m_StaticGestures)
+                    {
+                        if (gesture != this)
+                            gesture.highlighted = false;
+                    }
                 }
             }
 
             m_TimeOfLastConditionCheck = Time.timeSinceLevelLoad;
         }
-
-        bool m_WasDetected;
-        bool m_PerformedTriggered;
-        float m_TimeOfLastConditionCheck;
-        float m_HoldStartTime;
     }
 }

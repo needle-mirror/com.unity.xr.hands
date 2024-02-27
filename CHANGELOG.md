@@ -7,6 +7,17 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2024-02-27
+
+### Changed
+- Changed gesture detection to allow both upper and lower threshold for more finely-tuned configuration of the finger shapes.
+- Added partial-grab gesture detection to the Gestures sample.
+- Changed hand and gesture tracking debug UI to support upper threshold, lower theshold, and partial-grab gesture.
+- Updated visuals for hand and gesture tracking debug UI in the Gestures sample.
+
+### Fixed
+- Fixed compilation errors on tvOS platform where `ENABLE_VR` is not defined.
+
 ## [1.4.0-pre.1] - 2023-11-27
 
 ### Added
