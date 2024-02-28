@@ -27,10 +27,10 @@ To install the XR Hands package to a project in earlier versions of Unity, see [
 
 ## Editor compatibility
 
-XR Hands 1.4 is compatible with Unity 2021.3 and later.
+XR Hands 1.5 is compatible with Unity 2021.3 and later.
 
 > [!NOTE]
-> XR Hands 1.4 is compatible with Unity 2021.3 and up, but it does not appear in the Package Manager window.
+> XR Hands 1.5 is compatible with Unity 2021.3 and up, but it does not appear in the Package Manager window.
 
 # Required packages
 

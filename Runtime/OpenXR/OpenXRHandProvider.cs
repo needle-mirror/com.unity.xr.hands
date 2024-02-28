@@ -3,12 +3,17 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.ProviderImplementation;
 using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features;
+
+#if UNITY_OPENXR_PACKAGE_1_8
+using UnityEngine.XR.OpenXR.Features.Interactions;
+#endif
 
 namespace UnityEngine.XR.Hands.OpenXR
 {
@@ -95,6 +100,202 @@ namespace UnityEngine.XR.Hands.OpenXR
                 rightHandJoints.GetUnsafePtr());
         }
 
+        /// <inheritdoc/>
+        public override bool canSurfaceCommonPoseData
+        {
+            get
+            {
+                if (m_IsHandInteractionProfileEnabled)
+                    return true;
+
+                m_IsHandInteractionProfileEnabled =
+#if UNITY_OPENXR_PACKAGE_1_8
+                    OpenXRRuntime.IsExtensionEnabled(HandInteractionProfile.extensionString);
+#else
+                    false;
+#endif
+                return m_IsHandInteractionProfileEnabled;
+            }
+        }
+        bool m_IsHandInteractionProfileEnabled;
+ 
+        /// <inheritdoc/>
+        public override bool TryGetAimPose(Handedness handedness, out Pose aimPose)
+        {
+            aimPose = Pose.identity;
+ #if UNITY_OPENXR_PACKAGE_1_8
+            if (!TryGetHandDevice(handedness, out var handDevice))
+                return false;
+
+            if (handDevice.TryGetFeatureValue(Usages.aimPosition, out var position))
+                aimPose.position = position;
+
+            if (handDevice.TryGetFeatureValue(Usages.aimRotation, out var rotation))
+                aimPose.rotation = rotation;
+
+            return handDevice.TryGetFeatureValue(Usages.isAimPoseTracked, out var isTracked) && isTracked;
+#else
+            return false;
+#endif
+        }
+
+        /// <inheritdoc/>
+        public override bool TryGetAimActivateValue(Handedness handedness, out float aimActivateValue)
+        {
+            aimActivateValue = 0f;
+ #if UNITY_OPENXR_PACKAGE_1_8
+            if (!TryGetHandDevice(handedness, out var handDevice))
+                return false;
+
+            handDevice.TryGetFeatureValue(Usages.aimActivateValue, out aimActivateValue);
+            return handDevice.TryGetFeatureValue(Usages.isAimActivateValueReady, out var isReady) && isReady;
+#else
+            return false;
+#endif
+        }
+
+        /// <inheritdoc/>
+        public override bool TryGetGraspValue(Handedness handedness, out float graspValue)
+        {
+            graspValue = 0f;
+ #if UNITY_OPENXR_PACKAGE_1_8
+            if (!TryGetHandDevice(handedness, out var handDevice))
+                return false;
+
+            handDevice.TryGetFeatureValue(Usages.graspValue, out graspValue);
+            return handDevice.TryGetFeatureValue(Usages.isGraspValueReady, out var isReady) && isReady;
+#else
+            return false;
+#endif
+        }
+
+        /// <inheritdoc/>
+        public override bool TryGetGripPose(Handedness handedness, out Pose gripPose)
+        {
+            gripPose = Pose.identity;
+ #if UNITY_OPENXR_PACKAGE_1_8
+            if (!TryGetHandDevice(handedness, out var handDevice))
+                return false;
+
+            if (handDevice.TryGetFeatureValue(Usages.gripPosition, out var position))
+                gripPose.position = position;
+
+            if (handDevice.TryGetFeatureValue(Usages.gripRotation, out var rotation))
+                gripPose.rotation = rotation;
+
+            return handDevice.TryGetFeatureValue(Usages.isGripPoseTracked, out var isTracked) && isTracked;
+#else
+            return false;
+#endif
+        }
+
+        /// <inheritdoc/>
+        public override bool TryGetPinchPose(Handedness handedness, out Pose pinchPose)
+        {
+            pinchPose = Pose.identity;
+ #if UNITY_OPENXR_PACKAGE_1_8
+            if (!TryGetHandDevice(handedness, out var handDevice))
+                return false;
+
+            if (handDevice.TryGetFeatureValue(Usages.pinchPosition, out var position))
+                pinchPose.position = position;
+
+            if (handDevice.TryGetFeatureValue(Usages.pinchRotation, out var rotation))
+                pinchPose.rotation = rotation;
+
+            return handDevice.TryGetFeatureValue(Usages.isPinchPoseTracked, out var isTracked) && isTracked;
+#else
+            return false;
+#endif
+        }
+
+        /// <inheritdoc/>
+        public override bool TryGetPinchValue(Handedness handedness, out float pinchValue)
+        {
+            pinchValue = 0f;
+ #if UNITY_OPENXR_PACKAGE_1_8
+            if (!TryGetHandDevice(handedness, out var handDevice))
+                return false;
+
+            handDevice.TryGetFeatureValue(Usages.pinchValue, out pinchValue);
+            return handDevice.TryGetFeatureValue(Usages.isPinchValueReady, out var isReady) && isReady;
+#else
+            return false;
+#endif
+        }
+
+        /// <inheritdoc/>
+        public override bool TryGetPokePose(Handedness handedness, out Pose pokePose)
+        {
+            pokePose = Pose.identity;
+ #if UNITY_OPENXR_PACKAGE_1_8
+            if (!TryGetHandDevice(handedness, out var handDevice))
+                return false;
+
+            if (handDevice.TryGetFeatureValue(Usages.pokePosition, out var position))
+                pokePose.position = position;
+
+            if (handDevice.TryGetFeatureValue(Usages.pokeRotation, out var rotation))
+                pokePose.rotation = rotation;
+
+            return handDevice.TryGetFeatureValue(Usages.isPokePoseTracked, out var isTracked) && isTracked;
+#else
+            return false;
+#endif
+        }
+
+ #if UNITY_OPENXR_PACKAGE_1_8
+        static class Usages
+        {
+            internal static readonly InputFeatureUsage<bool> isAimPoseTracked = new InputFeatureUsage<bool>("PointerIsTracked");
+            internal static readonly InputFeatureUsage<Vector3> aimPosition = new InputFeatureUsage<Vector3>("PointerPosition");
+            internal static readonly InputFeatureUsage<Quaternion> aimRotation = new InputFeatureUsage<Quaternion>("PointerRotation");
+
+            internal static readonly InputFeatureUsage<bool> isAimActivateValueReady = new InputFeatureUsage<bool>("PointerActivateReady");
+            internal static readonly InputFeatureUsage<float> aimActivateValue = new InputFeatureUsage<float>("PointerActivateValue");
+
+            internal static readonly InputFeatureUsage<bool> isGraspValueReady = new InputFeatureUsage<bool>("GraspReady");
+            internal static readonly InputFeatureUsage<float> graspValue = new InputFeatureUsage<float>("GraspValue");
+
+            internal static readonly InputFeatureUsage<bool> isGripPoseTracked = new InputFeatureUsage<bool>("DeviceIsTracked");
+            internal static readonly InputFeatureUsage<Vector3> gripPosition = new InputFeatureUsage<Vector3>("DevicePosition");
+            internal static readonly InputFeatureUsage<Quaternion> gripRotation = new InputFeatureUsage<Quaternion>("DeviceRotation");
+
+            internal static readonly InputFeatureUsage<bool> isPinchPoseTracked = new InputFeatureUsage<bool>("PinchIsTracked");
+            internal static readonly InputFeatureUsage<Vector3> pinchPosition = new InputFeatureUsage<Vector3>("PinchPosition");
+            internal static readonly InputFeatureUsage<Quaternion> pinchRotation = new InputFeatureUsage<Quaternion>("PinchRotation");
+
+            internal static readonly InputFeatureUsage<bool> isPinchValueReady = new InputFeatureUsage<bool>("PinchReady");
+            internal static readonly InputFeatureUsage<float> pinchValue = new InputFeatureUsage<float>("PinchValue");
+
+            internal static readonly InputFeatureUsage<bool> isPokePoseTracked = new InputFeatureUsage<bool>("PokeIsTracked");
+            internal static readonly InputFeatureUsage<Vector3> pokePosition = new InputFeatureUsage<Vector3>("PokePosition");
+            internal static readonly InputFeatureUsage<Quaternion> pokeRotation = new InputFeatureUsage<Quaternion>("PokeRotation");
+        }
+
+        static readonly List<InputDevice> s_DevicesReuse = new List<InputDevice>();
+        bool TryGetHandDevice(Handedness handedness, out InputDevice device)
+        {
+            InputDevices.GetDevicesWithCharacteristics(
+                handedness == Handedness.Left
+                ? InputDeviceCharacteristics.Left
+                : InputDeviceCharacteristics.Right,
+                s_DevicesReuse);
+
+            for (int deviceIndex = 0; deviceIndex < s_DevicesReuse.Count; ++deviceIndex)
+            {
+                if (s_DevicesReuse[deviceIndex].name == "Hand Interaction OpenXR")
+                {
+                    device = s_DevicesReuse[deviceIndex];
+                    return true;
+                }
+            }
+
+            device = default;
+            return false;
+        }
+#endif
+
         bool m_IsValid;
 
         static internal string id { get; private set; }
@@ -111,10 +312,24 @@ namespace UnityEngine.XR.Hands.OpenXR
             var feature = settings.GetFeature<HandTracking>();
             if (feature != null && feature.enabled)
             {
+#if UNITY_OPENXR_PACKAGE_1_8
+                var profile = OpenXRSettings.Instance.GetFeature<HandInteractionProfile>();
+                bool commonPosesEnabled = profile != null && profile.enabled;
+#else
+                bool commonPosesEnabled = false;
+#endif
+
                 var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
                 {
                     id = id,
-                    providerType = typeof(OpenXRHandProvider)
+                    providerType = typeof(OpenXRHandProvider),
+                    supportsAimPose = commonPosesEnabled,
+                    supportsAimActivateValue = commonPosesEnabled,
+                    supportsGraspValue = commonPosesEnabled,
+                    supportsGripPose = commonPosesEnabled,
+                    supportsPinchPose = commonPosesEnabled,
+                    supportsPinchValue = commonPosesEnabled,
+                    supportsPokePose = commonPosesEnabled,
                 };
                 XRHandSubsystemDescriptor.Register(handsSubsystemCinfo);
             }

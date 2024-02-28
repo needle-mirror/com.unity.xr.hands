@@ -11,6 +11,41 @@ namespace UnityEngine.XR.Hands
         : SubsystemDescriptorWithProvider<XRHandSubsystem, XRHandSubsystemProvider>
     {
         /// <summary>
+        /// Whether the provider can supply aim pose.
+        /// </summary>
+        public bool supportsAimPose { get; }
+
+        /// <summary>
+        /// Whether the provider can supply aim activate value.
+        /// </summary>
+        public bool supportsAimActivateValue { get; }
+
+        /// <summary>
+        /// Whether the provider can supply grasp value.
+        /// </summary>
+        public bool supportsGraspValue { get; }
+
+        /// <summary>
+        /// Whether the provider can supply grip pose.
+        /// </summary>
+        public bool supportsGripPose { get; }
+
+        /// <summary>
+        /// Whether the provider can supply pinch pose.
+        /// </summary>
+        public bool supportsPinchPose { get; }
+
+        /// <summary>
+        /// Whether the provider can supply pinch value.
+        /// </summary>
+        public bool supportsPinchValue { get; }
+
+        /// <summary>
+        /// Whether the provider can supply poke pose.
+        /// </summary>
+        public bool supportsPokePose { get; }
+
+        /// <summary>
         /// Construction information for the <see cref="XRHandSubsystemDescriptor"/>.
         /// </summary>
         public struct Cinfo : IEquatable<Cinfo>
@@ -36,6 +71,41 @@ namespace UnityEngine.XR.Hands
             public Type subsystemTypeOverride { get; set; }
 
             /// <summary>
+            /// Whether the provider can supply aim pose.
+            /// </summary>
+            public bool supportsAimPose { get ; set; }
+
+            /// <summary>
+            /// Whether the provider can supply aim activate value.
+            /// </summary>
+            public bool supportsAimActivateValue { get; set; }
+
+            /// <summary>
+            /// Whether the provider can supply grasp value.
+            /// </summary>
+            public bool supportsGraspValue { get; set; }
+
+            /// <summary>
+            /// Whether the provider can supply grip pose.
+            /// </summary>
+            public bool supportsGripPose { get; set; }
+
+            /// <summary>
+            /// Whether the provider can supply pinch pose.
+            /// </summary>
+            public bool supportsPinchPose { get; set; }
+
+            /// <summary>
+            /// Whether the provider can supply pinch value.
+            /// </summary>
+            public bool supportsPinchValue { get; set; }
+
+            /// <summary>
+            /// Whether the provider can supply poke pose.
+            /// </summary>
+            public bool supportsPokePose { get; set; }
+
+            /// <summary>
             /// Generates a hash suitable for use with containers like <c>HashSet</c> and <c>Dictionary</c>.
             /// </summary>
             /// <returns>A hash code generated from this object's fields.</returns>
@@ -46,6 +116,13 @@ namespace UnityEngine.XR.Hands
                     int hashCode = id != null ? id.GetHashCode() : 0;
                     hashCode = hashCode * 486187739 + (providerType != null ? providerType.GetHashCode() : 0);
                     hashCode = hashCode * 486187739 + (subsystemTypeOverride != null ? subsystemTypeOverride.GetHashCode() : 0);
+                    hashCode = hashCode * 486187739 + supportsAimPose.GetHashCode();
+                    hashCode = hashCode * 486187739 + supportsAimActivateValue.GetHashCode();
+                    hashCode = hashCode * 486187739 + supportsGraspValue.GetHashCode();
+                    hashCode = hashCode * 486187739 + supportsGripPose.GetHashCode();
+                    hashCode = hashCode * 486187739 + supportsPinchPose.GetHashCode();
+                    hashCode = hashCode * 486187739 + supportsPinchValue.GetHashCode();
+                    hashCode = hashCode * 486187739 + supportsPokePose.GetHashCode();
                     return hashCode;
                 }
             }
@@ -62,7 +139,14 @@ namespace UnityEngine.XR.Hands
             {
                 return id == other.id &&
                     providerType == other.providerType &&
-                    subsystemTypeOverride == other.subsystemTypeOverride;
+                    subsystemTypeOverride == other.subsystemTypeOverride &&
+                    supportsAimPose == other.supportsAimPose &&
+                    supportsAimActivateValue == other.supportsAimActivateValue &&
+                    supportsGraspValue == other.supportsGraspValue &&
+                    supportsGripPose == other.supportsGripPose &&
+                    supportsPinchPose == other.supportsPinchPose &&
+                    supportsPinchValue == other.supportsPinchValue &&
+                    supportsPokePose == other.supportsPokePose;
             }
 
             /// <summary>
@@ -113,6 +197,13 @@ namespace UnityEngine.XR.Hands
             id = cinfo.id;
             providerType = cinfo.providerType;
             subsystemTypeOverride = cinfo.subsystemTypeOverride;
+            supportsAimPose = cinfo.supportsAimPose;
+            supportsAimActivateValue = cinfo.supportsAimActivateValue;
+            supportsGraspValue = cinfo.supportsGraspValue;
+            supportsGripPose = cinfo.supportsGripPose;
+            supportsPinchPose = cinfo.supportsPinchPose;
+            supportsPinchValue = cinfo.supportsPinchValue;
+            supportsPokePose = cinfo.supportsPokePose;
         }
     }
 }

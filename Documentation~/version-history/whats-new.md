@@ -1,6 +1,16 @@
 ---
 uid: xrhands-whats-new
 ---
+# What's new in version 1.5
+
+Summary of changes in XR Hands package version 1.5. The main updates in this release include:
+
+## Added
+
+### OpenXR common hand gestures
+
+Support for common hand gestures has been added with initial support for gestures piped through the OpenXR Hand Interaction Profile extension. This includes scripting APIs to expose **aim**, **grasp**, **grip**, **pinch**, and **poke** poses and values where appropriate for more information, please refer to the [Scripting API](https://docs.unity3d.com/Packages/com.unity.xr.hands@1.5/api/UnityEngine.XR.Hands.XRCommonHandGestures.html).
+
 # What's new in version 1.4
 
 Summary of changes in XR Hands package version 1.4. The main updates in this release include:

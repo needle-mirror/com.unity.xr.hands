@@ -1,5 +1,5 @@
 * [Introduction](xref:xrhands-manual)
-  * [What's new](xref:xrhands-whats-new)
+* [What's new](xref:xrhands-whats-new)
 * [Project Setup](xref:xrhands-project-setup)
   * [Install XR Hands](xref:xrhands-install)
   * [Scene Setup](xref:xrhands-scene-setup)

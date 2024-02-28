@@ -240,6 +240,16 @@ namespace UnityEngine.XR.Hands
         public Action<XRHand> trackingLost;
 
         /// <summary>
+        /// Gets common hand gestures getters and callbacks for the left hand.
+        /// </summary>
+        public XRCommonHandGestures leftHandCommonGestures => m_LeftHandCommonGestures;
+
+        /// <summary>
+        /// Gets common hand gestures getters and callbacks for the right hand.
+        /// </summary>
+        public XRCommonHandGestures rightHandCommonGestures => m_RightHandCommonGestures;
+
+        /// <summary>
         /// Request an update from the hand data provider. Application developers
         /// consuming hand tracking data should not call this function. 
         /// </summary>
@@ -302,6 +312,100 @@ namespace UnityEngine.XR.Hands
             for (int processorIndex = 0; processorIndex < m_Processors.Count; ++processorIndex)
                 m_Processors[processorIndex].ProcessJoints(this, updateSuccessFlags, updateType);
 
+            if (updateType == UpdateType.Dynamic && provider.canSurfaceCommonPoseData)
+            {
+                if (subsystemDescriptor.supportsAimPose)
+                {
+                    if (provider.TryGetAimPose(Handedness.Left, out var aimPoseLeft))
+                        m_LeftHandCommonGestures.UpdateAimPose(aimPoseLeft);
+                    else
+                        m_LeftHandCommonGestures.InvalidateAimPose();
+
+                    if (provider.TryGetAimPose(Handedness.Right, out var aimPoseRight))
+                        m_RightHandCommonGestures.UpdateAimPose(aimPoseRight);
+                    else
+                        m_RightHandCommonGestures.InvalidateAimPose();
+                }
+
+                if (subsystemDescriptor.supportsAimActivateValue)
+                {
+                    if (provider.TryGetAimActivateValue(Handedness.Left, out var aimActivateValueLeft))
+                        m_LeftHandCommonGestures.UpdateAimActivateValue(aimActivateValueLeft);
+                    else
+                        m_LeftHandCommonGestures.InvalidateAimActivateValue();
+
+                    if (provider.TryGetAimActivateValue(Handedness.Right, out var aimActivateValueRight))
+                        m_RightHandCommonGestures.UpdateAimActivateValue(aimActivateValueRight);
+                    else
+                        m_RightHandCommonGestures.InvalidateAimActivateValue();
+                }
+
+                if (subsystemDescriptor.supportsGraspValue)
+                {
+                    if (provider.TryGetGraspValue(Handedness.Left, out var graspValueLeft))
+                        m_LeftHandCommonGestures.UpdateGraspValue(graspValueLeft);
+                    else
+                        m_LeftHandCommonGestures.InvalidateGraspValue();
+
+                    if (provider.TryGetGraspValue(Handedness.Right, out var graspValueRight))
+                        m_RightHandCommonGestures.UpdateGraspValue(graspValueRight);
+                    else
+                        m_RightHandCommonGestures.InvalidateGraspValue();
+                }
+
+                if (subsystemDescriptor.supportsGripPose)
+                {
+                    if (provider.TryGetGripPose(Handedness.Left, out var gripPoseLeft))
+                        m_LeftHandCommonGestures.UpdateGripPose(gripPoseLeft);
+                    else
+                        m_LeftHandCommonGestures.InvalidateGripPose();
+
+                    if (provider.TryGetGripPose(Handedness.Right, out var gripPoseRight))
+                        m_RightHandCommonGestures.UpdateGripPose(gripPoseRight);
+                    else
+                        m_RightHandCommonGestures.InvalidateGripPose();
+                }
+
+                if (subsystemDescriptor.supportsPinchPose)
+                {
+                    if (provider.TryGetPinchPose(Handedness.Left, out var pinchPoseLeft))
+                        m_LeftHandCommonGestures.UpdatePinchPose(pinchPoseLeft);
+                    else
+                        m_LeftHandCommonGestures.InvalidatePinchPose();
+
+                    if (provider.TryGetPinchPose(Handedness.Right, out var pinchPoseRight))
+                        m_RightHandCommonGestures.UpdatePinchPose(pinchPoseRight);
+                    else
+                        m_RightHandCommonGestures.InvalidatePinchPose();
+                }
+
+                if (subsystemDescriptor.supportsPinchValue)
+                {
+                    if (provider.TryGetPinchValue(Handedness.Left, out var pinchValueLeft))
+                        m_LeftHandCommonGestures.UpdatePinchValue(pinchValueLeft);
+                    else
+                        m_LeftHandCommonGestures.InvalidatePinchValue();
+
+                    if (provider.TryGetPinchValue(Handedness.Right, out var pinchValueRight))
+                        m_RightHandCommonGestures.UpdatePinchValue(pinchValueRight);
+                    else
+                        m_RightHandCommonGestures.InvalidatePinchValue();
+                }
+
+                if (subsystemDescriptor.supportsPokePose)
+                {
+                    if (provider.TryGetPokePose(Handedness.Left, out var pokePoseLeft))
+                        m_LeftHandCommonGestures.UpdatePokePose(pokePoseLeft);
+                    else
+                        m_LeftHandCommonGestures.InvalidatePokePose();
+
+                    if (provider.TryGetPokePose(Handedness.Right, out var pokePoseRight))
+                        m_RightHandCommonGestures.UpdatePokePose(pokePoseRight);
+                    else
+                        m_RightHandCommonGestures.InvalidatePokePose();
+                }
+            }
+
             if (updatedHands != null)
                 updatedHands.Invoke(this, updateSuccessFlags, updateType);
 
@@ -359,6 +463,9 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         protected override void OnCreate()
         {
+            m_LeftHandCommonGestures = new XRCommonHandGestures(Handedness.Left);
+            m_RightHandCommonGestures = new XRCommonHandGestures(Handedness.Right);
+
             m_JointsInLayout = new NativeArray<bool>(XRHandJointID.EndMarker.ToIndex(), Allocator.Persistent);
             provider.GetHandLayout(m_JointsInLayout);
 
@@ -399,6 +506,8 @@ namespace UnityEngine.XR.Hands
         }
 
         List<IXRHandProcessor> m_Processors = new List<IXRHandProcessor>();
+        XRCommonHandGestures m_LeftHandCommonGestures;
+        XRCommonHandGestures m_RightHandCommonGestures;
 
         static int CompareProcessors(IXRHandProcessor a, IXRHandProcessor b)
             => a.callbackOrder.CompareTo(b.callbackOrder);

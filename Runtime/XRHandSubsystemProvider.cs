@@ -122,6 +122,160 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
             ref Pose rightHandRootPose,
             NativeArray<XRHandJoint> rightHandJoints);
 
+        /// <summary>
+        /// Whether the provider is currently able to surface data from any of <see cref="TryGetAimPose"/>,
+        /// <see cref="TryGetAimActivateValue"/>, <see cref="TryGetGraspValue"/>, <see cref="TryGetGripPose"/>,
+        /// <see cref="TryGetPinchPose"/>, <see cref="TryGetPinchValue"/>, or <see cref="TryGetPinchPose"/>.
+        /// </summary>
+        public virtual bool canSurfaceCommonPoseData => false;
+
+        /// <summary>
+        /// Gets the aim pose. Will only be called if <see cref="XRHandSubsystemDescriptor.supportsAimPose"/>
+        /// is enabled.
+        /// </summary>
+        /// <param name="handedness">
+        /// Which hand to retrieve data for.
+        /// </param>
+        /// <param name="aimPose">
+        /// The pose to update the aim pose to, if available. Will not be used if
+        /// <see langword="false"/> is returned.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if successful and the aim pose was
+        /// filled out, returns <see langword="false"/> otherwise.
+        /// </returns>
+        public virtual bool TryGetAimPose(Handedness handedness, out Pose aimPose)
+        {
+            aimPose = Pose.identity;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the aim activate value. Will only be called if <see cref="XRHandSubsystemDescriptor.supportsAimActivateValue"/>
+        /// is enabled.
+        /// </summary>
+        /// <param name="handedness">
+        /// Which hand to retrieve data for.
+        /// </param>
+        /// <param name="aimActivateValue">
+        /// The aim activate value, if available. Will not be used if
+        /// <see langword="false"/> is returned.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if successful and the aim activate value was
+        /// filled out, returns <see langword="false"/> otherwise.
+        /// </returns>
+        public virtual bool TryGetAimActivateValue(Handedness handedness, out float aimActivateValue)
+        {
+            aimActivateValue = 0f;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the grasp value. Will only be called if <see cref="XRHandSubsystemDescriptor.supportsGraspValue"/>
+        /// is enabled.
+        /// </summary>
+        /// <param name="handedness">
+        /// Which hand to retrieve data for.
+        /// </param>
+        /// <param name="graspValue">
+        /// The grasp value, if available. Will not be used if
+        /// <see langword="false"/> is returned.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if successful and the grasp value was
+        /// filled out, returns <see langword="false"/> otherwise.
+        /// </returns>
+        public virtual bool TryGetGraspValue(Handedness handedness, out float graspValue)
+        {
+            graspValue = 0f;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the grip pose. Will only be called if <see cref="XRHandSubsystemDescriptor.supportsGripPose"/>
+        /// is enabled.
+        /// </summary>
+        /// <param name="handedness">
+        /// Which hand to retrieve data for.
+        /// </param>
+        /// <param name="gripPose">
+        /// The pose to update the aim pose to, if available. Will not be used if
+        /// <see langword="false"/> is returned.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if successful and the grip pose was
+        /// filled out, returns <see langword="false"/> otherwise.
+        /// </returns>
+        public virtual bool TryGetGripPose(Handedness handedness, out Pose gripPose)
+        {
+            gripPose = Pose.identity;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the pinch pose. Will only be called if <see cref="XRHandSubsystemDescriptor.supportsPinchPose"/>
+        /// is enabled.
+        /// </summary>
+        /// <param name="handedness">
+        /// Which hand to retrieve data for.
+        /// </param>
+        /// <param name="pinchPose">
+        /// The pose to update the pinch pose to, if available. Will not be used if
+        /// <see langword="false"/> is returned.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if successful and the pinch pose was
+        /// filled out, returns <see langword="false"/> otherwise.
+        /// </returns>
+        public virtual bool TryGetPinchPose(Handedness handedness, out Pose pinchPose)
+        {
+            pinchPose = Pose.identity;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the pinch value. Will only be called if <see cref="XRHandSubsystemDescriptor.supportsPinchValue"/>
+        /// is enabled.
+        /// </summary>
+        /// <param name="handedness">
+        /// Which hand to retrieve data for.
+        /// </param>
+        /// <param name="pinchValue">
+        /// The pinch value, if available. Will not be used if
+        /// <see langword="false"/> is returned.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if successful and the grasp value was
+        /// filled out, returns <see langword="false"/> otherwise.
+        /// </returns>
+        public virtual bool TryGetPinchValue(Handedness handedness, out float pinchValue)
+        {
+            pinchValue = 0f;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the poke pose. Will only be called if <see cref="XRHandSubsystemDescriptor.supportsPokePose"/>
+        /// is enabled.
+        /// </summary>
+        /// <param name="handedness">
+        /// Which hand to retrieve data for.
+        /// </param>
+        /// <param name="pokePose">
+        /// The pose to update the poke pose to, if available. Will not be used if
+        /// <see langword="false"/> is returned.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if successful and the poke pose was
+        /// filled out, returns <see langword="false"/> otherwise.
+        /// </returns>
+        public virtual bool TryGetPokePose(Handedness handedness, out Pose pokePose)
+        {
+            pokePose = Pose.identity;
+            return false;
+        }
+
         // these defaults were captured using a Meta Quest 2
         static class FingerConfigDefaults
         {
