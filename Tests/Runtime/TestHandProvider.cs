@@ -16,6 +16,16 @@ class TestHandProvider : XRHandSubsystemProvider
         System.Array.Fill(rightHandJointsTrackingStates, XRHandJointTrackingState.Pose | XRHandJointTrackingState.HighFidelityPose);
     }
 
+    public enum CommonGestureBehavior
+    {
+        Disabled,
+        CorePosesOnly,
+        Extended
+    }
+
+    public CommonGestureBehavior commonGestureBehavior { get; set; }
+    public override bool canSurfaceCommonPoseData => commonGestureBehavior.AreCoreCommonGesturesEnabled();
+
     public int numStartCalls { get; private set; }
     public int numStopCalls { get; private set; }
     public int numDestroyCalls { get; private set; }
@@ -101,5 +111,102 @@ class TestHandProvider : XRHandSubsystemProvider
         return successFlags;
     }
 
+    public override bool TryGetAimPose(Handedness handedness, out Pose aimPose)
+    {
+        if (commonGestureBehavior.AreCoreCommonGesturesEnabled())
+        {
+            var gestureData = TestCommonGestureData.GetCommonGestureData(handedness);
+            aimPose = gestureData.aimPose;
+            return true;
+        }
+
+        return base.TryGetAimPose(handedness, out aimPose);
+    }
+
+    public override bool TryGetAimActivateValue(Handedness handedness, out float aimActivateValue)
+    {
+        if (commonGestureBehavior.AreExtensionCommonGesturesEnabled())
+        {
+            var gestureData = TestCommonGestureData.GetCommonGestureData(handedness);
+            aimActivateValue = gestureData.aimActivateValue;
+            return true;
+        }
+
+        return base.TryGetAimActivateValue(handedness, out aimActivateValue);
+    }
+
+    public override bool TryGetGripPose(Handedness handedness, out Pose gripPose)
+    {
+        if (commonGestureBehavior.AreCoreCommonGesturesEnabled())
+        {
+            var gestureData = TestCommonGestureData.GetCommonGestureData(handedness);
+            gripPose = gestureData.gripPose;
+            return true;
+        }
+
+        return base.TryGetGripPose(handedness, out gripPose);
+    }
+
+    public override bool TryGetGraspValue(Handedness handedness, out float graspValue)
+    {
+        if (commonGestureBehavior.AreExtensionCommonGesturesEnabled())
+        {
+            var gestureData = TestCommonGestureData.GetCommonGestureData(handedness);
+            graspValue = gestureData.graspValue;
+            return true;
+        }
+
+        return base.TryGetGraspValue(handedness, out graspValue);
+    }
+
+    public override bool TryGetPinchPose(Handedness handedness, out Pose pinchPose)
+    {
+        if (commonGestureBehavior.AreCoreCommonGesturesEnabled())
+        {
+            var gestureData = TestCommonGestureData.GetCommonGestureData(handedness);
+            pinchPose = gestureData.pinchPose;
+            return true;
+        }
+
+        return base.TryGetPinchPose(handedness, out pinchPose);
+    }
+
+    public override bool TryGetPinchValue(Handedness handedness, out float pinchValue)
+    {
+        if (commonGestureBehavior.AreExtensionCommonGesturesEnabled())
+        {
+            var gestureData = TestCommonGestureData.GetCommonGestureData(handedness);
+            pinchValue = gestureData.pinchValue;
+            return true;
+        }
+
+        return base.TryGetPinchValue(handedness, out pinchValue);
+    }
+
+    public override bool TryGetPokePose(Handedness handedness, out Pose pokePose)
+    {
+        if (commonGestureBehavior.AreCoreCommonGesturesEnabled())
+        {
+            var gestureData = TestCommonGestureData.GetCommonGestureData(handedness);
+            pokePose = gestureData.pokePose;
+            return true;
+        }
+
+        return base.TryGetPokePose(handedness, out pokePose);
+    }
+
     public static string descriptorId => "Test-Hands";
+}
+
+static class TestHandProviderExtensions
+{
+    public static bool AreCoreCommonGesturesEnabled(this TestHandProvider.CommonGestureBehavior commonGestureBehavior)
+    {
+        return commonGestureBehavior != TestHandProvider.CommonGestureBehavior.Disabled;
+    }
+
+    public static bool AreExtensionCommonGesturesEnabled(this TestHandProvider.CommonGestureBehavior commonGestureBehavior)
+    {
+        return commonGestureBehavior == TestHandProvider.CommonGestureBehavior.Extended;
+    }
 }

@@ -82,7 +82,10 @@ namespace UnityEditor.XR.Hands
             public static readonly GUIContent clearJoints = EditorGUIUtility.TrTextContent("Clear");
         }
 
-        void OnEnable()
+        /// <summary>
+        /// See <see cref="Editor"/>.
+        /// </summary>
+        protected void OnEnable()
         {
             m_XRHandTrackingEvents = serializedObject.FindProperty(k_XRHandTrackingEventsPropertyName);
             m_JointTransformReferences = serializedObject.FindProperty(k_JointTransformReferencesPropertyName);
@@ -91,7 +94,10 @@ namespace UnityEditor.XR.Hands
             m_JointsExpanded = SessionState.GetBool(k_JointsExpandedStateKey, false);
         }
 
-        void OnDisable()
+        /// <summary>
+        /// See <see cref="MonoBehaviour"/>.
+        /// </summary>
+        protected virtual void OnDisable()
         {
             SessionState.SetBool(k_JointsExpandedStateKey, m_JointsExpanded);
         }

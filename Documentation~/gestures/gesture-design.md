@@ -99,7 +99,7 @@ If you’re coupling a UI element with the gesture, consider the placement of th
 
 UI placement to avoid:
 
-| Position | Reson to avoid |
+| Position | Reason to avoid |
 | :-- | :-- |
 | On top of the arm | Requires holding out the arm in an awkward angle and height for comfortable pressing of buttons which can cause fatigue over time. |
 | Above fingers | Hand fatigue because of holding out hand for a long time. |

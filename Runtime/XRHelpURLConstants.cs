@@ -7,7 +7,7 @@ namespace UnityEngine.XR.Hands
     {
         const string k_ApiFolder = "api";
         const string k_ManualFolder = "manual";
-        const string k_CurrentDocsVersion = "1.5";
+        const string k_CurrentDocsVersion = "1.6";
         const string k_CurrentDocsBaseUrl = "https://docs.unity3d.com/Packages/com.unity.xr.hands@" + k_CurrentDocsVersion + "/";
         const string k_NamespaceRoot = "UnityEngine.XR.Hands.";
 
@@ -22,6 +22,11 @@ namespace UnityEngine.XR.Hands
         /// Base URL for the current version of the XR Hands manual page.
         /// </summary>
         internal const string k_CurrentManualDocsBaseUrl = k_CurrentDocsBaseUrl + k_ManualFolder + "/";
+
+        /// <summary>
+        /// Auxiliary path for the OpenXR-related features documented in the Hands manual pages.
+        /// </summary>
+        internal const string k_OpenXRFeaturesDocsBaseUrl = k_CurrentManualDocsBaseUrl + "openxr-features/";
 
         /// <summary>
         /// Scripting API URL for <see cref="XRHandSkeletonDriver"/>.

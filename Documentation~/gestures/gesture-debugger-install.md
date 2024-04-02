@@ -1,5 +1,5 @@
 ---
-uid: xrhands-install-gesture-visualizer
+uid: xrhands-install-gesture-debugger
 ---
 
 # Install the gesture debugger
@@ -16,4 +16,4 @@ The sample files are copied into your project under **Assets/Samples/XR Hands/{v
 
 ## Run the gesture debugger
 
-To run the debugger scene, build the project and deploy it on a device that supports hand tracking. Refer to [Customize the gesture debugger scene](xref:xrhands-customize-gesture-visualizer) for instructions on how to add your own hand shapes and gestures to the visualizer.
+To run the debugger scene, build the project and deploy it on a device that supports hand tracking. Refer to [Customize the gesture debugger scene](xref:xrhands-customize-gesture-debugger) for instructions on how to add your own hand shapes and hand poses to the debugger.

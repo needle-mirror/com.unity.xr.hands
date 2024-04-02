@@ -45,6 +45,10 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample
         [Tooltip("The static gestures associated with this gestures handedness.")]
         StaticHandGesture[] m_StaticGestures;
 
+        [SerializeField]
+        [Tooltip("The image component that draws the highlighted gesture icon border.")]
+        Image m_Highlight;
+
         XRHandShape m_HandShape;
         XRHandPose m_HandPose;
         bool m_WasDetected;
@@ -52,7 +56,7 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample
         float m_TimeOfLastConditionCheck;
         float m_HoldStartTime;
         Color m_BackgroundDefaultColor;
-        Color m_BackgroundHiglightColor = new Color(0f, 0.627451f, 1f);
+        Color m_BackgroundHighlightColor = new Color(0f, 0.627451f, 1f);
 
         /// <summary>
         /// The hand tracking events component to subscribe to receive updated joint data to be used for gesture detection.
@@ -91,6 +95,15 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample
         }
 
         /// <summary>
+        /// The image component that draws the highlight state drawn on top of the gesture icon background.
+        /// </summary>
+        public Image highlight
+        {
+            get => m_Highlight;
+            set => m_Highlight = value;
+        }
+
+        /// <summary>
         /// The event fired when the gesture is performed.
         /// </summary>
         public UnityEvent gesturePerformed
@@ -126,9 +139,27 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample
             set => m_GestureDetectionInterval = value;
         }
 
+        /// <summary>
+        /// Sets any assigned highlight UI component as visible/hidden
+        /// </summary>
+        public bool highlightVisible
+        {
+            set
+            {
+                if (m_Highlight)
+                    m_Highlight.enabled = value;
+            }
+        }
+
         void Awake()
         {
             m_BackgroundDefaultColor = m_Background.color;
+
+            if (m_Highlight)
+            {
+                m_Highlight.enabled = false;
+                m_Highlight.gameObject.SetActive(true);
+            }
         }
 
         void OnEnable()
@@ -173,7 +204,16 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample
                 {
                     m_GesturePerformed?.Invoke();
                     m_PerformedTriggered = true;
-                    m_Background.color = m_BackgroundHiglightColor;
+                    m_Background.color = m_BackgroundHighlightColor;
+
+                    if (m_Highlight)
+                        m_Highlight.enabled = true;
+
+                    foreach (var gesture in m_StaticGestures)
+                    {
+                        if (gesture != this)
+                            gesture.highlightVisible = false;
+                    }
                 }
             }
 

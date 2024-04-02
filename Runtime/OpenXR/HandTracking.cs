@@ -38,7 +38,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         BuildTargetGroups = new[] { BuildTargetGroup.Standalone, BuildTargetGroup.WSA, BuildTargetGroup.Android },
         Company = "Unity",
         Desc = "Creates and manages an XRHandSubsystem.",
-        DocumentationLink = XRHelpURLConstants.k_CurrentManualDocsBaseUrl + "features/handtracking.html",
+        DocumentationLink = XRHelpURLConstants.k_OpenXRFeaturesDocsBaseUrl + "handtracking.html",
         Version = "0.0.1",
         OpenxrExtensionStrings = extensionString,
         Category = UnityEditor.XR.OpenXR.Features.FeatureCategory.Feature,

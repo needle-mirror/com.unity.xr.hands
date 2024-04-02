@@ -1,12 +1,12 @@
 using NUnit.Framework;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SubsystemsImplementation.Extensions;
 using UnityEngine.TestTools;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.ProviderImplementation;
+using Is = Unity.XR.Hands.Tests.NUnitExtensions.Is;
 
 class Tests
 {
@@ -28,7 +28,7 @@ class Tests
     [Test]
     public void CanCreateTestSubsystem()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
         Assert.AreNotEqual(subsystem, null);
         subsystem.Destroy();
     }
@@ -36,7 +36,7 @@ class Tests
     [Test]
     public void SubsystemAsksForHandLayoutDuringCreate()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
 
         var testProvider = subsystem.GetProvider() as TestHandProvider;
         Assert.IsNotNull(testProvider);
@@ -48,7 +48,7 @@ class Tests
     [Test]
     public void SubsystemWontAskProviderForHandDataWithoutStarting()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
         for (var call = 0; call < 10; ++call)
         {
             var flags = subsystem.TryUpdateHands(
@@ -69,15 +69,15 @@ class Tests
     public void SubsystemAsksForHandsDataIfRunning()
     {
         const int numUpdates = 10;
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
         subsystem.Start();
 
         for (var call = 0; call < numUpdates; ++call)
         {
             var flags = subsystem.TryUpdateHands(
                 ((call & 1) != 0)
-                    ? XRHandSubsystem.UpdateType.Dynamic
-                    : XRHandSubsystem.UpdateType.BeforeRender);
+                ? XRHandSubsystem.UpdateType.Dynamic
+                : XRHandSubsystem.UpdateType.BeforeRender);
             Assert.AreEqual(XRHandSubsystem.UpdateSuccessFlags.All, flags);
         }
 
@@ -91,7 +91,7 @@ class Tests
     [Test]
     public void HandsMarkedWithCorrectHandedness()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
 
         Assert.AreEqual(Handedness.Left, subsystem.leftHand.handedness);
         Assert.AreEqual(Handedness.Right, subsystem.rightHand.handedness);
@@ -102,7 +102,7 @@ class Tests
     [Test]
     public void StopIsCalledImplcitlyOnDestroyIfRunning()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
         subsystem.Start();
         subsystem.Destroy();
 
@@ -116,14 +116,14 @@ class Tests
     [Test]
     public void ProviderGivesValidHandDataWhenRunning()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
         subsystem.Start();
 
         var updateFlags = subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic);
         Assert.AreEqual(XRHandSubsystem.UpdateSuccessFlags.All, updateFlags);
 
-        AssertAreApproximatelyEqual(TestHandData.leftRoot, subsystem.leftHand.rootPose);
-        AssertAreApproximatelyEqual(TestHandData.rightRoot, subsystem.rightHand.rootPose);
+        TestHandUtils.AssertAreApproximatelyEqual(TestHandData.leftRoot, subsystem.leftHand.rootPose);
+        TestHandUtils.AssertAreApproximatelyEqual(TestHandData.rightRoot, subsystem.rightHand.rootPose);
 
         int numValidLeftJoints = 0, numValidRightJoints = 0;
         for (int jointIndex = XRHandJointID.BeginMarker.ToIndex();
@@ -136,7 +136,7 @@ class Tests
             if (leftJoint.TryGetPose(out var leftPose))
             {
                 ++numValidLeftJoints;
-                AssertAreApproximatelyEqual(TestHandData.leftHand[jointIndex], leftPose);
+                TestHandUtils.AssertAreApproximatelyEqual(TestHandData.leftHand[jointIndex], leftPose);
             }
             else
             {
@@ -147,7 +147,7 @@ class Tests
             if (rightJoint.TryGetPose(out var rightPose))
             {
                 ++numValidRightJoints;
-                AssertAreApproximatelyEqual(TestHandData.rightHand[jointIndex], rightPose);
+                TestHandUtils.AssertAreApproximatelyEqual(TestHandData.rightHand[jointIndex], rightPose);
             }
             else
             {
@@ -163,7 +163,7 @@ class Tests
     [Test]
     public void MockProviderOnlyGivesHandPosesAndSensibleDefaults()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
         subsystem.Start();
 
         var updateFlags = subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic);
@@ -200,7 +200,7 @@ class Tests
     [Test]
     public void XRHandJointToStringNeverNull()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
 
         for (int jointIndex = XRHandJointID.BeginMarker.ToIndex();
              jointIndex < XRHandJointID.EndMarker.ToIndex();
@@ -287,7 +287,7 @@ class Tests
     [Test]
     public void SubsystemPassesUpdateTypeDirectlyToProvider()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
         var testProvider = subsystem.GetProvider() as TestHandProvider;
         subsystem.Start();
 
@@ -307,7 +307,7 @@ class Tests
         var flags = XRHandSubsystem.UpdateSuccessFlags.None;
         void OnUpdatedHands(XRHandSubsystem xrHandSubsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateType) => flags = updateSuccessFlags;
 
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
         subsystem.updatedHands += OnUpdatedHands;
         subsystem.Start();
 
@@ -357,7 +357,7 @@ class Tests
     [Test]
     public void JointIDsMatch()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
         subsystem.Start();
 
         var flags = subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic);
@@ -381,7 +381,7 @@ class Tests
     [Test]
     public void TestJointsAreInSubsystemLayout()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
 
         for (int jointIndex = XRHandJointID.BeginMarker.ToIndex();
              jointIndex < XRHandJointID.EndMarker.ToIndex();
@@ -396,7 +396,7 @@ class Tests
     [UnityTest]
     public IEnumerator SubsystemUpdaterWorks()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
         var updater = new XRHandProviderUtility.SubsystemUpdater(subsystem);
         try
         {
@@ -421,7 +421,7 @@ class Tests
     [UnityTest]
     public IEnumerator HandTrackingEventCallbacks()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
         var updater = new XRHandProviderUtility.SubsystemUpdater(subsystem);
         var provider = (TestHandProvider)subsystem.GetProvider();
         var go = new GameObject("TestHandTrackingEvents");
@@ -525,7 +525,7 @@ class Tests
     [UnityTest]
     public IEnumerator HandTrackingPoseStatusUpdates()
     {
-        var subsystem = CreateTestSubsystem();
+        var subsystem = TestHandUtils.CreateTestSubsystem();
         var updater = new XRHandProviderUtility.SubsystemUpdater(subsystem);
         var provider = (TestHandProvider)subsystem.GetProvider();
 
@@ -564,8 +564,8 @@ class Tests
                 && successFlags.HasFlag(XRHandSubsystem.UpdateSuccessFlags.RightHandJoints);
 
             for (int jointIndex = XRHandJointID.BeginMarker.ToIndex();
-                    jointIndex < XRHandJointID.EndMarker.ToIndex();
-                    ++jointIndex)
+                 jointIndex < XRHandJointID.EndMarker.ToIndex();
+                 ++jointIndex)
             {
                 if (leftHandJointsUpdatedThisFrame)
                 {
@@ -580,6 +580,7 @@ class Tests
                 }
             }
         }
+
         subsystem.updatedHands += OnUpdatedHands;
 
         try
@@ -658,66 +659,335 @@ class Tests
         }
     }
 
-    static void EnsureTestSubsystemDescriptorRegistered()
+    [UnityTest]
+    public IEnumerator CommonGesturesProviderNoSupport()
     {
-        var descriptors = new List<XRHandSubsystemDescriptor>();
-        SubsystemManager.GetSubsystemDescriptors(descriptors);
-
-        foreach (var descriptor in descriptors)
+        var expectedDescriptorCinfo = new XRHandSubsystemDescriptor.Cinfo
         {
-            if (descriptor.id == TestHandProvider.descriptorId)
+            id = "Test-Hands-NoGestureSupport",
+            providerType = typeof(TestHandProvider),
+            supportsAimPose = false,
+            supportsAimActivateValue = false,
+            supportsGripPose = false,
+            supportsGraspValue = false,
+            supportsPinchPose = false,
+            supportsPinchValue = false,
+            supportsPokePose = false
+        };
+
+        void CheckUnsupportedCommonGestureGetters(XRHandSubsystem subsystem, Handedness handedness)
+        {
+            var commonGestures =
+                handedness == Handedness.Left ? subsystem.leftHandCommonGestures : subsystem.rightHandCommonGestures;
+
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetAimPose), Is.EqualTo((false, Pose.identity)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPokePose), Is.EqualTo((false, Pose.identity)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPinchPose), Is.EqualTo((false, Pose.identity)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetGripPose), Is.EqualTo((false, Pose.identity)));
+
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetGraspValue), Is.EqualTo((false, 0.0f)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetAimActivateValue), Is.EqualTo((false, 0.0f)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPinchValue), Is.EqualTo((false, 0.0f)));
+        }
+
+        void CheckUnsupportedCommonGestures(XRHandSubsystem subsystem, bool checkGestures)
+        {
+            TestHandUtils.AssertSubsystemGestureSupport(expectedDescriptorCinfo, subsystem.subsystemDescriptor);
+            if (checkGestures)
+            {
+                CheckUnsupportedCommonGestureGetters(subsystem, Handedness.Left);
+                CheckUnsupportedCommonGestureGetters(subsystem, Handedness.Right);
+            }
+        }
+
+        void OnUpdatedHands(
+            XRHandSubsystem subsystem,
+            XRHandSubsystem.UpdateSuccessFlags successFlags,
+            XRHandSubsystem.UpdateType updateType)
+        {
+            if (updateType != XRHandSubsystem.UpdateType.Dynamic)
                 return;
         }
 
-        var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
+        var subsystem = TestHandUtils.CreateTestSubsystem(expectedDescriptorCinfo);
+        var updater = new XRHandProviderUtility.SubsystemUpdater(subsystem);
+
+        subsystem.updatedHands += OnUpdatedHands;
+
+        CheckUnsupportedCommonGestures(subsystem, false);
+
+        try
         {
-            id = TestHandProvider.descriptorId,
-            providerType = typeof(TestHandProvider)
-        };
-        XRHandSubsystemDescriptor.Register(handsSubsystemCinfo);
+            subsystem.Start();
+            updater.Start();
+            yield return null;
+
+            CheckUnsupportedCommonGestures(subsystem, true);
+        }
+        finally
+        {
+            updater.Stop();
+            updater.Destroy();
+            subsystem.Destroy();
+        }
     }
 
-    static XRHandSubsystem CreateTestSubsystem()
+    [UnityTest]
+    public IEnumerator CommonGesturesFullySupported()
     {
-        EnsureTestSubsystemDescriptorRegistered();
-
-        var descriptors = new List<XRHandSubsystemDescriptor>();
-        SubsystemManager.GetSubsystemDescriptors(descriptors);
-
-        foreach (var descriptor in descriptors)
+        var expectedHandsDescriptorCinfo = new XRHandSubsystemDescriptor.Cinfo
         {
-            if (descriptor.id == TestHandProvider.descriptorId)
-                return descriptor.Create();
+            id = "Test-Hands-FullGestureSupport",
+            providerType = typeof(TestHandProvider),
+            supportsAimPose = true,
+            supportsAimActivateValue = true,
+            supportsGripPose = true,
+            supportsGraspValue = true,
+            supportsPinchPose = true,
+            supportsPinchValue = true,
+            supportsPokePose = true
+        };
+
+        void CheckCommonGestureGetters(XRHandSubsystem subsystem, Handedness handedness)
+        {
+            var commonGestures =
+                handedness == Handedness.Left ? subsystem.leftHandCommonGestures : subsystem.rightHandCommonGestures;
+
+            var expectedGestures = TestCommonGestureData.GetCommonGestureData(handedness);
+
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetAimPose), Is.EqualTo((true, expectedGestures.aimPose)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPokePose), Is.EqualTo((true, expectedGestures.pokePose)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPinchPose), Is.EqualTo((true, expectedGestures.pinchPose)));
+
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetGraspValue), Is.EqualTo((true, expectedGestures.graspValue)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetAimActivateValue), Is.EqualTo((true, expectedGestures.aimActivateValue)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPinchValue), Is.EqualTo((true, expectedGestures.pinchValue)));
         }
 
-        return null;
+        void CheckSupportedCommonGestures(XRHandSubsystem subsystem, bool checkGestures)
+        {
+            TestHandUtils.AssertSubsystemGestureSupport(expectedHandsDescriptorCinfo, subsystem.subsystemDescriptor);
+
+            if (checkGestures)
+            {
+                CheckCommonGestureGetters(subsystem, Handedness.Left);
+                CheckCommonGestureGetters(subsystem, Handedness.Right);
+            }
+        }
+
+        var subsystem = TestHandUtils.CreateTestSubsystem(expectedHandsDescriptorCinfo);
+        var updater = new XRHandProviderUtility.SubsystemUpdater(subsystem);
+        var provider = (TestHandProvider)subsystem.GetProvider();
+
+        provider.commonGestureBehavior = TestHandProvider.CommonGestureBehavior.Extended;
+
+        MockCommonGestureListener mockGestureListener = new MockCommonGestureListener();
+        mockGestureListener.SubscribeToAllGestureUpdates(subsystem);
+
+        mockGestureListener.leftHandMocks.aimPoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertAimPoseUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.aimPoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertAimPoseUpdated(Handedness.Right, args));
+
+        mockGestureListener.leftHandMocks.aimActivateValueUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertAimActivateUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.aimActivateValueUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertAimActivateUpdated(Handedness.Right, args));
+
+        mockGestureListener.leftHandMocks.gripPoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertGripPoseUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.gripPoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertGripPoseUpdated(Handedness.Right, args));
+
+        mockGestureListener.leftHandMocks.graspValueUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertGraspValueUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.graspValueUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertGraspValueUpdated(Handedness.Right, args));
+
+        mockGestureListener.leftHandMocks.pinchPoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertPinchPoseUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.pinchPoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertPinchPoseUpdated(Handedness.Right, args));
+
+        mockGestureListener.leftHandMocks.pinchValueUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertPinchValueUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.pinchValueUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertPinchValueUpdated(Handedness.Right, args));
+
+        mockGestureListener.leftHandMocks.pokePoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertPokePoseUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.pokePoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertPokePoseUpdated(Handedness.Right, args));
+
+        try
+        {
+            subsystem.Start();
+            updater.Start();
+            yield return null;
+
+            CheckSupportedCommonGestures(subsystem, true);
+        }
+        finally
+        {
+            updater.Stop();
+            updater.Destroy();
+            subsystem.Destroy();
+
+            mockGestureListener.AssertAllConditions();
+        }
     }
 
-    static void AssertAreApproximatelyEqual(float expected, float actual)
+    [UnityTest]
+    public IEnumerator CommonGesturesPosesOnlySupported()
     {
-        Assert.IsTrue(Mathf.Abs(actual - expected) <= k_EpsilonSqrt);
-    }
+        var expectedHandsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
+        {
+            id = "Test-Hands-PoseOnlySupport",
+            providerType = typeof(TestHandProvider),
+            supportsAimPose = true,
+            supportsAimActivateValue = false,
+            supportsGripPose = true,
+            supportsGraspValue = false,
+            supportsPinchPose = true,
+            supportsPinchValue = false,
+            supportsPokePose = true
+        };
 
-    static void AssertAreApproximatelyEqual(Vector3 expected, Vector3 actual)
-    {
-        AssertAreApproximatelyEqual(expected.x, actual.x);
-        AssertAreApproximatelyEqual(expected.y, actual.y);
-        AssertAreApproximatelyEqual(expected.z, actual.z);
-    }
+        void CheckGestureGetters(XRHandSubsystem subsystem, Handedness handedness)
+        {
+            var commonGestures =
+                handedness == Handedness.Left ? subsystem.leftHandCommonGestures : subsystem.rightHandCommonGestures;
 
-    static void AssertAreApproximatelyEqual(Quaternion expected, Quaternion actual)
-    {
-        AssertAreApproximatelyEqual(expected.x, actual.x);
-        AssertAreApproximatelyEqual(expected.y, actual.y);
-        AssertAreApproximatelyEqual(expected.z, actual.z);
-        AssertAreApproximatelyEqual(expected.w, actual.w);
-    }
+            var expectedGestures = TestCommonGestureData.GetCommonGestureData(handedness);
 
-    static void AssertAreApproximatelyEqual(Pose expected, Pose actual)
-    {
-        AssertAreApproximatelyEqual(expected.position, actual.position);
-        AssertAreApproximatelyEqual(expected.rotation, actual.rotation);
-    }
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetAimPose), Is.EqualTo((true, expectedGestures.aimPose)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPokePose), Is.EqualTo((true, expectedGestures.pokePose)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPinchPose), Is.EqualTo((true, expectedGestures.pinchPose)));
 
-    static readonly float k_EpsilonSqrt = Mathf.Sqrt(Mathf.Epsilon);
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetGraspValue), Is.EqualTo((false, 0.0f)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetAimActivateValue), Is.EqualTo((false, 0.0f)));
+            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPinchValue), Is.EqualTo((false, 0.0f)));
+        }
+
+        void CheckCommonGestures(XRHandSubsystem subsystem, bool checkGestures)
+        {
+            TestHandUtils.AssertSubsystemGestureSupport(expectedHandsSubsystemCinfo, subsystem.subsystemDescriptor);
+
+            if (checkGestures)
+            {
+                CheckGestureGetters(subsystem, Handedness.Left);
+                CheckGestureGetters(subsystem, Handedness.Right);
+            }
+        }
+
+        var subsystem = TestHandUtils.CreateTestSubsystem(expectedHandsSubsystemCinfo);
+        var updater = new XRHandProviderUtility.SubsystemUpdater(subsystem);
+        var provider = (TestHandProvider)subsystem.GetProvider();
+
+        provider.commonGestureBehavior = TestHandProvider.CommonGestureBehavior.CorePosesOnly;
+
+        MockCommonGestureListener mockGestureListener = new MockCommonGestureListener();
+        mockGestureListener.SubscribeToAllGestureUpdates(subsystem);
+
+        mockGestureListener.leftHandMocks.aimPoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertAimPoseUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.aimPoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertAimPoseUpdated(Handedness.Right, args));
+
+        mockGestureListener.leftHandMocks.gripPoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertGripPoseUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.gripPoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertGripPoseUpdated(Handedness.Right, args));
+
+        mockGestureListener.leftHandMocks.pinchPoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertPinchPoseUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.pinchPoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertPinchPoseUpdated(Handedness.Right, args));
+
+        mockGestureListener.leftHandMocks.pokePoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertPokePoseUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.pokePoseUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertPokePoseUpdated(Handedness.Right, args));
+
+        mockGestureListener.leftHandMocks.aimActivateValueUpdated.WillNotBeCalled();
+        mockGestureListener.rightHandMocks.aimActivateValueUpdated.WillNotBeCalled();
+
+        mockGestureListener.leftHandMocks.graspValueUpdated.WillNotBeCalled();
+        mockGestureListener.rightHandMocks.graspValueUpdated.WillNotBeCalled();
+
+        mockGestureListener.leftHandMocks.pinchValueUpdated.WillNotBeCalled();
+        mockGestureListener.rightHandMocks.pinchValueUpdated.WillNotBeCalled();
+
+        try
+        {
+            subsystem.Start();
+            updater.Start();
+            yield return null;
+
+            CheckCommonGestures(subsystem, true);
+        }
+        finally
+        {
+            updater.Stop();
+            updater.Destroy();
+            subsystem.Destroy();
+
+            mockGestureListener.AssertAllConditions();
+        }
+    }
 }

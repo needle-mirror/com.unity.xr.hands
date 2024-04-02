@@ -36,7 +36,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         /// Update the text label that denotes the currently detected hand gesture
         /// </summary>
         /// <param name="handPoseOrShape">The pose or shape whose name will be displayed</param>
-        public void UpdateSelectedHandshapeTextUI(ScriptableObject handPoseOrShape)
+        public void UpdateSelectedHandShapeTextUI(ScriptableObject handPoseOrShape)
         {
             var handShape = handPoseOrShape as XRHandShape;
             var handPose = handPoseOrShape as XRHandPose;

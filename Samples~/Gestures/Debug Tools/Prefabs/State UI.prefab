@@ -86,9 +86,8 @@ MonoBehaviour:
   m_UpperRangeImage: {fileID: 5061850610764703637}
   m_LowerRangeImage: {fileID: 7719256522712289463}
   m_RangeStatusText: {fileID: 819085919867319305}
-  m_CheckmarkImage: {fileID: 6172370909403414748}
+  m_CheckMarkImage: {fileID: 6172370909403414748}
   m_CrossImage: {fileID: 443660986631770653}
-  m_NoFingerShapeCondition: 0
 --- !u!1 &1966040542689825197
 GameObject:
   m_ObjectHideFlags: 0
@@ -713,11 +712,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 6684258963732687077}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 226.25, y: -0.00002670288}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 226.25003, y: -0.00004196167}
   m_SizeDelta: {x: 71.5, y: 24}
-  m_Pivot: {x: 0, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!222 &8320222692360699762
 CanvasRenderer:
   m_ObjectHideFlags: 0

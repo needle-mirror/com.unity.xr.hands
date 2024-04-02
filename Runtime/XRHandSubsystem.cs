@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.SubsystemsImplementation;
+using UnityEngine.XR.Hands.Analytics;
 using UnityEngine.XR.Hands.Gestures;
+using UnityEngine.XR.Hands.Meshing;
 using UnityEngine.XR.Hands.Processing;
 using UnityEngine.XR.Hands.ProviderImplementation;
 
@@ -278,6 +280,10 @@ namespace UnityEngine.XR.Hands
         /// </remarks>
         public virtual unsafe UpdateSuccessFlags TryUpdateHands(UpdateType updateType)
         {
+#if UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS
+            XRHandFeatureUsageData.xrHandSubsystemRuntimeUsed = true;
+#endif
+
             if (!running)
                 return UpdateSuccessFlags.None;
 
@@ -415,6 +421,54 @@ namespace UnityEngine.XR.Hands
 #pragma warning restore 618
 
             return updateSuccessFlags;
+        }
+
+        /// <summary>
+        /// Attempt to retrieve hand mesh data from the platform. Only called when
+        /// <see cref="XRHandSubsystem.TryGetMeshData"/> is called.
+        /// </summary>
+        /// <param name="result">
+        /// Output data for hand meshes.
+        /// </param>
+        /// <param name="queryParams">
+        /// Input data for hand meshes.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if successful and either hand has
+        /// valid data. Otherwise, returns <see langword="false"/>.
+        /// </returns>
+        /// <remarks>
+        /// If this returns <see langword="true"/>, it is your responsibility to
+        /// to clean up the data by calling <see cref="XRHandMeshData.Dispose"/>
+        /// on each of those contained in the the filled-out <paramref name="result"/>,
+        /// or by calling <see cref="XRHandMeshDataQueryResult.Dispose"/> on the
+        /// <paramref name="result"/> itself.
+        /// </remarks>
+        public bool TryGetMeshData(out XRHandMeshDataQueryResult result, ref XRHandMeshDataQueryParams queryParams)
+        {
+            result = new XRHandMeshDataQueryResult();
+            result.leftHand = new XRHandMeshData(Handedness.Left);
+            result.rightHand = new XRHandMeshData(Handedness.Right);
+
+            var ret = provider.TryGetMeshData(ref result, ref queryParams);
+
+            // users should only have to worry about calling Dispose if this
+            // returns true, so ensure that in case the provider mistakenly
+            // set some data but still returned false
+            if (!ret)
+            {
+                result.leftHand = InvalidateMeshData(result.leftHand);
+                result.rightHand = InvalidateMeshData(result.rightHand);
+            }
+
+            return ret;
+        }
+
+        static XRHandMeshData InvalidateMeshData(XRHandMeshData meshData)
+        {
+            meshData.Dispose();
+            meshData.m_IsRootPoseValid = false;
+            return meshData;
         }
 
         /// <summary>

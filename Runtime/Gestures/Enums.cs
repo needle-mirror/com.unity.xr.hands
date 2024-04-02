@@ -40,6 +40,12 @@ namespace UnityEngine.XR.Hands.Gestures
         /// This state does not exist for the <see cref="XRHandFingerID.Little"/> finger.
         /// </remarks>
         Spread,
+
+        /// <summary>
+        /// Used to display an unselected shape-type state in new HandShape XRFingerShapeConditions scriptable object entries.
+        /// This value is utilized by the HandShapeEditor custom inspector.
+        /// </summary>
+        Unspecified
     }
 
     /// <summary>

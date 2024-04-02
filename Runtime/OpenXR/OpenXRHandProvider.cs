@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.XR.Hands;
+using UnityEngine.XR.Hands.Meshing;
+using UnityEngine.XR.Hands.OpenXR.Meshing;
 using UnityEngine.XR.Hands.ProviderImplementation;
 using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features;
@@ -243,6 +245,34 @@ namespace UnityEngine.XR.Hands.OpenXR
             return false;
 #endif
         }
+
+        /// <summary>
+        /// The <see cref="OpenXRHandProvider"/> calls into this when
+        /// <see cref="XRHandSubsystem.TryGetMeshData"/> is called.
+        /// </summary>
+        /// <value>
+        /// This is only useful for developers exposing hand mesh data for their
+        /// platform. If you are a user making a game or app, you do not need to
+        /// worry about this.
+        /// </value>
+        public IOpenXRHandMeshDataSupplier handMeshDataSupplier { get; set; }
+
+        /// <summary>
+        /// Attempt to retrieve hand mesh data from the platform. Only called when
+        /// <see cref="XRHandSubsystem.TryGetMeshData"/> is called.
+        /// </summary>
+        /// <param name="result">
+        /// Output data for hand meshes.
+        /// </param>
+        /// <param name="queryParams">
+        /// Input data for hand meshes.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if successful and either hand has
+        /// valid data. Otherwise, returns <see langword="false"/>.
+        /// </returns>
+        public override bool TryGetMeshData(ref XRHandMeshDataQueryResult result, ref XRHandMeshDataQueryParams queryParams)
+            => handMeshDataSupplier != null ? handMeshDataSupplier.TryGetMeshData(ref result, ref queryParams) : false;
 
 #if UNITY_OPENXR_PACKAGE_1_8
         static class Usages

@@ -25,6 +25,8 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         /// </summary>
         public XRFingerShapeDebugUI[] xrFingerShapeDebugGraphs => m_XRFingerShapeDebugGraphs;
 
+        public Handedness handedness => m_Handedness;
+
         void Start()
         {
             if (m_Handedness == Handedness.Invalid)
@@ -45,8 +47,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
         void Update()
         {
-            var subsystem = TryGetSubsystem();
-            if (subsystem == null)
+            if (!TryGetSubsystem(out var subsystem))
                 return;
 
             var hand = m_Handedness == Handedness.Left ? subsystem.leftHand : subsystem.rightHand;
@@ -93,10 +94,19 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             }
         }
 
-        static XRHandSubsystem TryGetSubsystem()
+        static bool TryGetSubsystem(out XRHandSubsystem system)
         {
-            SubsystemManager.GetSubsystems(s_SubsystemsReuse);
-            return s_SubsystemsReuse.Count > 0 ? s_SubsystemsReuse[0] : null;
+            system = null;
+
+            if (s_SubsystemsReuse.Count == 0)
+                SubsystemManager.GetSubsystems(s_SubsystemsReuse);
+
+            if (s_SubsystemsReuse.Count > 0)
+            {
+                system = s_SubsystemsReuse[0];
+                return true;
+            }
+            return false;
         }
     }
 }

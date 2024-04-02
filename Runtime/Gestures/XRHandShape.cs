@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine.XR.Hands.Analytics;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -45,6 +46,10 @@ namespace UnityEngine.XR.Hands.Gestures
         /// </returns>
         public bool CheckConditions(XRHandJointsUpdatedEventArgs eventArgs)
         {
+#if UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS
+            XRHandFeatureUsageData.xrHandCustomGestureUsed = true;
+#endif
+
             if (!eventArgs.hand.isTracked)
                 return false;
 
@@ -94,6 +99,28 @@ namespace UnityEngine.XR.Hands.Gestures
                 {
                     condition.targets[i].upperTolerance = k_DefaultShapeTolerance;
                     condition.targets[i].lowerTolerance = k_DefaultShapeTolerance;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Set a new shapeType for a given FingerShapeCondition target.
+        /// </summary>
+        /// <remarks>
+        /// This function is called by the HandShapeEditor when setting a new shape in the custom inspector.
+        /// </remarks>
+        /// <param name="fingerShapeType">The new shapeType to set for a given FingerShapeCondition target.</param>
+        /// <param name="fingerShapeConditionPosition">The position of the FingerShapeCondition to update.</param>
+        /// <param name="conditionTargetPosition">The position of the FingerShapeCondition target to update.</param>
+        public void UpdateFingerShapeType(XRFingerShapeType fingerShapeType, int fingerShapeConditionPosition, int conditionTargetPosition)
+        {
+            if (fingerShapeConditionPosition >= 0 && fingerShapeConditionPosition < m_FingerShapeConditions.Count)
+            {
+                var fingerShapeCondition = m_FingerShapeConditions[fingerShapeConditionPosition];
+                if (fingerShapeCondition != null && conditionTargetPosition >= 0 &&
+                    conditionTargetPosition < fingerShapeCondition.targets.Length)
+                {
+                    fingerShapeCondition.targets[conditionTargetPosition].shapeType = fingerShapeType;
                 }
             }
         }

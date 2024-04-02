@@ -2,6 +2,7 @@ using System;
 using Unity.Collections;
 using UnityEngine.SubsystemsImplementation;
 using UnityEngine.XR.Hands.Gestures;
+using UnityEngine.XR.Hands.Meshing;
 
 namespace UnityEngine.XR.Hands.ProviderImplementation
 {
@@ -88,7 +89,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// requested under.
         /// </param>
         /// <param name="leftHandRootPose">
-        /// Update this and include <c>XRHandSubsystem.UpdateSuccesFlags.LeftHandRootPose</c>
+        /// Update this and include <c>XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose</c>
         /// in the return value to update the left hand's root pose.
         /// </param>
         /// <param name="leftHandJoints">
@@ -96,11 +97,11 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// initialized with a copy of the current joint data for the left hand,
         /// so if the last known tracking data for a particular joint is still
         /// fine, you don't need to fill out that data again. If you update
-        /// these, include <c>XRHandSubsystem.UpdateSuccesFlags.LeftHandJoints</c>
+        /// these, include <c>XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints</c>
         /// in the return value to have the changes reflected in the subsystem.
         /// </param>
         /// <param name="rightHandRootPose">
-        /// Update this and include <c>XRHandSubsystem.UpdateSuccesFlags.RightHandRootPose</c>
+        /// Update this and include <c>XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose</c>
         /// in the return value to update the right hand's root pose.
         /// </param>
         /// <param name="rightHandJoints">
@@ -108,7 +109,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// initialized with a copy of the current joint data for the right hand,
         /// so if the last known tracking data for a particular joint is still
         /// fine, you don't need to fill out that data again. If you update
-        /// these, include <c>XRHandSubsystem.UpdateSuccesFlags.RightHandJoints</c>
+        /// these, include <c>XRHandSubsystem.UpdateSuccessFlags.RightHandJoints</c>
         /// in the return value to have the changes reflected in the subsystem.
         /// </param>
         /// <returns>
@@ -275,6 +276,23 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
             pokePose = Pose.identity;
             return false;
         }
+
+        /// <summary>
+        /// Attempt to retrieve hand mesh data from the platform. Only called when
+        /// <see cref="XRHandSubsystem.TryGetMeshData"/> is called.
+        /// </summary>
+        /// <param name="result">
+        /// Output data for hand meshes.
+        /// </param>
+        /// <param name="queryParams">
+        /// Input data for hand meshes.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if successful and either hand has
+        /// valid data. Otherwise, returns <see langword="false"/>.
+        /// </returns>
+        public virtual bool TryGetMeshData(ref XRHandMeshDataQueryResult result, ref XRHandMeshDataQueryParams queryParams)
+            => false;
 
         // these defaults were captured using a Meta Quest 2
         static class FingerConfigDefaults

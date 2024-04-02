@@ -1,6 +1,22 @@
 ---
 uid: xrhands-whats-new
 ---
+# What's new in version 1.6
+
+Summary of changes in XR Hands package version 1.6. The main updates in this release include:
+
+## Added
+
+### New XRHandShape Inspector
+
+A new inspector has been added to make creating custom hand shape and finger shapes easier to navigate and fine-tune specific values for target and threshold levels for finger shape detection.
+
+### Hand Shape Completeness Calculator
+
+A new [**Hand Shape Completeness Calculator**](xref:xrhands-handshape-completeness-calculator) component has added to the **Gestures** sample and the **HandGestures** sample scene has been updated to support this feature. This tool allows you to evaluate, in real-time, how closely your current hand shape matches a predefined target hand shape. Additionally, the completeness calculation method can be customized to suit your specific requirements.
+
+![The handshape completeness debugger](../images/gestures/hand-shape-completeness-demo.png)<br/>*The progress bar shows the left hand performing an incomplete grab shape and the right hand performing a full grab shape.*
+
 # What's new in version 1.5
 
 Summary of changes in XR Hands package version 1.5. The main updates in this release include:
@@ -9,7 +25,7 @@ Summary of changes in XR Hands package version 1.5. The main updates in this rel
 
 ### OpenXR common hand gestures
 
-Support for common hand gestures has been added with initial support for gestures piped through the OpenXR Hand Interaction Profile extension. This includes scripting APIs to expose **aim**, **grasp**, **grip**, **pinch**, and **poke** poses and values where appropriate for more information, please refer to the [Scripting API](https://docs.unity3d.com/Packages/com.unity.xr.hands@1.5/api/UnityEngine.XR.Hands.XRCommonHandGestures.html).
+Support for common hand gestures has been added with initial support for gestures piped through the OpenXR Hand Interaction Profile extension. This includes scripting APIs to expose **aim**, **grasp**, **grip**, **pinch**, and **poke** poses and values where appropriate for more information, please refer to the [Scripting API](https://docs.unity3d.com/Packages/com.unity.xr.hands@1.6/api/UnityEngine.XR.Hands.XRCommonHandGestures.html).
 
 ### High Fidelity Tracking Flag
 
@@ -32,10 +48,10 @@ The XR Hands package now enables detection of static hand gestures such as thumb
 
 For additional information, refer to the [custom gesture documentation](xref:xrhands-custom-gestures).
 
-### Upper and lower tolerance range for finger shapes
+### Upper and lower tolerance threshold range for finger shapes
 ![Tolerance ranges](../images/upper-lower-tolerance.png)
 
-The ability to specify lower and upper tolerance limits for individual finger shapes when defining a hand shape is now available. Each finger shape behaves differently on specific fingers or hands based on various factors. Adding specific tolerance ranges increases the chances of detecting a gesture.
+The ability to specify lower and upper tolerance threshold limits for individual finger shapes when defining a hand shape is now available. Each finger shape behaves differently on specific fingers or hands based on various factors. Adding specific tolerance ranges increases the chances of detecting a gesture.
 
 ### Intermediate grab pose
 ![Intermediate grab pose](../images/intermediate-grab-pose.png)
@@ -55,6 +71,11 @@ This menu displays text-based tiles for hand poses that are now visually enhance
 This menu displays live finger state values, and allows for debugging selected hand shapes. The Finger State UI elements have been rebuilt, and enhanced with support for displaying upper and lower tolerance ranges, along with additional UI changes that help to display the state of the currently detected gesture input.
 
 <img src="../images/gestures/gesture-debugger-screenshot.png" alt="Gesture debugger"/><br/><i>The gesture debugger scene visualizing a gesture</i>
+
+### Advanced Debugging menu for prebuilt hand poses
+![Debug hand poses](../images/gestures/advanced-pose-debugger.png)
+
+This menu displays live finger state values, and also allows for debugging assigned between multiple hand poses with additional gesture and fingershape information being displayed.
 
 ---
 # What's new in version 1.3

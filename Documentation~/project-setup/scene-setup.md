@@ -20,6 +20,6 @@ After adding an XR Origin to the scene, the Hierarchy window will look like the 
 
 ![Scene graph containing XR Origin](../images/simple-scene-graph.png)<br/>*Scene graph containing XR Origin*
 
-This is the default scene setup, but you can rename or reparent the GameObjects according to your project needs.
+This is the default scene setup, but you can rename or re-parent the GameObjects according to your project needs.
 
 To enable hand-tracking on top of this, you need to enable it in the Project Settings for your target platform, and have a component similar to the `HandVisualizer` component in the sample attached to a child object of the "Camera Offset" GameObject.

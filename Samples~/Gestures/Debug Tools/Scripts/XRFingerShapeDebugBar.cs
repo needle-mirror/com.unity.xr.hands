@@ -47,7 +47,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
         [SerializeField]
         [Tooltip("The Image component that displays the cross icon, denoting that input is within range for a detected gesture")]
-        Image m_CheckmarkImage;
+        Image m_CheckMarkImage;
 
         [SerializeField]
         [Tooltip("The Image component that displays the cross icon, denoting that input is out of range for a detected gesture")]
@@ -68,6 +68,10 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         float m_LowerToleranceAmount;
 
         bool m_NoFingerShapeCondition;
+
+        Transform m_RangeStatusTextTransform;
+        Vector3 m_RangeStatusPositionWithIcon;
+        Vector3 m_RangeStatusPositionWithoutIcon;
 
         /// <summary>
         /// The container that determines the width of the max length bar, and holds the target and range indicators.
@@ -145,12 +149,12 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         }
 
         /// <summary>
-        /// The Image component that displays the checkmark image when within the valid range
+        /// The Image component that displays the check mark image when within the valid range
         /// </summary>
-        public Image checkmarkImage
+        public Image checkMarkImage
         {
-            get => m_CheckmarkImage;
-            set => m_CheckmarkImage = value;
+            get => m_CheckMarkImage;
+            set => m_CheckMarkImage = value;
         }
 
         /// <summary>
@@ -163,7 +167,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         }
 
         /// <summary>
-        /// Change the appearance of the bar based on a handshape being detected
+        /// Change the appearance of the bar based on a hand shape being detected
         /// </summary>
         public bool fingerShapeDetected
         {
@@ -177,10 +181,9 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
                     (m_TargetAmount + m_UpperToleranceAmount) > currentValue &&
                     (m_TargetAmount - m_LowerToleranceAmount) < currentValue;
 
-                var positionIndent = m_RangeStatusText.transform.localPosition;
                 if (value)
                 {
-                    positionIndent.x = 226f;
+                    m_RangeStatusTextTransform.localPosition = m_RangeStatusPositionWithIcon;
 
                     if (withinToleranceRange)
                     {
@@ -188,7 +191,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
                         m_RangeStatusText.text = k_InRangeText;
                         m_UpperRangeImage.color = m_InRangeColor;
                         m_LowerRangeImage.color = m_InRangeColor;
-                        m_CheckmarkImage.enabled = true;
+                        m_CheckMarkImage.enabled = true;
                         m_CrossImage.enabled = false;
                     }
                     else
@@ -197,25 +200,23 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
                         m_RangeStatusText.text = k_OutOfRangeText;
                         m_UpperRangeImage.color = m_OutOfRangeColor;
                         m_LowerRangeImage.color = m_OutOfRangeColor;
-                        m_CheckmarkImage.enabled = false;
+                        m_CheckMarkImage.enabled = false;
                         m_CrossImage.enabled = true;
                     }
                 }
                 else
                 {
-                    positionIndent.x = 210f;
+                    m_RangeStatusTextTransform.localPosition = m_RangeStatusPositionWithoutIcon;
 
                     if (m_NoFingerShapeCondition)
                     {
                         m_RangeStatusText.text = k_NoTargetSetText;
                         m_RangeStatusText.color = m_NoSetTargetColor;
 
-                        m_CheckmarkImage.enabled = false;
+                        m_CheckMarkImage.enabled = false;
                         m_CrossImage.enabled = false;
                     }
                 }
-
-                m_RangeStatusText.transform.localPosition = positionIndent;
             }
         }
 
@@ -224,10 +225,23 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             m_RangeRectHeight = m_UpperRangeIndicator.rect.height;
             m_RangeActiveColor = m_UpperRangeImage.color;
             m_RangeDeactivatedColor = new Color(m_RangeActiveColor.r, m_RangeActiveColor.g, m_RangeActiveColor.b, 0.35f);
+            m_RangeStatusTextTransform = m_RangeStatusText.transform;
             fingerShapeDetected = false;
 
-            m_CheckmarkImage.enabled = false;
+            m_CheckMarkImage.enabled = false;
             m_CrossImage.enabled = false;
+        }
+
+        void Start()
+        {
+            // RangeStatus text should position itself horizontally accordingly if a range-status icon is visible
+            var positionIndent = m_RangeStatusTextTransform.localPosition;
+            const float kWithoutIconXOffset = 226f;
+            positionIndent.x = kWithoutIconXOffset;
+            m_RangeStatusPositionWithIcon = positionIndent;
+            const float kWithIconXOffset = 210f;
+            positionIndent.x = kWithIconXOffset;
+            m_RangeStatusPositionWithoutIcon = positionIndent;
         }
 
         /// <summary>
@@ -278,8 +292,13 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             m_UpperRangeIndicator.gameObject.SetActive(false);
             m_LowerRangeIndicator.gameObject.SetActive(false);
 
+            m_CheckMarkImage.enabled = false;
+            m_CrossImage.enabled = false;
+
             m_RangeStatusText.text = k_NoTargetSetText;
             m_RangeStatusText.color = m_NoSetTargetColor;
+
+            m_RangeStatusTextTransform.localPosition = m_RangeStatusPositionWithoutIcon;
         }
     }
 }

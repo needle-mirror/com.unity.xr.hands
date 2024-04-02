@@ -7,6 +7,18 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.6.0-pre.1] - 2024-04-02
+
+### Added
+
+- Added new custom editor inspector for hand shapes.
+- Added `XRHandSubsystem.TryGetMeshData` to attempt retrieval of runtime-supplied hand mesh data, if it's supported on that platform and enabled.
+
+### Fixed
+
+- Fixed the help documentation links in the OpenXR Project Settings where hands features were exposed in the Feature Groups editor window.
+- Recompiled the native plug-in with support for [16 KB page sizes](https://developer.android.com/guide/practices/page-sizes) on Android 15 or newer.
+
 ## [1.5.0] - 2024-09-23
 
 ### Added
@@ -49,23 +61,28 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.4.0-pre.1] - 2023-11-27
 
 ### Added
+
 - Added support for custom gestures. For additional information, refer to the [manual documentation](xref:xrhands-custom-gestures).
 
 ### Fixed
+
 - OpenXR implementation now correctly responds to feature lifecycle callbacks.
 
 ## [1.3.0] - 2023-08-14
 
 ### Added
+
 - Added a root pose offset to the `XRHandSkeletonDriver` that allows an additional offset to the root pose (typically the wrist). This is useful for situations where you want the visual hand representation to stop while interacting with objects in a scene.
 - Added missing sample script API documentation to make it easier to understand and build from.
 
 ### Fixed
+
 - Fixed documentation links for OpenXR features to point at latest documentation version.
 
 ## [1.2.1] - 2023-05-30
 
 ### Fixed
+
 - Fixed build pipeline that caused `UnityOpenXRHands` assembly to get skipped.
 
 ## [1.2.0] - 2023-05-25
@@ -80,6 +97,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added `XRHandSkeletonDriver` component that subscribes to events from a `XRHandTrackingEvents` and updates a hierarchy of Transforms for each `XRHandJoint`.
 
 ### Changed
+
 - Minimum supported Unity Editor version has changed to 2021.3.
 
 ### Fixed

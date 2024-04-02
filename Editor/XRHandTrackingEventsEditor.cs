@@ -35,7 +35,10 @@ namespace UnityEditor.XR.Hands
                 "to affect physics and complex work in callbacks can negatively impact framerate.");
         }
 
-        void OnEnable()
+        /// <summary>
+        /// See <see cref="Editor"/>.
+        /// </summary>
+        protected void OnEnable()
         {
             m_Handedness = serializedObject.FindProperty("m_Handedness");
             m_UpdateType = serializedObject.FindProperty("m_UpdateType");
@@ -47,7 +50,10 @@ namespace UnityEditor.XR.Hands
             m_EventsExpanded = SessionState.GetBool(k_HandTrackingEventsExpandedKey, false);
         }
 
-        void OnDisable()
+        /// <summary>
+        /// See <see cref="Editor"/>.
+        /// </summary>
+        protected void OnDisable()
         {
             SessionState.SetBool(k_HandTrackingEventsExpandedKey, m_EventsExpanded);
         }
