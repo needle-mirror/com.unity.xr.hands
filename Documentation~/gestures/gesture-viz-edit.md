@@ -44,5 +44,5 @@ The gesture detector section of the debug visualizer scene contains a set of Gam
 8. Assign the new HandShape or HandPose asset to the **Hand Shape Or Pose** property of the **Static Hand Gesture** component.
 9. If the gesture requires a target relative orientation, edit the **Target Relative Orientation** properties of the **Static Hand Gesture** component.
 10. Locate the **Text** GameObject under the hierarchy of your new gesture detecter object and assign a meaningful name in the text component.
-11. Assign your HandShape and HandPose assets to the right side missing rererences in the two **Gesture Performed** events.
+11. Assign your HandShape and HandPose assets to the right side missing references in the two **Gesture Performed** events.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            

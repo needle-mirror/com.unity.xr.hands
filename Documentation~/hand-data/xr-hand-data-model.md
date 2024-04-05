@@ -201,7 +201,7 @@ Anatomic: Proximal Interphalangeal (PIP)
   </tr>
   <tr>
    <td rowspan="10" ><strong>Proximal point</strong><br>
-<img src="../images/gestures/proximal.png" width="" alt="MetacarpoPhalangeal joints" title="MetacarpoPhalangeal joints">
+<img src="../images/gestures/proximal.png" width="" alt="Metacarpophalangeal joints" title="MetacarpoPhalangeal joints">
 
    </td>
    <td><strong>Thumb</strong>
@@ -210,7 +210,7 @@ Anatomic: Proximal Interphalangeal (PIP)
   <tr>
    <td><strong>Unity API</strong>: ThumbProximal<br><strong>OpenXR</strong>: XR_HAND_JOINT_THUMB_PROXIMAL_EXT
 <p>
-<strong>Anatomic</strong>: MetacarpoPhalangeal (MCP)
+<strong>Anatomic</strong>: Metacarpophalangeal (MCP)
    </td>
   </tr>
   <tr>
@@ -220,7 +220,7 @@ Anatomic: Proximal Interphalangeal (PIP)
   <tr>
    <td><strong>Unity API</strong>: IndexProximal<br><strong>OpenXR</strong>: XR_HAND_JOINT_INDEX_PROXIMAL_EXT
 <p>
-<strong>Anatomic</strong>: MetacarpoPhalangeal (MCP)
+<strong>Anatomic</strong>: Metacarpophalangeal (MCP)
    </td>
   </tr>
   <tr>
@@ -230,7 +230,7 @@ Anatomic: Proximal Interphalangeal (PIP)
   <tr>
    <td><strong>Unity API</strong>: MiddleProximal<br><strong>OpenXR</strong>: XR_HAND_JOINT_MIDDLE_PROXIMAL_EXT
 <p>
-<strong>Anatomic</strong>: MetacarpoPhalangeal (MCP)
+<strong>Anatomic</strong>: Metacarpophalangeal (MCP)
    </td>
   </tr>
   <tr>
@@ -238,7 +238,7 @@ Anatomic: Proximal Interphalangeal (PIP)
    </td>
   </tr>
   <tr>
-   <td><strong>Unity API</strong>: RingProximal<br><strong>OpenXR</strong>: XR_HAND_JOINT_RING_PROXIMAL_EXT<br><strong>Anatomic</strong>: MetacarpoPhalangeal (MCP)
+   <td><strong>Unity API</strong>: RingProximal<br><strong>OpenXR</strong>: XR_HAND_JOINT_RING_PROXIMAL_EXT<br><strong>Anatomic</strong>: Metacarpophalangeal (MCP)
    </td>
   </tr>
   <tr>
@@ -246,7 +246,7 @@ Anatomic: Proximal Interphalangeal (PIP)
    </td>
   </tr>
   <tr>
-   <td><strong>Unity API</strong>: LittleProximal<br><strong>OpenXR</strong>: XR_HAND_JOINT_LITTLE_PROXIMAL_EXT<br><strong>Anatomic</strong>: MetacarpoPhalangeal (MCP)
+   <td><strong>Unity API</strong>: LittleProximal<br><strong>OpenXR</strong>: XR_HAND_JOINT_LITTLE_PROXIMAL_EXT<br><strong>Anatomic</strong>: Metacarpophalangeal (MCP)
    </td>
   </tr>
   <tr>

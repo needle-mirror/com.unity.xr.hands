@@ -42,12 +42,11 @@ namespace UnityEngine.XR.Hands.Gestures
 
             [SerializeField]
             [Range(0f, 1f)]
-            [Tooltip("The maximum the value can differ from the Desired value for the condition to be met.")]
+            [Tooltip("The maximum allowable increase in range from the Desired value that will allow for a condition to be met.")]
             float m_UpperTolerance;
 
             /// <summary>
-            /// The maximum the value can differ from the <see cref="desired"/>
-            /// for the condition to be met.
+            /// The maximum allowable increase in range from the <see cref="desired"/> value that will allow for a condition to be met.
             /// </summary>
             public float upperTolerance
             {
@@ -57,11 +56,11 @@ namespace UnityEngine.XR.Hands.Gestures
 
             [Range(0f, 1f)]
             [SerializeField]
-            [Tooltip("The minimum the value can differ from the Desired value for the condition to be met.")]
+            [Tooltip("The minimum allowable decrease in range from the Desired value that will allow for a condition to be met.")]
             float m_LowerTolerance;
 
             /// <summary>
-            /// The minimum the value can differ from the <see cref="desired"/>
+            /// The minimum allowable decrease in range from the <see cref="desired"/> value that will allow for a condition to be met.
             /// for the condition to be met.
             /// </summary>
             public float lowerTolerance
@@ -74,7 +73,7 @@ namespace UnityEngine.XR.Hands.Gestures
             float m_Tolerance;
 
             /// <summary>
-            /// The deprecated maximum the value can differ from the <see cref="desired"/>
+            /// The deprecated minimum and maximum the value can differ from the <see cref="desired"/>
             /// for the condition to be met.
             /// </summary>
             [Obsolete("Deprecated. Use upperTolerance and lowerTolerance instead.")]
@@ -189,7 +188,10 @@ namespace UnityEngine.XR.Hands.Gestures
                         throw new ArgumentOutOfRangeException($"Finger shape type {target.shapeType} is invalid for finger shape target condition.");
                 }
 
-                if (!hasValue || Math.Abs(value - target.desired) > target.upperTolerance || target.lowerTolerance < Math.Clamp((target.desired - value), 0f, 1f))
+                // Test for the current tracked value being within the allowed range
+                if (!hasValue ||
+                    value < (target.desired - target.lowerTolerance) ||
+                    value > (target.desired + target.upperTolerance))
                 {
                     return false;
                 }

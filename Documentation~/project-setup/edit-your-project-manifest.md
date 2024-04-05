@@ -14,9 +14,9 @@ You can edit the [project manifest](https://docs.unity3d.com/Manual/upm-manifest
 
 3. Under "dependencies", add:
 
-   `"com.unity.xr.hands": "1.4.0"`
+   `"com.unity.xr.hands": "1.4.1"`
 
-	![A sample project manifest is shown in a text editor. The line containing "com.unity.xr.xr.hands" is called out.](../images/project-manifest.png)<br />*A typical manifest with the XR Hands package version 1.4.0 added*
+	![A sample project manifest is shown in a text editor. The line containing "com.unity.xr.xr.hands" is called out.](../images/project-manifest.png)<br />*A typical manifest with the XR Hands package version 1.4.1 added*
 
    All edits must use correct JSON syntax.
 

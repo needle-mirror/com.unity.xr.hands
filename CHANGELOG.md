@@ -7,12 +7,22 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2024-04-05
+
+### Changed
+- Split hand pose debug UI into hand shape and hand pose to make it simpler to debug in each scenario.
+- Updated hand shape debugger with added cross and check mark icon sprites for finger state gesture debug UI
+
+### Fixed
+- Fixed performance regression in hand gesture debug UI.
+- Fix tolerance range check in `XRFingerShapeCondition` component.
+
 ## [1.4.0] - 2024-02-27
 
 ### Changed
 - Changed gesture detection to allow both upper and lower threshold for more finely-tuned configuration of the finger shapes.
 - Added partial-grab gesture detection to the Gestures sample.
-- Changed hand and gesture tracking debug UI to support upper threshold, lower theshold, and partial-grab gesture.
+- Changed hand and gesture tracking debug UI to support upper threshold, lower threshold, and partial-grab gesture.
 - Updated visuals for hand and gesture tracking debug UI in the Gestures sample.
 
 ### Fixed

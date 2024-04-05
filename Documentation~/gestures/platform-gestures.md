@@ -11,7 +11,7 @@ The XR platforms with native gesture detection include:
 | Platform | Provider plugin | Supported platform gestures |
 | :------- | :-------------- | :-------------------------- |
 | [OpenXR] | [OpenXR], [XR Hands]      | Pinch, aim, system gesture, system menu gesture through the Meta AIM hand OpenXR extension. Grip, aim, pinch, and poke through the Hand Interaction Poses OpenXR extension.|
-| [Hololens 2] |  [Mixed Reality OpenXR plugin] | |
+| [HoloLens 2] |  [Mixed Reality OpenXR plugin] | |
 | [Magic Leap 2] | Magic Leap XR plugin] | |
 
 Platform gestures might require their own set of components or platform-specific extensions. As such they often aren't suitable for cross-platform projects.

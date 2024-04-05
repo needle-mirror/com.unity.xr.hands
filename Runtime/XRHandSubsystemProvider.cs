@@ -88,7 +88,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// requested under.
         /// </param>
         /// <param name="leftHandRootPose">
-        /// Update this and include <c>XRHandSubsystem.UpdateSuccesFlags.LeftHandRootPose</c>
+        /// Update this and include <c>XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose</c>
         /// in the return value to update the left hand's root pose.
         /// </param>
         /// <param name="leftHandJoints">
@@ -96,11 +96,11 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// initialized with a copy of the current joint data for the left hand,
         /// so if the last known tracking data for a particular joint is still
         /// fine, you don't need to fill out that data again. If you update
-        /// these, include <c>XRHandSubsystem.UpdateSuccesFlags.LeftHandJoints</c>
+        /// these, include <c>XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints</c>
         /// in the return value to have the changes reflected in the subsystem.
         /// </param>
         /// <param name="rightHandRootPose">
-        /// Update this and include <c>XRHandSubsystem.UpdateSuccesFlags.RightHandRootPose</c>
+        /// Update this and include <c>XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose</c>
         /// in the return value to update the right hand's root pose.
         /// </param>
         /// <param name="rightHandJoints">
@@ -108,7 +108,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// initialized with a copy of the current joint data for the right hand,
         /// so if the last known tracking data for a particular joint is still
         /// fine, you don't need to fill out that data again. If you update
-        /// these, include <c>XRHandSubsystem.UpdateSuccesFlags.RightHandJoints</c>
+        /// these, include <c>XRHandSubsystem.UpdateSuccessFlags.RightHandJoints</c>
         /// in the return value to have the changes reflected in the subsystem.
         /// </param>
         /// <returns>

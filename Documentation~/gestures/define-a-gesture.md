@@ -22,7 +22,7 @@ To define a custom gesture and add it to a scene:
    3. If the gesture design requires that the hand be oriented in a specific way relative to a target GameObject in the scene, add the necessary **Hand Orientation Conditions** to identify the orientation and the target object.
    4. Adjust the recognition time properties, **Minimum Hold Time** and **Gesture Detection Interval** for reliable gesture detection.
    5. Hook up the **Gesture Performed** and **Gesture Ended** events to the appropriate event handlers in the scene.
-   6. Assign your HandShape and HandPose assets to the right side missing rererences in the two **Gesture Performed** events.
+   6. Assign your HandShape and HandPose assets to the right side missing references in the two **Gesture Performed** events.
   
 A [Static Hand Gesture](xref:xrhands-static-gesture-component) component can recognize a single gesture for either the right or the left hand. Add a component for each different gesture that you want recognized. 
 

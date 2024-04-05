@@ -3,7 +3,7 @@ using System;
 namespace UnityEngine.XR.Hands
 {
     /// <summary>
-    /// A subystem for detecting and tracking hands and their corresponding
+    /// A subsystem for detecting and tracking hands and their corresponding
     /// joint pose data.
     /// </summary>
     public partial class XRHandSubsystem

@@ -134,7 +134,7 @@ Target orientations use the local axis of the target GameObject's transform.
 
 ## Alignment
 
-You can choose from the following types of alignement to use when comparing a hand axis to a reference direction:
+You can choose from the following types of alignment to use when comparing a hand axis to a reference direction:
 
 * **Aligns With**: Both directions must point in the same direction.
 * **Perpendicular to**: The hand axis must be perpendicular to the reference direction.

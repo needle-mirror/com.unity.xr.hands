@@ -56,7 +56,7 @@ A user relative condition defines the required angular relationship between an a
 | Property | Description |
 | :------- | :---------- |
 | **Hand Axis** | The [axis of the hand](xref:xrhands-hand-orientation#hand-axis) to compare to the **Reference Direction**. |
-| **Alignment Condition**| The desired [alignement](xref:xrhands-hand-orientation#alignment) between the **Hand Axis** and the **Reference Direction**. The options are:<ul><li><b>Aligns With</b>: Parallel and point in the same direction</li><li><b>Perpendicular To</b>: At right angles to each other</li><li><b>Opposite To</b>: Parallel but point in the opposite directions</li></ul> |
+| **Alignment Condition**| The desired [alignment](xref:xrhands-hand-orientation#alignment) between the **Hand Axis** and the **Reference Direction**. The options are:<ul><li><b>Aligns With</b>: Parallel and point in the same direction</li><li><b>Perpendicular To</b>: At right angles to each other</li><li><b>Opposite To</b>: Parallel but point in the opposite directions</li></ul> |
 | **Reference Direction** | The user-relative direction to compare to the chosen **Hand Axis**. You can also use the [XR Origin Up axis](xref:xrhands-hand-orientation#origin-up) as the reference direction. (Set the orientation condition in a [Static Hand Gesture](xref:xrhands-static-gesture-component) component to specify target-relative conditions.) |
 | **Angle Tolerance**| The allowed deviation in degrees between the **Hand Axis** and the **Reference Direction**. |
 | **Ignore Position Y** | Enable to ignore the Y values of the hand when determining orientation. |
@@ -72,7 +72,7 @@ For additional information, including visual examples, about the orientation pro
 | Property | Description |
 | :------- | :---------- |
 | **Hand Axis** | The [axis of the hand](xref:xrhands-hand-orientation#hand-axis) to compare to the **Reference Direction**. |
-| **Alignment Condition** | The desired [alignement](xref:xrhands-hand-orientation#alignment) between the **Hand Axis** and the **Reference Direction**. The options are:<ul><li><b>Aligns With</b>: Parallel and point in the same direction</li><li><b>Perpendicular To</b>: At right angles to each other</li><li><b>Opposite To</b>: Parallel but point in the opposite directions</li></ul>|
+| **Alignment Condition** | The desired [alignment](xref:xrhands-hand-orientation#alignment) between the **Hand Axis** and the **Reference Direction**. The options are:<ul><li><b>Aligns With</b>: Parallel and point in the same direction</li><li><b>Perpendicular To</b>: At right angles to each other</li><li><b>Opposite To</b>: Parallel but point in the opposite directions</li></ul>|
 | **Reference Direction** | The target relative direction to compare to the chosen **Hand Axis**. |
 | **Angle Tolerance** | The allowed deviation in degrees between the **Hand Axis** and the **Reference Direction**. |
 | **Ignore Position Y** | Enable to ignore the Y values of the hand and the target object when determining orientation. Only matters when the **Hand To Target** is chosen as the **Reference Direction**. |
