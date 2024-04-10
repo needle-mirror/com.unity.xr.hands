@@ -294,6 +294,11 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         public virtual bool TryGetMeshData(ref XRHandMeshDataQueryResult result, ref XRHandMeshDataQueryParams queryParams)
             => false;
 
+        /// <summary>
+        /// Describes which version of authored hand meshes is detected for use.
+        /// </summary>
+        public virtual XRDetectedHandMeshLayout detectedHandMeshLayout => XRDetectedHandMeshLayout.OpenXRMetaQuest;
+
         // these defaults were captured using a Meta Quest 2
         static class FingerConfigDefaults
         {

@@ -1,8 +1,16 @@
-using System;
 using System.Collections.Generic;
+using UnityEngine.Serialization;
 
 namespace UnityEngine.XR.Hands.Samples.VisualizerSample
 {
+    // Hand rig setups can differ between platforms. In these cases, the HandVisualizer supports displaying unique hands on a per-platform basis.
+    // If you would like to customize the hand meshes that are displayed by the HandVisualizer, based on the platform you are using,
+    // you will need to replace the rigged hand mesh references assigned to the corresponding fields for that platform.
+    // For Meta Quest devices, assign your rigged hand meshes to the "m_MetaQuestLeftHandMesh" & "m_MetaQuestRightHandMesh" fields.
+    // For Android XR devices, assign your rigged hand meshes to the "m_AndroidXRLeftHandMesh" & "m_AndroidXRRightHandMesh" fields.
+    // The rigged hand meshes that are assigned for a given platform will be displayed when that platform is detected,
+    // and any other rigged hand meshes assigned for other undetected platforms will not be displayed.
+
     /// <summary>
     /// This component visualizes the hand joints and mesh for the left and right hands.
     /// </summary>
@@ -33,13 +41,23 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
         [Tooltip("If this is enabled, this component will enable the Input System internal feature flag 'USE_OPTIMIZED_CONTROLS'. You must have at least version 1.5.0 of the Input System and have its backend enabled for this to take effect.")]
         bool m_UseOptimizedControls;
 
-        [SerializeField]
+        [SerializeField, FormerlySerializedAs("m_LeftHandMesh")]
         [Tooltip("References either a prefab or a GameObject in the scene that will be used to visualize the left hand.")]
-        GameObject m_LeftHandMesh;
+        GameObject m_MetaQuestLeftHandMesh;
+
+        [SerializeField, FormerlySerializedAs("m_RightHandMesh")]
+        [Tooltip("References either a prefab or a GameObject in the scene that will be used to visualize the right hand.")]
+        GameObject m_MetaQuestRightHandMesh;
 
         [SerializeField]
-        [Tooltip("References either a prefab or a GameObject in the scene that will be used to visualize the right hand.")]
-        GameObject m_RightHandMesh;
+        [Tooltip("References either a prefab or a GameObject in the scene that will be used to visualize the left hand on Android XR devices." +
+                 "<br><br><b>Instructions for how to setup and use these meshes can be found at the top of the <b>HandVisualizer.cs class</b>")]
+        GameObject m_AndroidXRLeftHandMesh;
+
+        [SerializeField]
+        [Tooltip("References either a prefab or a GameObject in the scene that will be used to visualize the right hand on Android XR devices." +
+                 "<br><br><b>Instructions for how to setup and use these meshes can be found at the top of the <b>HandVisualizer.cs class</b>")]
+        GameObject m_AndroidXRRightHandMesh;
 
         [SerializeField]
         [Tooltip("(Optional) If this is set, the hand meshes will be assigned this material.")]
@@ -94,7 +112,6 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
             get => m_VelocityType;
             set => m_VelocityType = value;
         }
-
 
         XRHandSubsystem m_Subsystem;
         HandGameObjects m_LeftHandGameObjects;
@@ -185,12 +202,24 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
             if (!foundRunningHandSubsystem)
                 return;
 
+            GameObject selectedLeftHandMesh = null, selectedRightHandMesh = null;
+            if (m_Subsystem.detectedHandMeshLayout == XRDetectedHandMeshLayout.OpenXRAndroidXR)
+            {
+                selectedLeftHandMesh = m_AndroidXRLeftHandMesh;
+                selectedRightHandMesh = m_AndroidXRRightHandMesh;
+            }
+            else
+            {
+                selectedLeftHandMesh = m_MetaQuestLeftHandMesh;
+                selectedRightHandMesh = m_MetaQuestRightHandMesh;
+            }
+
             if (m_LeftHandGameObjects == null)
             {
                 m_LeftHandGameObjects = new HandGameObjects(
                     Handedness.Left,
                     transform,
-                    m_LeftHandMesh,
+                    selectedLeftHandMesh,
                     m_HandMeshMaterial,
                     m_DebugDrawPrefab,
                     m_VelocityPrefab);
@@ -201,7 +230,7 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
                 m_RightHandGameObjects = new HandGameObjects(
                     Handedness.Right,
                     transform,
-                    m_RightHandMesh,
+                    selectedRightHandMesh,
                     m_HandMeshMaterial,
                     m_DebugDrawPrefab,
                     m_VelocityPrefab);

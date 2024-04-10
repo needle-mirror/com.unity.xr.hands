@@ -76,7 +76,7 @@ namespace UnityEngine.XR.Hands
         internal unsafe void SetLeftHand(XRHand hand)
         {
             if (hand.m_Joints.GetUnsafePtr() != m_LeftHand.m_Joints.GetUnsafePtr())
-                throw new InvalidOperationException("Cannot overrwrite the left hand with a hand that was not first retrieved from the subsystem's leftHand property!");
+                throw new InvalidOperationException("Cannot overwrite the left hand with a hand that was not first retrieved from the subsystem's leftHand property!");
             m_LeftHand = hand;
         }
 
@@ -99,7 +99,7 @@ namespace UnityEngine.XR.Hands
         internal unsafe void SetRightHand(XRHand hand)
         {
             if (hand.m_Joints.GetUnsafePtr() != m_RightHand.m_Joints.GetUnsafePtr())
-                throw new InvalidOperationException("Cannot overrwrite the right hand with a hand that was not first retrieved from the subsystem's rightHand property!");
+                throw new InvalidOperationException("Cannot overwrite the right hand with a hand that was not first retrieved from the subsystem's rightHand property!");
             m_RightHand = hand;
         }
 
@@ -477,6 +477,11 @@ namespace UnityEngine.XR.Hands
         /// <see cref="IXRHandProcessor.ProcessJoints"/> are called.
         /// </summary>
         public Action<XRHandSubsystem, UpdateSuccessFlags, UpdateType> preprocessJoints;
+
+        /// <summary>
+        /// Describes which version of authored hand meshes is detected for use.
+        /// </summary>
+        public XRDetectedHandMeshLayout detectedHandMeshLayout => provider.detectedHandMeshLayout;
 
         /// <summary>
         /// Registers a processor for hand joint data.

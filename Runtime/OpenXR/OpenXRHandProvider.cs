@@ -274,6 +274,9 @@ namespace UnityEngine.XR.Hands.OpenXR
         public override bool TryGetMeshData(ref XRHandMeshDataQueryResult result, ref XRHandMeshDataQueryParams queryParams)
             => handMeshDataSupplier != null ? handMeshDataSupplier.TryGetMeshData(ref result, ref queryParams) : false;
 
+        /// <inheritdoc/>
+        public override XRDetectedHandMeshLayout detectedHandMeshLayout => NativeApi.GetDetectedHandMeshLayout();
+
 #if UNITY_OPENXR_PACKAGE_1_8
         static class Usages
         {
@@ -401,6 +404,9 @@ namespace UnityEngine.XR.Hands.OpenXR
                 void* leftHandJoints,
                 ref Pose rightRootPose,
                 void* rightHandJoints);
+
+            [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_GetDetectedHandMeshLayout")]
+            internal static extern XRDetectedHandMeshLayout GetDetectedHandMeshLayout();
         }
     }
 }

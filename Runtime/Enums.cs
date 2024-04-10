@@ -256,6 +256,27 @@ namespace UnityEngine.XR.Hands
     }
 
     /// <summary>
+    /// Describes which version of authored hand meshes is detected for use by the provider.
+    /// </summary>
+    public enum XRDetectedHandMeshLayout
+    {
+        /// <summary>
+        /// The system was unable to detect a hand mesh layout to use.
+        /// </summary>
+        Unknown,
+
+        /// <summary>
+        /// The originally shipped version of sample meshes provided by the XR Hands package, compatible with Meta Quest in OpenXR.
+        /// </summary>
+        OpenXRMetaQuest,
+
+        /// <summary>
+        /// The version of sample meshes that is meant for use with the Android XR runtime in OpenXR.
+        /// </summary>
+        OpenXRAndroidXR,
+    }
+
+    /// <summary>
     /// Houses extension and utility methods for <see cref="XRHandJointID"/>.
     /// </summary>
     public static class XRHandJointIDUtility

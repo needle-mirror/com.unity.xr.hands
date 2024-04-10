@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.hands",
   "displayName": "XR Hands",
-  "version": "1.6.0-pre.1",
+  "version": "1.6.0-pre.2",
   "unity": "2021.3",
   "description": "Surfaces the cross-platform subsystem API for hand-tracking. Implementations of providers will be found in the package for that platform.",
   "keywords": [
@@ -22,16 +22,16 @@
     "com.unity.mathematics": "1.2.6"
   },
   "_upm": {
-    "changelog": "### Added\n\n- Added new custom editor inspector for hand shapes.\n- Added `XRHandSubsystem.TryGetMeshData` to attempt retrieval of runtime-supplied hand mesh data, if it's supported on that platform and enabled.\n\n### Fixed\n\n- Fixed the help documentation links in the OpenXR Project Settings where hands features were exposed in the Feature Groups editor window.\n- Recompiled the native plug-in with support for [16 KB page sizes](https://developer.android.com/guide/practices/page-sizes) on Android 15 or newer."
+    "changelog": "### Added\n\n- Added ability to switch between hand meshes depending on the underlying runtime and vendor. The initial support provides a mesh for OpenXR conformant devices such as Android XR and a mesh to support Meta Quest devices by way of OpenXR."
   },
   "upmCi": {
-    "footprint": "6cc501076503bf9cb6f65bacb92e22587f1e1507"
+    "footprint": "d705926036ac96e52e644e7ed45f38eee550e219"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.6/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.xr.hands.git",
     "type": "git",
-    "revision": "27288e934ef6137bc76aa689fe423288d9838276"
+    "revision": "8365610db199e96d366a7363deca3722b6675c9d"
   },
   "samples": [
     {
