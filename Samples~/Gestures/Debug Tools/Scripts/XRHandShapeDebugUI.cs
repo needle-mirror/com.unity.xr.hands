@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine.XR.Hands.Gestures;
 
 namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
@@ -12,6 +13,16 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         [SerializeField]
         [Tooltip("The debug UI that will be used to display the finger states.")]
         XRAllFingerShapesDebugUI m_XRAllFingerShapesDebugUI;
+
+        [SerializeField]
+        [Tooltip("The hand shape or pose that must be detected for the gesture to be performed.")]
+        ScriptableObject m_HandShapeOrPose;
+
+        [SerializeField]
+        TextMeshProUGUI SelectedHandShapeName;
+
+        [SerializeField]
+        XRSelectedHandShapeDebugUI m_XRSelectedHandShapeDebugUI;
 
         XRHandShape m_HandShape;
 
@@ -35,7 +46,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
                 m_HandShapeDetected = m_HandShape != null;
                 foreach (var bar in k_Bars)
-                    bar.handShapeDetected = m_HandShapeDetected;
+                    bar.fingerShapeDetected = m_HandShapeDetected;
 
                 if (m_HandShapeDetected)
                 {
@@ -48,6 +59,24 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
         void Awake()
         {
+            m_HandShape = (XRHandShape)m_HandShapeOrPose;
+
+            if (m_HandShape == null)
+            {
+                XRHandPose poseCastTest = (XRHandPose)m_HandShapeOrPose;
+                if (poseCastTest != null)
+                    m_HandShape = poseCastTest.handShape;
+            }
+
+            m_HandShapeDetected = m_HandShape != null;
+
+            if (m_HandShapeDetected)
+            {
+                SelectedHandShapeName.text = m_HandShape.name;
+                handShapeOrPose = m_HandShape;
+                m_XRSelectedHandShapeDebugUI.UpdateSelectedHandshapeTextUI(m_HandShape);
+            }
+
             if (k_Bars.Count == 0)
             {
                 foreach (var graph in m_XRAllFingerShapesDebugUI.xrFingerShapeDebugGraphs)
@@ -60,6 +89,9 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
         void Update()
         {
+            foreach (var bar in k_Bars)
+                bar.HideTargetAndTolerance();
+
             // Track all the bars that have no target and tolerance so they can be hidden
             k_ReusableBarsToHide.Clear();
             foreach (var graph in m_XRAllFingerShapesDebugUI.xrFingerShapeDebugGraphs)

@@ -7,6 +7,19 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.5.0-pre.3] - 2024-06-05
+
+### Added
+- Added public `subsystem` property to `XRHandTrackingEvents` to let users get the `XRHandSubsystem` that is the source of the hand tracking data. Also added public `subsystem` property to `XRHandJointsUpdatedEventArgs` so it is available in the `XRHandTrackingEvents.jointsUpdated` event callback.
+
+### Fixed
+- Fixed reference direction when using `XRHandUserRelativeDirection.NoseDirection` for gesture detection.
+
+## [1.5.0-pre.2] - 2024-05-10
+
+### Changed
+- Allows for ignoring tip-most knuckle when calculating full curl when the `XRFingerShapeConfiguration`'s `minimumFullCurlDegrees3` or `maximumFullCurlDegrees3` is non-positive.
+
 ## [1.5.0-pre.1] - 2024-02-28
 
 ### Added
@@ -17,7 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Changed gesture detection to allow both upper and lower threshold for more finely-tuned configuration of the finger shapes.
 - Added partial-grab gesture detection to the Gestures sample.
-- Changed hand and gesture tracking debug UI to support upper threshold, lower theshold, and partial-grab gesture.
+- Changed hand and gesture tracking debug UI to support upper threshold, lower threshold, and partial-grab gesture.
 - Updated visuals for hand and gesture tracking debug UI in the Gestures sample.
 
 ### Fixed

@@ -11,5 +11,10 @@ namespace UnityEngine.XR.Hands
         /// The data for the XR Hand.
         /// </summary>
         public XRHand hand;
+
+        /// <summary>
+        /// The subsystem that is the source of the hand tracking data.
+        /// </summary>
+        public XRHandSubsystem subsystem { get; internal set; }
     }
 }

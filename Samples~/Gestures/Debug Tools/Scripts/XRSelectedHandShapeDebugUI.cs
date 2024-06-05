@@ -27,7 +27,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             set => m_HandShapeNameLabel = value;
         }
 
-        void Start()
+        void Awake()
         {
             m_HandShapeNameLabel.text = k_NoGestureDetectedString;
         }

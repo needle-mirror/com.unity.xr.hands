@@ -42,10 +42,6 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample
         float m_GestureDetectionInterval = 0.1f;
 
         [SerializeField]
-        [Tooltip("The image displayed when this gesture is performed.")]
-        Image m_Highlight;
-
-        [SerializeField]
         [Tooltip("The static gestures associated with this gestures handedness.")]
         StaticHandGesture[] m_StaticGestures;
 
@@ -130,37 +126,9 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample
             set => m_GestureDetectionInterval = value;
         }
 
-        /// <summary>
-        /// The image component that draws the highlight state visuals for gesture icons.
-        /// </summary>
-        public Image highlight
-        {
-            get => m_Highlight;
-            set => m_Highlight = value;
-        }
-
-        /// <summary>
-        ///  Show or hide any highlight-state related visual UI elements
-        /// </summary>
-        public bool highlighted
-        {
-            set
-            {
-                m_Highlight.enabled = value;
-            }
-        }
-
         void Awake()
         {
             m_BackgroundDefaultColor = m_Background.color;
-        }
-
-        void Start()
-        {
-            foreach (var gesture in m_StaticGestures)
-            {
-                gesture.highlighted = false;
-            }
         }
 
         void OnEnable()
@@ -206,13 +174,6 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample
                     m_GesturePerformed?.Invoke();
                     m_PerformedTriggered = true;
                     m_Background.color = m_BackgroundHiglightColor;
-                    m_Highlight.enabled = true;
-
-                    foreach (var gesture in m_StaticGestures)
-                    {
-                        if (gesture != this)
-                            gesture.highlighted = false;
-                    }
                 }
             }
 

@@ -11,6 +11,11 @@ Summary of changes in XR Hands package version 1.5. The main updates in this rel
 
 Support for common hand gestures has been added with initial support for gestures piped through the OpenXR Hand Interaction Profile extension. This includes scripting APIs to expose **aim**, **grasp**, **grip**, **pinch**, and **poke** poses and values where appropriate for more information, please refer to the [Scripting API](https://docs.unity3d.com/Packages/com.unity.xr.hands@1.5/api/UnityEngine.XR.Hands.XRCommonHandGestures.html).
 
+## Fixed
+- Fixed performance regression in hand gesture debug UI.
+
+---
+
 # What's new in version 1.4
 
 Summary of changes in XR Hands package version 1.4. The main updates in this release include:
@@ -35,10 +40,17 @@ Grab is one of the more nuanced interactions in XR. Providing an intermediate gr
 
 ## Updates
 
-### Debugging menu with prebuilt hand poses images
+### Debugging menu with prebuilt hand poses
 ![Debug hand poses](../images/debug-hand-poses.png)
 
-Text-based tiles for hand poses are now visually enhanced with drawings to illustrate the meaning of each prebuilt pose. You can still add a tile to detect your own hand pose, which will appear as a text-based tile. The Finger State UI elements have been rebuilt, and enhanced with support for displaying upper and lower tolerance ranges, along with additional UI changes that help to display the state of the currently detected gesture input.
+This menu displays text-based tiles for hand poses that are now visually enhanced with drawings to illustrate the meaning of each prebuilt pose. You can still add a tile to detect your own hand pose, which will appear as a text-based tile..
+
+### Debugging menu for individually assigned hand shapes
+![Debug hand shapes](../images/debug-hand-shapes.png)
+
+This menu displays live finger state values, and allows for debugging selected hand shapes. The Finger State UI elements have been rebuilt, and enhanced with support for displaying upper and lower tolerance ranges, along with additional UI changes that help to display the state of the currently detected gesture input.
+
+<img src="../images/gestures/gesture-debugger-screenshot.png" alt="Gesture debugger"/><br/><i>The gesture debugger scene visualizing a gesture</i>
 
 ---
 # What's new in version 1.3

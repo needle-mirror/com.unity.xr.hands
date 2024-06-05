@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.hands",
   "displayName": "XR Hands",
-  "version": "1.5.0-pre.1",
+  "version": "1.5.0-pre.3",
   "unity": "2021.3",
   "description": "Surfaces the cross-platform subsystem API for hand-tracking. Implementations of providers will be found in the package for that platform.",
   "keywords": [
@@ -22,16 +22,16 @@
     "com.unity.mathematics": "1.2.6"
   },
   "_upm": {
-    "changelog": "### Added\n- Added `XRCommonHandGestures` and surfaced related data from the OpenXR Hand Interaction Profile extension."
+    "changelog": "### Added\n- Added public `subsystem` property to `XRHandTrackingEvents` to let users get the `XRHandSubsystem` that is the source of the hand tracking data. Also added public `subsystem` property to `XRHandJointsUpdatedEventArgs` so it is available in the `XRHandTrackingEvents.jointsUpdated` event callback.\n\n### Fixed\n- Fixed reference direction when using `XRHandUserRelativeDirection.NoseDirection` for gesture detection."
   },
   "upmCi": {
-    "footprint": "3c1137e6e7cb7b281dc298e09819fefc174bdd68"
+    "footprint": "55beba2bf2082186c294660e36ebb4bf43c92611"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.5/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.xr.hands.git",
     "type": "git",
-    "revision": "95b72333c059cd8048639e833facbee876cf11ae"
+    "revision": "79f3a02078a178ecc5dafbcef1b9269535bdfda3"
   },
   "samples": [
     {

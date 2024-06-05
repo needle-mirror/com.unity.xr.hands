@@ -350,7 +350,7 @@ namespace UnityEngine.XR.Hands.Gestures
                 (DegreesBetween(position0, position1, rotation1, position2) - minimumDegrees1) / (maximumDegrees1 - minimumDegrees1) +
                 (DegreesBetween(position1, position2, rotation2, position3) - minimumDegrees2) / (maximumDegrees2 - minimumDegrees2);
 
-            if (fingerID != XRHandFingerID.Thumb)
+            if (fingerID != XRHandFingerID.Thumb && minimumDegrees3 > 0f && maximumDegrees3 > 0f)
             {
                 divisor = 3f;
                 totalNormalizedDegrees +=

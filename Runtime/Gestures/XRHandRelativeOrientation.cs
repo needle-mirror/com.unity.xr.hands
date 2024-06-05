@@ -144,7 +144,7 @@ namespace UnityEngine.XR.Hands.Gestures
                         break;
 
                     case XRHandUserRelativeDirection.NoseDirection:
-                        worldDirection = math.rotate(headTransform, new float3(1f, 0f, 1f));
+                        worldDirection = math.rotate(headTransform, new float3(0f, 0f, 1f));
                         break;
 
                     case XRHandUserRelativeDirection.ChinDirection:

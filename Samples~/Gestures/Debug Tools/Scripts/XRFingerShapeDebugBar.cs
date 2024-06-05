@@ -1,3 +1,5 @@
+using System;
+using TMPro;
 using UnityEngine.UI;
 
 namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
@@ -8,6 +10,10 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
     /// </summary>
     public class XRFingerShapeDebugBar : MonoBehaviour
     {
+        const string k_InRangeText = "In range";
+        const string k_OutOfRangeText = "Out of range";
+        const string k_NoTargetSetText = "No Target Set";
+
         [SerializeField]
         [Tooltip("The container that determines the width of the max length bar, and holds the target and range indicators.")]
         RectTransform m_BarContainer;
@@ -36,11 +42,32 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         [Tooltip("The Image component that displays the lower range")]
         Image m_LowerRangeImage;
 
+        [SerializeField]
+        TextMeshProUGUI m_RangeStatusText;
+
+        [SerializeField]
+        [Tooltip("The Image component that displays the cross icon, denoting that input is within range for a detected gesture")]
+        Image m_CheckmarkImage;
+
+        [SerializeField]
+        [Tooltip("The Image component that displays the cross icon, denoting that input is out of range for a detected gesture")]
+        Image m_CrossImage;
+
+        Color m_InRangeColor = Color.green;
+        Color m_OutOfRangeColor = Color.red;
+        Color m_NoSetTargetColor = new Color(0f, 0.627451f, 1f);
+
         float m_RangeRectHeight;
 
         Color m_RangeActiveColor;
 
         Color m_RangeDeactivatedColor;
+
+        float m_TargetAmount;
+        float m_UpperToleranceAmount;
+        float m_LowerToleranceAmount;
+
+        bool m_NoFingerShapeCondition;
 
         /// <summary>
         /// The container that determines the width of the max length bar, and holds the target and range indicators.
@@ -109,14 +136,85 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         }
 
         /// <summary>
+        /// The text component that displays the status of a tracked fingerstate being within a target range
+        /// </summary>
+        public TextMeshProUGUI rangeStatusText
+        {
+            get => m_RangeStatusText;
+            set => m_RangeStatusText = value;
+        }
+
+        /// <summary>
+        /// The Image component that displays the checkmark image when within the valid range
+        /// </summary>
+        public Image checkmarkImage
+        {
+            get => m_CheckmarkImage;
+            set => m_CheckmarkImage = value;
+        }
+
+        /// <summary>
+        /// The Image component that displays the cross-image when outside of the valid range
+        /// </summary>
+        public Image crossImage
+        {
+            get => m_CrossImage;
+            set => m_CrossImage = value;
+        }
+
+        /// <summary>
         /// Change the appearance of the bar based on a handshape being detected
         /// </summary>
-        public bool handShapeDetected
+        public bool fingerShapeDetected
         {
             set
             {
                 m_UpperRangeImage.color = value ? m_RangeActiveColor : m_RangeDeactivatedColor;
                 m_LowerRangeImage.color = m_UpperRangeImage.color;
+
+                var currentValue = m_ValueBar.localScale.x;
+                var withinToleranceRange = Math.Abs(currentValue - m_TargetAmount) > m_UpperToleranceAmount ||
+                    m_LowerToleranceAmount < Math.Clamp((m_TargetAmount - currentValue), 0f, 1f);
+
+                var positionIndent = m_RangeStatusText.transform.localPosition;
+                if (value)
+                {
+                    positionIndent.x = 226f;
+
+                    if (!withinToleranceRange)
+                    {
+                        m_RangeStatusText.color = m_InRangeColor;
+                        m_RangeStatusText.text = k_InRangeText;
+                        m_UpperRangeImage.color = m_InRangeColor;
+                        m_LowerRangeImage.color = m_InRangeColor;
+                        m_CheckmarkImage.enabled = true;
+                        m_CrossImage.enabled = false;
+                    }
+                    else
+                    {
+                        m_RangeStatusText.color = m_OutOfRangeColor;
+                        m_RangeStatusText.text = k_OutOfRangeText;
+                        m_UpperRangeImage.color = m_OutOfRangeColor;
+                        m_LowerRangeImage.color = m_OutOfRangeColor;
+                        m_CheckmarkImage.enabled = false;
+                        m_CrossImage.enabled = true;
+                    }
+                }
+                else
+                {
+                    positionIndent.x = 210f;
+
+                    if (m_NoFingerShapeCondition)
+                    {
+                        m_RangeStatusText.text = k_NoTargetSetText;
+                        m_RangeStatusText.color = m_NoSetTargetColor;
+
+                        m_CheckmarkImage.enabled = false;
+                        m_CrossImage.enabled = false;
+                    }
+                }
+
+                m_RangeStatusText.transform.localPosition = positionIndent;
             }
         }
 
@@ -125,6 +223,10 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             m_RangeRectHeight = m_UpperRangeIndicator.rect.height;
             m_RangeActiveColor = m_UpperRangeImage.color;
             m_RangeDeactivatedColor = new Color(m_RangeActiveColor.r, m_RangeActiveColor.g, m_RangeActiveColor.b, 0.35f);
+            fingerShapeDetected = false;
+
+            m_CheckmarkImage.enabled = false;
+            m_CrossImage.enabled = false;
         }
 
         /// <summary>
@@ -147,6 +249,10 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         /// <param name="lowerTolerance">The lower tolerance to show around the target value.</param>
         public void SetTargetAndTolerances(float target, float upperTolerance, float lowerTolerance)
         {
+            m_TargetAmount = target;
+            m_UpperToleranceAmount = upperTolerance;
+            m_LowerToleranceAmount = lowerTolerance;
+
             m_TargetIndicator.gameObject.SetActive(true);
             m_UpperRangeIndicator.gameObject.SetActive(true);
             m_LowerRangeIndicator.gameObject.SetActive(true);
@@ -156,6 +262,8 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             m_UpperRangeIndicator.sizeDelta = new Vector2(upperTolerance * containerWidth, m_RangeRectHeight);
             m_LowerRangeIndicator.anchoredPosition = new Vector2(target * containerWidth - 100f, 0f);
             m_LowerRangeIndicator.sizeDelta = new Vector2(lowerTolerance * containerWidth, m_RangeRectHeight);
+
+            fingerShapeDetected = true;
         }
 
         /// <summary>
@@ -163,9 +271,14 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         /// </summary>
         public void HideTargetAndTolerance()
         {
+            m_NoFingerShapeCondition = true;
+
             m_TargetIndicator.gameObject.SetActive(false);
             m_UpperRangeIndicator.gameObject.SetActive(false);
             m_LowerRangeIndicator.gameObject.SetActive(false);
+
+            m_RangeStatusText.text = k_NoTargetSetText;
+            m_RangeStatusText.color = m_NoSetTargetColor;
         }
     }
 }

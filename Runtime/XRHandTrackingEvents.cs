@@ -115,6 +115,11 @@ namespace UnityEngine.XR.Hands
         public bool handIsTracked => m_Subsystem != null && m_Subsystem.running && m_HandIsTracked.Value;
 
         /// <summary>
+        /// The source of the hand tracking data.
+        /// </summary>
+        public XRHandSubsystem subsystem => m_Subsystem;
+
+        /// <summary>
         /// The root pose of the hand.
         /// </summary>
         public Pose rootPose => m_HandJointsUpdatedEventArgs.hand.rootPose;
@@ -239,7 +244,7 @@ namespace UnityEngine.XR.Hands
             m_TrackingChanged?.Invoke(isTracked);
         }
 
-        void OnUpdatedHands(XRHandSubsystem subsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateEventType)
+        void OnUpdatedHands(XRHandSubsystem handSubsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateEventType)
         {
             if (updateEventType == XRHandSubsystem.UpdateType.Dynamic && !m_UpdateType.IsSet(UpdateTypes.Dynamic)
                 || updateEventType == XRHandSubsystem.UpdateType.BeforeRender && !m_UpdateType.IsSet(UpdateTypes.BeforeRender))
@@ -251,7 +256,10 @@ namespace UnityEngine.XR.Hands
                 var leftRootPoseUpdated = (updateSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose) != XRHandSubsystem.UpdateSuccessFlags.None;
 
                 if (leftJointsUpdated || leftRootPoseUpdated)
-                    m_HandJointsUpdatedEventArgs.hand = m_Subsystem.leftHand;
+                {
+                    m_HandJointsUpdatedEventArgs.hand = handSubsystem.leftHand;
+                    m_HandJointsUpdatedEventArgs.subsystem = handSubsystem;
+                }
 
                 if (leftJointsUpdated)
                     m_JointsUpdated?.Invoke(m_HandJointsUpdatedEventArgs);
@@ -265,7 +273,10 @@ namespace UnityEngine.XR.Hands
                 var rightRootPoseUpdated = (updateSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose) != XRHandSubsystem.UpdateSuccessFlags.None;
 
                 if (rightJointsUpdated || rightRootPoseUpdated)
-                    m_HandJointsUpdatedEventArgs.hand = m_Subsystem.rightHand;
+                {
+                    m_HandJointsUpdatedEventArgs.hand = handSubsystem.rightHand;
+                    m_HandJointsUpdatedEventArgs.subsystem = handSubsystem;
+                }
 
                 if (rightJointsUpdated)
                     m_JointsUpdated?.Invoke(m_HandJointsUpdatedEventArgs);
