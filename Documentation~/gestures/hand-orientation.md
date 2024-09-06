@@ -18,7 +18,7 @@ When you define a custom gesture, you can specify whether the hand must be in a 
 
 ## Hand axis
 
-For specifying an orientation, the axes of the hand are defined relative to the extended fingers, extended thumb, and the palm of the hand.  
+For specifying an orientation, the axes of the hand are defined relative to the extended fingers, extended thumb, and the palm of the hand.
 
 <table style="table-layout: fixed;">
     <tr>
@@ -32,12 +32,12 @@ For specifying an orientation, the axes of the hand are defined relative to the 
         <td><img src="../images/gestures/palm-direction.png"/></td>
     </tr>
     <tr>
-        <td>This hand axis points in the same direction as the fully extended fingers (along the proximal-distal line of the hand).</td>        
+        <td>This hand axis points in the same direction as the fully extended fingers (along the proximal-distal line of the hand).</td>
         <td>
             <p>This hand axis points in the same direction as the fully extended thumb (along the radial-ulnar -- also known as medial-lateral -- line of the hand).</p>
             <p>The thumb extended direction is always referenced to the thumb, so it points the opposite direction on the left hand compared to the right hand. However, this allows you to use the same hand poses for both hands.</p>
-        </td>        
-        <td>This hand axis points in the direction the palm is facing (along the palmar-dorsal line of the hand).</td>        
+        </td>
+        <td>This hand axis points in the direction the palm is facing (along the palmar-dorsal line of the hand).</td>
     </tr>
 </table>
 
@@ -79,7 +79,7 @@ A direction pointing from the palm point of the hand toward the center of the us
 
 ### Head axis
 
-For specifying an orientation, the axes of the head are defined relative to the face.  
+For specifying an orientation, the axes of the head are defined relative to the face.
 
 <table style="table-layout: fixed;">
     <tr>
@@ -93,12 +93,12 @@ For specifying an orientation, the axes of the head are defined relative to the 
         <td><img src="../images/gestures/nose-direction.png"/></td>
     </tr>
     <tr>
-        <td>A direction pointing along the head's local Y axis or downward direction.</td>        
+        <td>A direction pointing along the head's local Y axis or downward direction.</td>
         <td>
             <p>A direction pointing along the head's local X axis.</p>
             <p>This direction points out of the left ear for gestures of the left hand and out of the right ear for gestures of the right hand.</p>
         </td>
-        <td>A direction pointing along the head's local Z axis or forward direction.</td>        
+        <td>A direction pointing along the head's local Z axis or forward direction.</td>
     </tr>
 </table>
 
@@ -125,9 +125,9 @@ Target orientations use the local axis of the target GameObject's transform.
         <td><img src="../images/gestures/target-forward.png"/></td>
     </tr>
     <tr>
-        <td>A direction pointing along a target's local Y axis.</td>        
+        <td>A direction pointing along a target's local Y axis.</td>
         <td>A direction pointing along a target's local X axis.</td>
-        <td>A direction pointing along a target's local Z axis.</td>        
+        <td>A direction pointing along a target's local Z axis.</td>
     </tr>
 </table>
 
@@ -142,7 +142,7 @@ You can choose from the following types of alignment to use when comparing a han
 
 When specifying an orientation, you can set the **Angle Tolerance** to a value between 0.1 and 180 degrees. The two directions must be within that many degrees of each other using the chosen alignment type in order for the gesture to be recognized.
 
-You can also choose to ignore the Y component when comparing alignment between the hand and the **Hand to Head** or **Hand to Target** reference directions. This option effectively projects the chosen hand axis and reference directions onto the X-Z plane (through the origin). For example, you could use this option so that the user only needs to point in the general, compass direction of a target object to perform a gesture, rather than directly at it. 
+You can also choose to ignore the Y component when comparing alignment between the hand and the **Hand to Head** or **Hand to Target** reference directions. This option effectively projects the chosen hand axis and reference directions onto the X-Z plane (through the origin). For example, you could use this option so that the user only needs to point in the general, compass direction of a target object to perform a gesture, rather than directly at it.
 
 ### Alignment examples
 

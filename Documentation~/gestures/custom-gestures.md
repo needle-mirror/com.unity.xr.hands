@@ -4,7 +4,7 @@ uid: xrhands-custom-gestures
 
 # Custom gestures
 
-The XR Hands package provides a custom gesture recognizer that can detect when the user performs a gesture that you define as a hand shape and orientation. 
+The XR Hands package provides a custom gesture recognizer that can detect when the user performs a gesture that you define as a hand shape and orientation.
 
 > [!IMPORTANT]
 > The recognizer can detect static poses only. Gestures involving motion, such as a swipe or a throw, are not supported.

@@ -19,7 +19,7 @@ class TestHandProvider : XRHandSubsystemProvider
     public XRHandSubsystem.UpdateType mostRecentUpdateType { get; private set; }
 
     public bool leftHandIsTracked { get; set; } = true;
-    
+
     public bool rightHandIsTracked { get; set; } = true;
 
     public override void Start()
@@ -77,15 +77,15 @@ class TestHandProvider : XRHandSubsystemProvider
         }
 
         var successFlags = XRHandSubsystem.UpdateSuccessFlags.All;
-        
+
         if (!leftHandIsTracked)
             successFlags &= ~XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints & ~XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose;
-        
+
         if (!rightHandIsTracked)
             successFlags &= ~XRHandSubsystem.UpdateSuccessFlags.RightHandJoints & ~XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose;
 
         return successFlags;
     }
-    
+
     public static string descriptorId => "Test-Hands";
 }

@@ -11,7 +11,7 @@ namespace UnityEditor.XR.Hands
     public class XRHandTrackingEventsEditor : BaseXRHandsEditor
     {
         const string k_HandTrackingEventsExpandedKey = "XRHands." + nameof(XRHandTrackingEventsEditor) + ".EventsExpanded";
-        
+
         SerializedProperty m_Handedness;
         SerializedProperty m_UpdateType;
         SerializedProperty m_PoseUpdated;
@@ -46,7 +46,7 @@ namespace UnityEditor.XR.Hands
             m_TrackingLost = serializedObject.FindProperty("m_TrackingLost");
             m_EventsExpanded = SessionState.GetBool(k_HandTrackingEventsExpandedKey, false);
         }
-        
+
         void OnDisable()
         {
             SessionState.SetBool(k_HandTrackingEventsExpandedKey, m_EventsExpanded);

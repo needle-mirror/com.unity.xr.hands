@@ -95,12 +95,12 @@ namespace UnityEngine.XR.Hands
     /// <remarks>
     /// For this type to function, you must enable hand-tracking and be running
     /// with either the OpenXR or Oculus plug-in.
-    /// 
+    ///
     /// The <see cref="TrackedDevice.devicePosition"/> and
     /// <see cref="TrackedDevice.deviceRotation"/> inherited from <see cref="TrackedDevice"/>
     /// represent the aim pose. You can use these values to discover the target for pinch gestures,
-    /// when appropriate. 
-    /// 
+    /// when appropriate.
+    ///
     /// Use the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin) in the scene to position and orient
     /// the device properly. If you are using this data to set the Transform of a GameObject in
     /// the scene hierarchy, you can set the local position and rotation of the Transform and make

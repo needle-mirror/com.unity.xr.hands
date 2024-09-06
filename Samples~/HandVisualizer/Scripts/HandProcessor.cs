@@ -99,7 +99,7 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
                     currentLeftHandPosition = Vector3.Lerp(m_LastLeftHandPosition, currentLeftHandPosition, tweenAmt);
                     m_LeftHandPose.position = currentLeftHandPosition;
                     m_LeftHandPose.rotation = leftPose.rotation;
-                    
+
                     leftHand.SetRootPose(m_LeftHandPose);
                     subsystem.SetCorrespondingHand(leftHand);
                 }
@@ -116,7 +116,7 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
                     currentRightHandPosition = Vector3.Lerp(m_LastRightHandPosition, currentRightHandPosition, tweenAmt);
                     m_RightHandPose.position = currentRightHandPosition;
                     m_RightHandPose.rotation = rightPose.rotation;
-                    
+
                     rightHand.SetRootPose(m_RightHandPose);
                     subsystem.SetCorrespondingHand(rightHand);
                 }
@@ -129,7 +129,7 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
         {
             var leftHand = subsystem.leftHand;
             var leftHandPose = leftHand.rootPose;
-            
+
             var rightHand = subsystem.rightHand;
             var rightHandPose = rightHand.rootPose;
 

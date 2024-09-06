@@ -21,7 +21,7 @@ namespace UnityEngine.XR.Hands
     ///
     /// Get an instance for this <c>XRHandSubsystem</c> from the active XR
     /// loader, as described in [Get the XRHandSubsystem instance](xref:xrhands-access-data#get-instance).
-    /// 
+    ///
     /// For lowest latency, read the tracking data available from the <see cref="leftHand"/>
     /// and <see cref="rightHand"/> properties in a delegate function assigned to the
     /// <see cref="updatedHands"/> callback. This callback is invoked twice per frame, once near
@@ -110,14 +110,14 @@ namespace UnityEngine.XR.Hands
         /// <see cref="XRHandJointID"/> list. This array contains an element for
         /// each possible joint. A value of true indicates the the current provider
         /// supports tracking the associated joint.
-        /// 
+        ///
         /// To get the correct array index for a joint, call
         /// <see cref="XRHandJointIDUtility.ToIndex(XRHandJointID)"/> on the
         /// <see cref="XRHandJointID"/> in question.
         ///
         /// Refer to [Get supported joints array](xref:xrhands-access-data#joint-layout)
         /// for additional information.
-        /// 
+        ///
         /// This array will already be valid as soon as you have a reference to
         /// a subsystem (in other words, it's filled out before the subsystem is
         /// returned by a call to <c>XRHandSubsystemDescriptor.Create</c>).
@@ -131,7 +131,7 @@ namespace UnityEngine.XR.Hands
         /// <remarks>
         /// This property updated every time the hand data is updated, which only occurs while this
         /// XRHandSubsystem is running.
-        /// 
+        ///
         /// The <see cref="updateSuccessFlags"/> value is also passed to the callback
         /// function assigned to <see cref="updatedHands"/>.
         /// </remarks>
@@ -233,7 +233,7 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         /// <remarks>
         /// This is called before <see cref="updatedHands"/>.
-        /// 
+        ///
         /// The delegate assigned to this property must take one parameter of type
         /// <see cref="XRHand"/>, which is assigned a reference to the hand whose tracking was lost.
         /// </remarks>
@@ -241,7 +241,7 @@ namespace UnityEngine.XR.Hands
 
         /// <summary>
         /// Request an update from the hand data provider. Application developers
-        /// consuming hand tracking data should not call this function. 
+        /// consuming hand tracking data should not call this function.
         /// </summary>
         /// <param name="updateType">
         /// Informs the provider which kind of timing the update is being
@@ -261,7 +261,7 @@ namespace UnityEngine.XR.Hands
         /// future, for example, requesting <see cref="UpdateType.BeforeRender"/> from a
         /// <c>MonoBehaviour.Update</c> function, then the provider predicts what the hand data
         /// will be at the requested time.
-        /// 
+        ///
         /// If overriding this method in a derived type, it is expected that you
         /// call <c>base.TryUpdateHands(updateType)</c> and return what it
         /// returns.

@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.hands",
   "displayName": "XR Hands",
-  "version": "1.4.1",
+  "version": "1.4.3",
   "unity": "2021.3",
   "description": "Surfaces the cross-platform subsystem API for hand-tracking. Implementations of providers will be found in the package for that platform.",
   "keywords": [
@@ -22,16 +22,16 @@
     "com.unity.mathematics": "1.2.6"
   },
   "_upm": {
-    "changelog": "### Changed\n- Split hand pose debug UI into hand shape and hand pose to make it simpler to debug in each scenario.\n- Updated hand shape debugger with added cross and check mark icon sprites for finger state gesture debug UI\n\n### Fixed\n- Fixed performance regression in hand gesture debug UI.\n- Fix tolerance range check in `XRFingerShapeCondition` component."
+    "changelog": "### Changed\n\n- Allows for ignoring tip-most knucle when calculating full curl when the `XRFingerShapeConfiguration`'s `minimumFullCurlDegrees3` or `maximumFullCurlDegrees3` is non-positive.\n\n### Fixed\n\n- Fixed reference direction when using `XRHandUserRelativeDirection.NoseDirection` for gesture detection.\n- Fixed runtime invalidation, which resulted in crashes on some OpenXR runtimes. Runtime is invalidated when the `XrInstance` is destroyed.\n- Fixed issue where XrHands would try to update hand joints with an uninitialized XrTime value of XR_INFINITE_DURATION.\n- Updated app space change behavior for XR provider to no longer destroy hand trackers only to recreate them the next update."
   },
   "upmCi": {
-    "footprint": "bc389580f9a3bf6d85f4d786192320a9cb3f89bd"
+    "footprint": "8579a993d40f48ab6c7216f50d61cffe93e64e46"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.4/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.xr.hands.git",
     "type": "git",
-    "revision": "9819522796e7fbd1f8a7e13879de250f66ff40d1"
+    "revision": "eeeaae4a5337b6b83feeb482d11efb0e659c573f"
   },
   "samples": [
     {

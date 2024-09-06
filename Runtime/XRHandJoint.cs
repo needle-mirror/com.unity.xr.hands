@@ -77,14 +77,16 @@ namespace UnityEngine.XR.Hands
         /// </returns>
         /// <remarks>
         /// Joint poses are relative to the real-world point chosen by the user's device.
-        /// 
+        ///
         /// To transform to world space so that the joint appears in the correct location
         /// relative to the user, transform the pose based on the
         /// [XROrigin](xref:Unity.XR.CoreUtils.XROrigin).
         /// </remarks>
         /// <example>
+        /// <para>
         /// The following example illustrates how to transform a pose into world space using the
         /// transform from the XROrigin object in a scene.
+        /// </para>
         /// <code>
         /// public Pose ToWorldPose(XRHandJoint joint, Transform origin)
         /// {

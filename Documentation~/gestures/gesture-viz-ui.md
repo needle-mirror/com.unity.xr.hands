@@ -26,9 +26,9 @@ The following table describes each part of the data graph:
 
 |     | Description |
 | :-- | :---------- |
-| A | The names of the shape values. | 
-| B | The numeric scale, which is a normalized range between zero and one. | 
-| C | The finger shape data: <br/><ul><li><b>White line</b>: The current value of the shape based on the incoming joint data from the hand tracking system.</li><li><b>Marker</b>: The target value of the configured HandShape asset.</li><li><b>Green or Red line</b>: The (upper & lower) tolerance range around the target value.  The line will be green when the current finger state value is within the tolerance range, and red when the value is not.</li></ul> | 
+| A | The names of the shape values. |
+| B | The numeric scale, which is a normalized range between zero and one. |
+| C | The finger shape data: <br/><ul><li><b>White line</b>: The current value of the shape based on the incoming joint data from the hand tracking system.</li><li><b>Marker</b>: The target value of the configured HandShape asset.</li><li><b>Green or Red line</b>: The (upper & lower) tolerance range around the target value.  The line will be green when the current finger state value is within the tolerance range, and red when the value is not.</li></ul> |
 | D | The name of the finger. |
 
 Refer to [Finger shapes](xref:xrhands-finger-shapes) for information about the shape values. Refer to [Hand shapes](xref:xrhands-hand-shapes) for information about creating and editing HandShape assets.
@@ -55,4 +55,3 @@ The Advanced Pose Debugger provides a more complex mix of features from both the
 The gesture detection section of the Advanced Pose Debugger provides indicators that change color when one of the configured gestures is detected. You can change the configured gestures or add to the list by editing the visualizer scene. Refer to [Edit the gesture list](xref:xrhands-customize-gesture-visualizer#gestures) for more information.
 
 <img src="../images/gestures/advanced-pose-debugger.png" alt="The preconfigured sample gestures"/><br/><i>The preconfigured sample gestures provided by the XR Hands sample, visualized by the Advanced Pose Debugger.</i>
-

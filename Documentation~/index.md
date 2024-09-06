@@ -11,7 +11,7 @@ The XR Hand package provides:
 
 * [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem): defines the XR subsystem interface for hand  tracking data.
 * [OpenXR HandTracking feature](xref:xrhands-openxr-hands-feature): this feature implements the `XRHandSubsystem` for the OpenXR provider plug-in. This means that you can access hand data if you have both the OpenXR and this XR Hand packages installed in a project. Other provider plug-ins must be updated to implement the XRHandSubsystem before you can access hand data when using them.
-* [Open XR Meta Aim Hand feature](xref:xrhands-meta-aim-feature): this feature provides data from the XR_FB_hand_tracking_aim  extension to the OpenXR specification. This extension provides basic gesture recognition. 
+* [Open XR Meta Aim Hand feature](xref:xrhands-meta-aim-feature): this feature provides data from the XR_FB_hand_tracking_aim  extension to the OpenXR specification. This extension provides basic gesture recognition.
 * [XRHand struct](xref:UnityEngine.XR.Hands.XRHand): the data for an individual tracked hand.
 * [XRHandJoint struct](xref:UnityEngine.XR.Hands.XRHandJoint): the data for an individual joint or other tracked point of the hand.
 * [MetaAimHand class](xref:UnityEngine.XR.Hands.MetaAimHand): the pinch and aim gesture data from the Meta Aim hand OpenXR feature.
@@ -38,7 +38,7 @@ This package provides samples that you can import into your project through the 
 
 | Sample | Description |
 | :----- | :---------- |
-| **Gestures** | Provides a scene for [visualizing and testing hand gestures](xref:xrhands-gesture-debugger). The [Static Hand Gesture](xref:xrhands-static-gesture-component) component is part of this sample, so you must import the **Gestures** sample to use the hand gesture feature provided by the XR Hands package. The gesture visualizer scene depends on components in the **HandVisualizer** sample, so you must import both samples to use it. | 
+| **Gestures** | Provides a scene for [visualizing and testing hand gestures](xref:xrhands-gesture-debugger). The [Static Hand Gesture](xref:xrhands-static-gesture-component) component is part of this sample, so you must import the **Gestures** sample to use the hand gesture feature provided by the XR Hands package. The gesture visualizer scene depends on components in the **HandVisualizer** sample, so you must import both samples to use it. |
 | **HandVisualizer** | Provides a scene, prefabs, and components that visualize hands with a mesh. The **HandVisualizer** sample has a mesh and script based on the OpenXR hand data layout, so you should use the sample with the OpenXR plug-in or one that conforms to the OpenXR hand joint layout.
 
 ![Import the XR Hands samples](images/import-vis-sample.png)<br/>*Import the XR Hands samples*

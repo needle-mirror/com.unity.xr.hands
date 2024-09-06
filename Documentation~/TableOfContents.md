@@ -21,6 +21,6 @@
     * [Static Hand Gesture component](xref:xrhands-static-gesture-component)
   * [Add a custom gesture](xref:xrhands-define-custom-gesture)
   * [Gesture debugger](xref:xrhands-gesture-debugger)
-    * [Install the gesture debugger](xref:xrhands-install-gesture-visualizer) 
+    * [Install the gesture debugger](xref:xrhands-install-gesture-visualizer)
     * [Understand the gesture debugger](xref:xrhands-understand-gesture-visualizer)
     * [Customize the gesture debugger](xref:xrhands-customize-gesture-visualizer)

@@ -7,19 +7,35 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.4.3] - 2024-09-06
+
+### Changed
+
+- Allows for ignoring tip-most knucle when calculating full curl when the `XRFingerShapeConfiguration`'s `minimumFullCurlDegrees3` or `maximumFullCurlDegrees3` is non-positive.
+
+### Fixed
+
+- Fixed reference direction when using `XRHandUserRelativeDirection.NoseDirection` for gesture detection.
+- Fixed runtime invalidation, which resulted in crashes on some OpenXR runtimes. Runtime is invalidated when the `XrInstance` is destroyed.
+- Fixed issue where XrHands would try to update hand joints with an uninitialized XrTime value of XR_INFINITE_DURATION.
+- Updated app space change behavior for XR provider to no longer destroy hand trackers only to recreate them the next update.
+
 ## [1.4.1] - 2024-04-05
 
 ### Changed
+
 - Split hand pose debug UI into hand shape and hand pose to make it simpler to debug in each scenario.
 - Updated hand shape debugger with added cross and check mark icon sprites for finger state gesture debug UI
 
 ### Fixed
+
 - Fixed performance regression in hand gesture debug UI.
 - Fix tolerance range check in `XRFingerShapeCondition` component.
 
 ## [1.4.0] - 2024-02-27
 
 ### Changed
+
 - Changed gesture detection to allow both upper and lower threshold for more finely-tuned configuration of the finger shapes.
 - Added partial-grab gesture detection to the Gestures sample.
 - Changed hand and gesture tracking debug UI to support upper threshold, lower threshold, and partial-grab gesture.
@@ -31,23 +47,28 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.4.0-pre.1] - 2023-11-27
 
 ### Added
+
 - Added support for custom gestures. For additional information, refer to the [manual documentation](xref:xrhands-custom-gestures).
 
 ### Fixed
+
 - OpenXR implementation now correctly responds to feature lifecycle callbacks.
 
 ## [1.3.0] - 2023-08-14
 
 ### Added
+
 - Added a root pose offset to the `XRHandSkeletonDriver` that allows an additional offset to the root pose (typically the wrist). This is useful for situations where you want the visual hand representation to stop while interacting with objects in a scene.
 - Added missing sample script API documentation to make it easier to understand and build from.
 
 ### Fixed
+
 - Fixed documentation links for OpenXR features to point at latest documentation version.
 
 ## [1.2.1] - 2023-05-30
 
 ### Fixed
+
 - Fixed build pipeline that caused `UnityOpenXRHands` assembly to get skipped.
 
 ## [1.2.0] - 2023-05-25
@@ -62,6 +83,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added `XRHandSkeletonDriver` component that subscribes to events from a `XRHandTrackingEvents` and updates a hierarchy of Transforms for each `XRHandJoint`.
 
 ### Changed
+
 - Minimum supported Unity Editor version has changed to 2021.3.
 
 ### Fixed

@@ -8,7 +8,7 @@ namespace UnityEngine.XR.Hands.Gestures
     public enum XRFingerShapeType
     {
         /// <summary>
-        /// The amount that all joints in a finger are curled.  
+        /// The amount that all joints in a finger are curled.
         /// </summary>
         FullCurl,
 

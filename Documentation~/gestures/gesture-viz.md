@@ -23,4 +23,3 @@ Refer to the following topics for more information:
 | [Install the gesture visualizer](xref:xrhands-install-gesture-visualizer) | How to import the sample HandGestures scene into your project. |
 | [Understand the gesture visualizer](xref:xrhands-understand-gesture-visualizer) | Describes the information shown by the visualizer. |
 | [Customize the gesture visualizer](xref:xrhands-customize-gesture-visualizer) | How to add your own gestures and hand shapes to the visualizer. |
-

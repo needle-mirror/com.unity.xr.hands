@@ -29,9 +29,9 @@ namespace UnityEngine.XR.Hands
     /// it a child of the <c>CameraOffset</c> object below the <c>XROrigin</c>. Otherwise, you can use the
     /// Transform of the <c>CameraOffset</c> to transform the data into world space.
     /// </remarks>
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     [InitializeOnLoad]
-    #endif
+#endif
     [Preserve, InputControlLayout(displayName = "XR Hand Device", commonUsages = new[] { "LeftHand", "RightHand" })]
     public class XRHandDevice : TrackedDevice
     {
@@ -66,7 +66,7 @@ namespace UnityEngine.XR.Hands
         public QuaternionControl gripRotation { get; private set; }
 
         /// <summary>
-        /// Position of the poke pose, representing the index finger's tip. 
+        /// Position of the poke pose, representing the index finger's tip.
         /// When transformed relative to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin),
         /// the position will be in the correct position in the scene relative to the user.
         /// </summary>

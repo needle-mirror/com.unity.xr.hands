@@ -284,8 +284,10 @@ namespace UnityEngine.XR.Hands
         /// object's list of joints.
         /// </returns>
         /// <example>
+        /// <para>
         /// You can use <c>GetFrontJointID</c> and <see cref="GetBackJointID(XRHandFingerID)"/> to iterate
         /// through the joints of a specific finger:
+        /// </para>
         /// <code>
         /// <![CDATA[
         ///     for(var i = XRHandFingerID.Thumb.GetFrontJointID().ToIndex(); // metacarpal
