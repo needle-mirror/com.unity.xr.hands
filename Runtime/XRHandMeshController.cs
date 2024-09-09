@@ -12,7 +12,7 @@ namespace UnityEngine.XR.Hands
         [SerializeField]
         [Tooltip("The XR Hand Tracking Events component that will be used to subscribe to hand tracking events.")]
         XRHandTrackingEvents m_XRHandTrackingEvents;
-        
+
         [SerializeField]
         [Tooltip("The renderer that is rendering the hand mesh.")]
         Renderer m_HandMeshRenderer;
@@ -20,7 +20,7 @@ namespace UnityEngine.XR.Hands
         [SerializeField]
         [Tooltip("If enabled, the hand mesh renderer will be enabled when the hand tracking is acquired.")]
         bool m_ShowMeshWhenTrackingIsAcquired = true;
-        
+
         [SerializeField]
         [Tooltip("If enabled, the hand mesh renderer will be disabled when the hand tracking is lost.")]
         bool m_HideMeshWhenTrackingIsLost = true;

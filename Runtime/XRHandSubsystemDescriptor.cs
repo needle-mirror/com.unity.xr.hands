@@ -73,7 +73,7 @@ namespace UnityEngine.XR.Hands
             /// <summary>
             /// Whether the provider can supply aim pose.
             /// </summary>
-            public bool supportsAimPose { get ; set; }
+            public bool supportsAimPose { get; set; }
 
             /// <summary>
             /// Whether the provider can supply aim activate value.
@@ -169,7 +169,7 @@ namespace UnityEngine.XR.Hands
             /// Returns <see langword="true"/> if <paramref name="lhs"/> is equal
             /// to <paramref name="rhs"/>, otherwise returns <see langword="false"/>.
             /// </returns>
-            public static bool operator==(Cinfo lhs, Cinfo rhs) => lhs.Equals(rhs);
+            public static bool operator ==(Cinfo lhs, Cinfo rhs) => lhs.Equals(rhs);
 
             /// <summary>
             /// Tests for inequality. Same as `!`<see cref="Equals(Cinfo)"/>.
@@ -180,7 +180,7 @@ namespace UnityEngine.XR.Hands
             /// is not equal to <paramref name="rhs"/>, otherwise returns
             /// <see langword="false"/>.
             /// </returns>
-            public static bool operator!=(Cinfo lhs, Cinfo rhs) => !lhs.Equals(rhs);
+            public static bool operator !=(Cinfo lhs, Cinfo rhs) => !lhs.Equals(rhs);
         }
 
         /// <summary>

@@ -118,12 +118,12 @@ namespace UnityEngine.XR.Hands.OpenXR
             }
         }
         bool m_IsHandInteractionProfileEnabled;
- 
+
         /// <inheritdoc/>
         public override bool TryGetAimPose(Handedness handedness, out Pose aimPose)
         {
             aimPose = Pose.identity;
- #if UNITY_OPENXR_PACKAGE_1_8
+#if UNITY_OPENXR_PACKAGE_1_8
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
@@ -143,7 +143,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         public override bool TryGetAimActivateValue(Handedness handedness, out float aimActivateValue)
         {
             aimActivateValue = 0f;
- #if UNITY_OPENXR_PACKAGE_1_8
+#if UNITY_OPENXR_PACKAGE_1_8
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
@@ -158,7 +158,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         public override bool TryGetGraspValue(Handedness handedness, out float graspValue)
         {
             graspValue = 0f;
- #if UNITY_OPENXR_PACKAGE_1_8
+#if UNITY_OPENXR_PACKAGE_1_8
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
@@ -173,7 +173,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         public override bool TryGetGripPose(Handedness handedness, out Pose gripPose)
         {
             gripPose = Pose.identity;
- #if UNITY_OPENXR_PACKAGE_1_8
+#if UNITY_OPENXR_PACKAGE_1_8
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
@@ -193,7 +193,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         public override bool TryGetPinchPose(Handedness handedness, out Pose pinchPose)
         {
             pinchPose = Pose.identity;
- #if UNITY_OPENXR_PACKAGE_1_8
+#if UNITY_OPENXR_PACKAGE_1_8
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
@@ -213,7 +213,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         public override bool TryGetPinchValue(Handedness handedness, out float pinchValue)
         {
             pinchValue = 0f;
- #if UNITY_OPENXR_PACKAGE_1_8
+#if UNITY_OPENXR_PACKAGE_1_8
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
@@ -228,7 +228,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         public override bool TryGetPokePose(Handedness handedness, out Pose pokePose)
         {
             pokePose = Pose.identity;
- #if UNITY_OPENXR_PACKAGE_1_8
+#if UNITY_OPENXR_PACKAGE_1_8
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
@@ -244,7 +244,7 @@ namespace UnityEngine.XR.Hands.OpenXR
 #endif
         }
 
- #if UNITY_OPENXR_PACKAGE_1_8
+#if UNITY_OPENXR_PACKAGE_1_8
         static class Usages
         {
             internal static readonly InputFeatureUsage<bool> isAimPoseTracked = new InputFeatureUsage<bool>("PointerIsTracked");
@@ -273,9 +273,22 @@ namespace UnityEngine.XR.Hands.OpenXR
             internal static readonly InputFeatureUsage<Quaternion> pokeRotation = new InputFeatureUsage<Quaternion>("PokeRotation");
         }
 
+        InputDevice m_LeftHandInteractionDevice;
+        InputDevice m_RightHandInteractionDevice;
         static readonly List<InputDevice> s_DevicesReuse = new List<InputDevice>();
         bool TryGetHandDevice(Handedness handedness, out InputDevice device)
         {
+            if (handedness == Handedness.Left && m_LeftHandInteractionDevice.isValid)
+            {
+                device = m_LeftHandInteractionDevice;
+                return true;
+            }
+            else if (handedness == Handedness.Right && m_RightHandInteractionDevice.isValid)
+            {
+                device = m_RightHandInteractionDevice;
+                return true;
+            }
+
             InputDevices.GetDevicesWithCharacteristics(
                 handedness == Handedness.Left
                 ? InputDeviceCharacteristics.Left
@@ -284,11 +297,17 @@ namespace UnityEngine.XR.Hands.OpenXR
 
             for (int deviceIndex = 0; deviceIndex < s_DevicesReuse.Count; ++deviceIndex)
             {
-                if (s_DevicesReuse[deviceIndex].name == "Hand Interaction OpenXR")
-                {
-                    device = s_DevicesReuse[deviceIndex];
-                    return true;
-                }
+                if (s_DevicesReuse[deviceIndex].name != k_HandInteractionDeviceName)
+                    continue;
+
+                device = s_DevicesReuse[deviceIndex];
+
+                if (handedness == Handedness.Left)
+                    m_LeftHandInteractionDevice = device;
+                else
+                    m_RightHandInteractionDevice = device;
+
+                return true;
             }
 
             device = default;
@@ -301,6 +320,8 @@ namespace UnityEngine.XR.Hands.OpenXR
         static internal string id { get; private set; }
 
         static OpenXRHandProvider() => id = "OpenXR Hands";
+
+        const string k_HandInteractionDeviceName = "Hand Interaction OpenXR";
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Register()

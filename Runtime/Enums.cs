@@ -37,6 +37,11 @@ namespace UnityEngine.XR.Hands
         /// Joint was marked as not being part of the hand layout for the current provider.
         /// </summary>
         WillNeverBeValid = 1 << 4,
+
+        /// <summary>
+        /// The joint is being actively tracked by the runtime, and the pose is not based on inference.
+        /// </summary>
+        HighFidelityPose = 1 << 5,
     }
 
     /// <summary>
@@ -284,8 +289,10 @@ namespace UnityEngine.XR.Hands
         /// object's list of joints.
         /// </returns>
         /// <example>
+        /// <para>
         /// You can use <c>GetFrontJointID</c> and <see cref="GetBackJointID(XRHandFingerID)"/> to iterate
         /// through the joints of a specific finger:
+        /// </para>
         /// <code>
         /// <![CDATA[
         ///     for(var i = XRHandFingerID.Thumb.GetFrontJointID().ToIndex(); // metacarpal

@@ -71,7 +71,7 @@ namespace UnityEngine.XR.Hands
 
         [SerializeField]
         UnityEvent<Pose> m_PoseUpdated = new UnityEvent<Pose>();
-        
+
         [SerializeField]
         HandUpdatedEvent m_JointsUpdated = new HandUpdatedEvent();
 
@@ -105,7 +105,7 @@ namespace UnityEngine.XR.Hands
         }
 
         /// <summary>
-        /// Whether the hand is currently being tracked, stored as a bindable variable that can be subscribed to for value changes. 
+        /// Whether the hand is currently being tracked, stored as a bindable variable that can be subscribed to for value changes.
         /// </summary>
         public IReadOnlyBindableVariable<bool> bindableHandIsTracked => m_HandIsTracked;
 
@@ -123,7 +123,7 @@ namespace UnityEngine.XR.Hands
         /// The root pose of the hand.
         /// </summary>
         public Pose rootPose => m_HandJointsUpdatedEventArgs.hand.rootPose;
-        
+
         /// <summary>
         /// Event that occurs when the joints of the hands have updated.
         /// </summary>
@@ -132,7 +132,7 @@ namespace UnityEngine.XR.Hands
         /// do not hold a reference to it.
         /// </remarks>
         public HandUpdatedEvent jointsUpdated => m_JointsUpdated;
-        
+
         /// <summary>
         /// Event that occurs when the pose of the hands has updated.
         /// </summary>
@@ -201,7 +201,7 @@ namespace UnityEngine.XR.Hands
         internal void SetSubsystem(XRHandSubsystem handSubsystem)
         {
             UnsubscribeFromSubsystem();
-            
+
             m_Subsystem = handSubsystem;
 
             XRHand hand;
@@ -240,7 +240,7 @@ namespace UnityEngine.XR.Hands
                 m_TrackingAcquired?.Invoke();
             else
                 m_TrackingLost?.Invoke();
-            
+
             m_TrackingChanged?.Invoke(isTracked);
         }
 

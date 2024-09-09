@@ -96,14 +96,14 @@ namespace UnityEngine.XR.Hands
         /// Offset translation applied to hand root position.
         /// </summary>
         protected virtual Vector3 rootOffset => m_RootOffset;
-        
+
         Vector3 m_RootOffset = Vector3.zero;
 
         /// <summary>
         /// Bool tracking whether the root requires an offset to be applied to it.
         /// </summary>
         protected virtual bool hasRootOffset => m_HasRootOffset;
-        
+
         bool m_HasRootOffset;
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace UnityEngine.XR.Hands
 
         /// <summary>
         /// Applies an offset to the root pose of the hand skeleton.
-        /// This can be used to adjust the position of the hand in situations where you want the hand visual to stop moving when interacting with an object. 
+        /// This can be used to adjust the position of the hand in situations where you want the hand visual to stop moving when interacting with an object.
         /// The offset is applied in the local space of the hand's root transform.
         /// </summary>
         /// <param name="rootPoseOffset">A Vector3 representing the offset to apply to the root pose of the hand skeleton.</param>

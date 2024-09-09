@@ -17,7 +17,7 @@ To install this package in Unity 2021.3+, follow these steps to [Install a UPM p
 3. (Optional) Enter the full version number, such as <code class="long_version">X.Y.Z</code>, to install. If left blank, Unity chooses the "best" version -- typically the latest, release version for the current Unity Editor. See the [Changelog](xref:xrhands-changelog) for a list of versions available at the time this documentation page was published.
 4. Click **Add**.
 
-| Additional resources | Description | 
+| Additional resources | Description |
 | :------------------- | :---------- |
 | [The Package Manager tutorial](https://learn.unity.com/tutorial/the-package-manager#) | An overview of installing and managing packages in Unity. |
 | [Package Manager](xref:upm-ui) | Detailed documentation about the Package Manager in the Unity Manual. |

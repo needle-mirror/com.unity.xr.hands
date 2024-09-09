@@ -1,4 +1,4 @@
-﻿namespace UnityEngine.XR.Hands
+namespace UnityEngine.XR.Hands
 {
     /// <summary>
     /// Constants for <see cref="HelpURLAttribute"/> for XR Hands.
@@ -21,7 +21,7 @@
         /// <summary>
         /// Base URL for the current version of the XR Hands manual page.
         /// </summary>
-        internal const string k_CurrentManualDocsBaseUrl = k_CurrentDocsBaseUrl + k_ManualFolder + "/";                
+        internal const string k_CurrentManualDocsBaseUrl = k_CurrentDocsBaseUrl + k_ManualFolder + "/";
 
         /// <summary>
         /// Scripting API URL for <see cref="XRHandSkeletonDriver"/>.
@@ -32,7 +32,7 @@
         /// Scripting API URL for <see cref="XRHandTrackingEvents"/>.
         /// </summary>
         internal const string k_XRHandTrackingEvents = k_CurrentApiDocsBaseUrl + k_NamespaceRoot + nameof(XRHandTrackingEvents) + ".html";
-        
+
         /// <summary>
         /// Scripting API URL for <see cref="XRHandMeshController"/>.
         /// </summary>

@@ -9,6 +9,11 @@ class TestHandProvider : XRHandSubsystemProvider
 {
     public TestHandProvider()
     {
+        leftHandJointsTrackingStates = new XRHandJointTrackingState[XRHandJointID.EndMarker.ToIndex()];
+        rightHandJointsTrackingStates = new XRHandJointTrackingState[XRHandJointID.EndMarker.ToIndex()];
+
+        System.Array.Fill(leftHandJointsTrackingStates, XRHandJointTrackingState.Pose | XRHandJointTrackingState.HighFidelityPose);
+        System.Array.Fill(rightHandJointsTrackingStates, XRHandJointTrackingState.Pose | XRHandJointTrackingState.HighFidelityPose);
     }
 
     public int numStartCalls { get; private set; }
@@ -19,8 +24,11 @@ class TestHandProvider : XRHandSubsystemProvider
     public XRHandSubsystem.UpdateType mostRecentUpdateType { get; private set; }
 
     public bool leftHandIsTracked { get; set; } = true;
-    
+
     public bool rightHandIsTracked { get; set; } = true;
+
+    public XRHandJointTrackingState[] leftHandJointsTrackingStates { get; set; }
+    public XRHandJointTrackingState[] rightHandJointsTrackingStates { get; set; }
 
     public override void Start()
     {
@@ -63,29 +71,35 @@ class TestHandProvider : XRHandSubsystemProvider
             if (!TestHandData.jointsInLayout[jointIndex])
                 continue;
 
+            XRHandJointTrackingState leftHandTrackingState =
+                leftHandIsTracked ? leftHandJointsTrackingStates[jointIndex] : XRHandJointTrackingState.None;
+
+            XRHandJointTrackingState rightHandTrackingState =
+                rightHandIsTracked ? rightHandJointsTrackingStates[jointIndex] : XRHandJointTrackingState.None;
+
             leftHandJoints[jointIndex] = XRHandProviderUtility.CreateJoint(
                 Handedness.Left,
-                XRHandJointTrackingState.Pose,
+                leftHandTrackingState,
                 XRHandJointIDUtility.FromIndex(jointIndex),
                 TestHandData.leftHand[jointIndex]);
 
             rightHandJoints[jointIndex] = XRHandProviderUtility.CreateJoint(
                 Handedness.Right,
-                XRHandJointTrackingState.Pose,
+                rightHandTrackingState,
                 XRHandJointIDUtility.FromIndex(jointIndex),
                 TestHandData.rightHand[jointIndex]);
         }
 
         var successFlags = XRHandSubsystem.UpdateSuccessFlags.All;
-        
+
         if (!leftHandIsTracked)
             successFlags &= ~XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints & ~XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose;
-        
+
         if (!rightHandIsTracked)
             successFlags &= ~XRHandSubsystem.UpdateSuccessFlags.RightHandJoints & ~XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose;
 
         return successFlags;
     }
-    
+
     public static string descriptorId => "Test-Hands";
 }

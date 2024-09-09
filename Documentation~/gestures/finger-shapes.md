@@ -4,7 +4,7 @@ uid: xrhands-finger-shapes
 
 # Finger shape
 
-You can describe the way a user must hold an individual finger in a gesture by specifying a required value for one or more aspects of a finger shape. 
+You can describe the way a user must hold an individual finger in a gesture by specifying a required value for one or more aspects of a finger shape.
 
 ![Joints used to evaluate the finger shapes](../images/gestures/finger-shapes.png)<br/>*The OpenXR joint data associated with a finger is evaluated to compare how closely the current shape of the finger matches the specified target shape.*
 
@@ -18,12 +18,12 @@ You can specify values for the following shape aspects:
 | [Pinch](#pinch) | Whether the finger is in a pinching posture based on how close the tip of the finger is to the tip of the thumb. |
 | [Spread](#spread) | The spread between this finger and the next (moving from thumb to little finger). |
 
-When describing a hand shape, you assign a normalized target value between 0 and 1 to one or more finger shapes. A value of 1 indicates that the specified finger is fully in that shape. For example, if you set Full Curl equal to 1 for a finger, that finger must be fully curled for the custom gesture to be recognized. Conversely, if you set Full Curl equal to 0, then the finger must be straight. You can set multiple shape values for the same finger. 
+When describing a hand shape, you assign a normalized target value between 0 and 1 to one or more finger shapes. A value of 1 indicates that the specified finger is fully in that shape. For example, if you set Full Curl equal to 1 for a finger, that finger must be fully curled for the custom gesture to be recognized. Conversely, if you set Full Curl equal to 0, then the finger must be straight. You can set multiple shape values for the same finger.
 
 In addition to a normalized target value for a finger shape, you set upper and lower tolerance values. The tolerance specifies how close the current measurement of the shape must be to the target value for the gesture to be recognized. For example, if you set a target value of .75 with an upper and lower tolerance of 0.05, then the gesture can be recognized when the current, measured value is between .65 and .85. Tolerances allow you to make gestures easier to perform as well as accomodate for varying hand geometries and ranges of motions across your user base.
 
 > [!NOTE]
-> The thumb has no pinch value. The little finger has no spread value. If you specify values for these in a hand shape, the gesture will never be recognizable. 
+> The thumb has no pinch value. The little finger has no spread value. If you specify values for these in a hand shape, the gesture will never be recognizable.
 
 ## Full Curl
 
@@ -31,15 +31,15 @@ Full Curl specifies the overall curve of a finger. The Full Curl value is normal
 
 ![The joints used to measure full curl](../images/gestures/full-curl-joints.png)<br/> *The joints used to evaluate Full Curl*
 
-Full Curl is based on all of the joints of the finger or thumb. If you need to be more specific when specifying the finger shape for a gesture, you can use  [Base Curl](#base-curl) and [Tip Curl](#tip-curl). 
+Full Curl is based on all of the joints of the finger or thumb. If you need to be more specific when specifying the finger shape for a gesture, you can use  [Base Curl](#base-curl) and [Tip Curl](#tip-curl).
 
 **Full curl examples:**
 
 <table>
     <tr>
-        <td><img src="../images/gestures/full-curl-max.png"/></td> 
-        <td><img src="../images/gestures/full-curl-half.png"/></td> 
-        <td><img src="../images/gestures/full-curl-none.png"/></td> 
+        <td><img src="../images/gestures/full-curl-max.png"/></td>
+        <td><img src="../images/gestures/full-curl-half.png"/></td>
+        <td><img src="../images/gestures/full-curl-none.png"/></td>
     </tr>
     <tr>
         <td>Fully curled fingers<br/>Full Curl == 1.0</td>
@@ -50,7 +50,7 @@ Full Curl is based on all of the joints of the finger or thumb. If you need to b
 
 **Differences between full, tip and base curl:**
 
-Full Curl rates the overall curve of the finger, while Base Curl and Tip Curl rate the curve of the inner and outer parts of the finger. To illustrate the differences between these aspects of finger shape, the following examples show the differences in the normalized values you would expect for different hand shapes: 
+Full Curl rates the overall curve of the finger, while Base Curl and Tip Curl rate the curve of the inner and outer parts of the finger. To illustrate the differences between these aspects of finger shape, the following examples show the differences in the normalized values you would expect for different hand shapes:
 
 <table>
     <tr>
@@ -59,9 +59,9 @@ Full Curl rates the overall curve of the finger, while Base Curl and Tip Curl ra
         <th><b>Shelf</b></th>
     </tr>
     <tr>
-        <td><img src="../images/gestures/full-curl-max.png"/></td> 
-        <td><img src="../images/gestures/tip-curl-max.png"/></td> 
-        <td><img src="../images/gestures/base-curl-max.png"/></td> 
+        <td><img src="../images/gestures/full-curl-max.png"/></td>
+        <td><img src="../images/gestures/tip-curl-max.png"/></td>
+        <td><img src="../images/gestures/base-curl-max.png"/></td>
     </tr>
     <tr>
         <td>Full Curl == 1.0</td>
@@ -80,7 +80,7 @@ Full Curl rates the overall curve of the finger, while Base Curl and Tip Curl ra
     </tr>
 </table>
 
-Full Curl is calculated by averaging normalized angles at each of the three joints in the finger. 
+Full Curl is calculated by averaging normalized angles at each of the three joints in the finger.
 
 Full Curl for the thumb is calculated slightly differently. The same value is report as with [Tip Curl](#tip-curl), since there are only those last two angles instead.
 
@@ -98,9 +98,9 @@ Base Curl is based solely on the knuckle at the base of the finger between the m
 
 <table>
     <tr>
-        <td><img src="../images/gestures/base-curl-none.png"/></td> 
-        <td><img src="../images/gestures/base-curl-some.png"/></td> 
-        <td><img src="../images/gestures/base-curl-max.png"/></td> 
+        <td><img src="../images/gestures/base-curl-none.png"/></td>
+        <td><img src="../images/gestures/base-curl-some.png"/></td>
+        <td><img src="../images/gestures/base-curl-max.png"/></td>
     </tr>
     <tr>
         <td>Unbent knuckle<br/>Base Curl == 0</td>
@@ -111,8 +111,8 @@ Base Curl is based solely on the knuckle at the base of the finger between the m
 
 > [!NOTE]
 > The Base and Tip Curl ranges of motion overlap with that of the Full Curl shape. For many gestures, it is typically easier to use the Full Curl value. However, Base and Tip Curl are available when you need more detailed control of the finger shape to properly define a gesture.
- 
-Base Curl is calculated as a normalized angle (between 0 and 1). A straight, extended finger would have a Base Curl of 0.0, while a fully bent finger would have a Base Curl of 1.0. The angle we find is between the vectors leading from the central joint of the three that define the angle. 
+
+Base Curl is calculated as a normalized angle (between 0 and 1). A straight, extended finger would have a Base Curl of 0.0, while a fully bent finger would have a Base Curl of 1.0. The angle we find is between the vectors leading from the central joint of the three that define the angle.
 
 Base Curl for the thumb is still a normalized angle, but it is calculated differently than that of the other fingers. To illustrate, picture the wrist oriented so that it points forward along the z-axis. The base curl for the thumb corresponds to the vertical component of the angle between the thumb and index finger, similar to how [Spread](#spread) is the horizontal component of that angle.
 
@@ -122,15 +122,15 @@ Tip Curl specifies how much the outer joints of a finger or thumb are bent. The 
 
 ![The joints used to measure tip curl](../images/gestures/tip-curl-joints.png) <br/>*The joints used for Tip Curl*
 
-Tip Curl is based on the outer joints of the finger and does not include the metacarpophalangeal (MCP) joint between the metacarpal and the first phalange bone. For a finger, the last two joints, those between the three phalange bones, are used when measuring Tip Curl. Since the thumb only has two phalanges, only the single joint between them is used. 
+Tip Curl is based on the outer joints of the finger and does not include the metacarpophalangeal (MCP) joint between the metacarpal and the first phalange bone. For a finger, the last two joints, those between the three phalange bones, are used when measuring Tip Curl. Since the thumb only has two phalanges, only the single joint between them is used.
 
 **Tip curl examples:**
 
 <table>
     <tr>
-        <td><img src="../images/gestures/tip-curl-none.png"/></td> 
-        <td><img src="../images/gestures/tip-curl-half.png"/></td> 
-        <td><img src="../images/gestures/tip-curl-max.png"/></td> 
+        <td><img src="../images/gestures/tip-curl-none.png"/></td>
+        <td><img src="../images/gestures/tip-curl-half.png"/></td>
+        <td><img src="../images/gestures/tip-curl-max.png"/></td>
     </tr>
     <tr>
         <td>Uncurled finger tips<br/>Tip Curl == 0</td>
@@ -142,7 +142,7 @@ Tip Curl is based on the outer joints of the finger and does not include the met
 > [!NOTE]
 > The Base and Tip Curl ranges of motion overlap with that of the Full Curl shape. For many gestures, it is typically easier to use the Full Curl value. However, Base and Tip Curl are available when you need more detailed control of the finger shape to properly define a gesture.
 
-Full Curl is calculated by averaging normalized angles at each of the last two joints in the finger (or both joints of the thumb). 
+Full Curl is calculated by averaging normalized angles at each of the last two joints in the finger (or both joints of the thumb).
 
 ## Pinch
 
@@ -156,9 +156,9 @@ The thumb has no pinch value. If you specify a pinch value for the thumb in a ha
 
 <table>
     <tr>
-        <td><img src="../images/gestures/pinch-none.png"/></td> 
-        <td><img src="../images/gestures/pinch-some.png"/></td> 
-        <td><img src="../images/gestures/pinch-max.png"/></td> 
+        <td><img src="../images/gestures/pinch-none.png"/></td>
+        <td><img src="../images/gestures/pinch-some.png"/></td>
+        <td><img src="../images/gestures/pinch-max.png"/></td>
     </tr>
     <tr>
         <td>Not pinching<br/>Pinch == 0</td>
@@ -178,15 +178,15 @@ Spread specifies the angle between adjacent fingers. The Spread value is normali
 
 ![The spread angle between the index and middle fingers](../images/gestures/spread-joints.png) <br/>*The Spread angle between two fingers*
 
-Spread measures the angle between a finger and the next finger closer to the little finger (in other words, toward the ulnar, or medial, side of the hand). For example, Spread of the index finger is the angle between the index and middle fingers. The little, or pinky, finger has no Spread value. If you specify a Spread value for the little finger in a hand shape, it is ignored. 
+Spread measures the angle between a finger and the next finger closer to the little finger (in other words, toward the ulnar, or medial, side of the hand). For example, Spread of the index finger is the angle between the index and middle fingers. The little, or pinky, finger has no Spread value. If you specify a Spread value for the little finger in a hand shape, it is ignored.
 
 **Spread examples:**
 
 <table>
     <tr>
-        <td><img src="../images/gestures/spread-none.png"/></td> 
-        <td><img src="../images/gestures/spread-some.png"/></td> 
-        <td><img src="../images/gestures/spread-max.png"/></td> 
+        <td><img src="../images/gestures/spread-none.png"/></td>
+        <td><img src="../images/gestures/spread-some.png"/></td>
+        <td><img src="../images/gestures/spread-max.png"/></td>
     </tr>
     <tr>
         <td>No index finger Spread<br/>Index Spread == 0</td>

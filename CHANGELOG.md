@@ -7,33 +7,55 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.5.0-pre.4] - 2024-09-09
+
+### Added
+
+- Added support for a new `XRHandJointTrackingState.HighFidelityPose` flag to the XR Hands Subsystem.
+    - Added support for the HighFidelityPose tracking flag to the OpenXRHandProvider.
+    - Updated hand visualization sample to color debug joint cubes based on tracking fidelity: opaque white for joints which have a pose and are high fidelity; translucent red for joints which have a pose and are not high fidelity.
+
+### Fixed
+
+- Fixed runtime invalidation, which resulted in crashes on some OpenXR runtimes. Runtime is invalidated when the `XrInstance` is destroyed.
+- Fixed threshold-checking on gesture conditions to allow for the full range in `XRFingerShapeCondition`.
+- `XRCommonHandGestures` data retrieval no longer GC.Allocs.
+- Updated app space change behavior for XR provider to no longer destroy hand trackers only to recreate them the next update.
+- Fixed issue where XrHands would try to update hand joints with an uninitialized XrTime value of XR_INFINITE_DURATION.
+
 ## [1.5.0-pre.3] - 2024-06-05
 
 ### Added
+
 - Added public `subsystem` property to `XRHandTrackingEvents` to let users get the `XRHandSubsystem` that is the source of the hand tracking data. Also added public `subsystem` property to `XRHandJointsUpdatedEventArgs` so it is available in the `XRHandTrackingEvents.jointsUpdated` event callback.
 
 ### Fixed
+
 - Fixed reference direction when using `XRHandUserRelativeDirection.NoseDirection` for gesture detection.
 
 ## [1.5.0-pre.2] - 2024-05-10
 
 ### Changed
+
 - Allows for ignoring tip-most knuckle when calculating full curl when the `XRFingerShapeConfiguration`'s `minimumFullCurlDegrees3` or `maximumFullCurlDegrees3` is non-positive.
 
 ## [1.5.0-pre.1] - 2024-02-28
 
 ### Added
+
 - Added `XRCommonHandGestures` and surfaced related data from the OpenXR Hand Interaction Profile extension.
 
 ## [1.4.0] - 2024-02-27
 
 ### Changed
+
 - Changed gesture detection to allow both upper and lower threshold for more finely-tuned configuration of the finger shapes.
 - Added partial-grab gesture detection to the Gestures sample.
 - Changed hand and gesture tracking debug UI to support upper threshold, lower threshold, and partial-grab gesture.
 - Updated visuals for hand and gesture tracking debug UI in the Gestures sample.
 
 ### Fixed
+
 - Fixed compilation errors on tvOS platform where `ENABLE_VR` is not defined.
 
 ## [1.4.0-pre.1] - 2023-11-27

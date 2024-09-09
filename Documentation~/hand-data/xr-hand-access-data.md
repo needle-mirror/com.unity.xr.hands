@@ -4,7 +4,7 @@ uid: xrhands-access-data
 
 # Access hand data from Unity components in the scene
 
-Access hand-tracking data from Unity components in the scene. 
+Access hand-tracking data from Unity components in the scene.
 
 The [XRHandTrackingEvents](xref:UnityEngine.XR.Hands.XRHandTrackingEvents) component can be added to a GameObject in the scene to subscribe to hand-tracking events for a particular hand chosen by the Handedness property.
 This component subscribes to the [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem) and dispatches events when the hand data is updated.
@@ -14,7 +14,7 @@ There are also standard components to drive a Skinned Mesh Renderer component an
 
 # Access hand data from the XR Hand Subsystem
 
-Access hand tracking data from the [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem). 
+Access hand tracking data from the [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem).
 
 The [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem) updates hands twice per frame. The first update occurs as close as possible to the frame [Update](xref:ExecutionOrder) event. Use the data in this update to perform game logic, such as interactions, that depend on the hand data. The second update occurs just before rendering, as close as possible to the [Application.onBeforeRender](https://docs.unity3d.com/ScriptReference/Application-onBeforeRender.html) event. Use the data in this event to position game objects or other visual representations of the hands. This second update provides the lowest latency between hand motion and rendering.
 
@@ -105,7 +105,7 @@ The joints of the hand are indexed by the [XRHandJointID](xref:UnityEngine.XR.Ha
 
 ``` csharp
 for(var i = XRHandJointID.BeginMarker.ToIndex();
-        i < XRHandJointID.EndMarker.ToIndex(); 
+        i < XRHandJointID.EndMarker.ToIndex();
         i++)
 {
     var trackingData = hand.GetJoint(XRHandJointIDUtility.FromIndex(i));
@@ -134,7 +134,7 @@ Hand data can be unreliable for a variety of reasons. A hand or part of a hand m
 The XR Hands API provides several APIs that you can use to check data validity.
 
 | API | Purpose |
-|:---|:---| 
+|:---|:---|
 | [XRHandSubsystem.jointsInLayout](xref:UnityEngine.XR.Hands.XRHandSubsystem.jointsInLayout)| Indicates which joints are supported by the current hand data provider. You can use this property before the [XRHandSystem](xref:UnityEngine.XR.Hands.XRHandSubsystem) is loaded or initialized. |
 | [XRHandSubsystem.trackingAcquired](xref:UnityEngine.XR.Hands.XRHandSubsystem.trackingAcquired)| A callback function invoked when the system starts tracking a hand. |
 | [XRHandSubsystem.trackingLost](xref:UnityEngine.XR.Hands.XRHandSubsystem.trackingLost)| A callback function invoked when tracking of a hand is lost. |
@@ -153,19 +153,19 @@ The following example uses the `jointsInLayout` array to instantiate a prefab fo
 
 ``` csharp
 Dictionary<XRHandJointID, Transform> CreateHandDisplay(
-            GameObject jointPrefab, 
-            Transform sceneParent, 
+            GameObject jointPrefab,
+            Transform sceneParent,
             XRHandSubsystem handSubsystem)
 {
     var displayObjects = new Dictionary<XRHandJointID, Transform>();
-    
-    for(var i = XRHandJointID.BeginMarker.ToIndex(); 
-            i < XRHandJointID.EndMarker.ToIndex(); 
+
+    for(var i = XRHandJointID.BeginMarker.ToIndex();
+            i < XRHandJointID.EndMarker.ToIndex();
             i++)
     {
         if (handSubsystem.jointsInLayout[i])
         {
-            XRHandJointID jointID = XRHandJointIDUtility.FromIndex(i); 
+            XRHandJointID jointID = XRHandJointIDUtility.FromIndex(i);
             var go = Instantiate(jointPrefab, sceneParent);
             go.name = jointID.ToString();
             displayObjects.Add(jointID, go.transform);
@@ -178,7 +178,7 @@ Dictionary<XRHandJointID, Transform> CreateHandDisplay(
 With this dictionary, you could update the transforms of these game objects when a hand update is available:
 
 ``` csharp
-void UpdateJointTransforms(XRHand hand, 
+void UpdateJointTransforms(XRHand hand,
          Dictionary<XRHandJointID, Transform> displayObjects)
 {
     foreach (var joint in displayObjects)

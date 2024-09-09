@@ -19,7 +19,7 @@ The skeleton driver will work for any hierarchy of joints that matches the follo
 
 The parent structure is important to the skeleton driver because the pose for each joint is relative to the parent joint.
 
-Not every joint is required to be included, but if a joint is included, it should also include all its parents. 
+Not every joint is required to be included, but if a joint is included, it should also include all its parents.
 For example, you can ignore an entire finger by not including the `Metacarpal` joint and its child GameObjects, but if you include the `Proximal` joint, you must also include the `Metacarpal` joint as its parent.
 
 # XR Hand Mesh Controller

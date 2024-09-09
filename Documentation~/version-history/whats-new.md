@@ -11,6 +11,10 @@ Summary of changes in XR Hands package version 1.5. The main updates in this rel
 
 Support for common hand gestures has been added with initial support for gestures piped through the OpenXR Hand Interaction Profile extension. This includes scripting APIs to expose **aim**, **grasp**, **grip**, **pinch**, and **poke** poses and values where appropriate for more information, please refer to the [Scripting API](https://docs.unity3d.com/Packages/com.unity.xr.hands@1.5/api/UnityEngine.XR.Hands.XRCommonHandGestures.html).
 
+### High Fidelity Tracking Flag
+
+The XR Hands package now enables the detection of high or low fidelity hand tracking data via `XRHandJointTrackingState.HighFidelityPose`. For OpenXR based devices, this is set if and only if a joint has its position and orientation marked as tracked by the underlying runtime. For other platforms, consult the supporting package's documentation.
+
 ## Fixed
 - Fixed performance regression in hand gesture debug UI.
 

@@ -52,7 +52,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// A populated <see cref="XRFingerShapeConfiguration"/> representing
         /// range of motion for the given <see cref="XRHandFingerID"/>.
         /// </returns>
-        /// <exception>
+        /// <exception cref="ArgumentException">
         /// Will throw an exception if <paramref name="fingerID"/> is not a named
         /// value of <see cref="XRHandFingerID"/>.
         /// </exception>

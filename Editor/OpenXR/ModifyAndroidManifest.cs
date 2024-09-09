@@ -1,4 +1,4 @@
-﻿#if UNITY_OPENXR_PACKAGE
+#if UNITY_OPENXR_PACKAGE
 
 using System;
 using System.Collections.Generic;

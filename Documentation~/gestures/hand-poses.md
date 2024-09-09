@@ -28,15 +28,15 @@ To edit a hand pose:
 2. Choose an **XR Hand Shape** asset for the **Hand Shape property.
    * You can drag an asset to the property or click the object picker button inside the field.
 3. Under **Hand Orientation**, use the + button to add one or more **Hand Orientation Conditions** to the pose.
-4. Set the properties of each condition to the desired values.   
- 
+4. Set the properties of each condition to the desired values.
+
 When you reference a hand pose in a gesture component, the user's hand must satisfy both the hand shape conditions and the orientation conditions in order for the gesture to be recognized.
 
 > [!NOTE]
 > You can only specify user-relative orientations or the [XR Origin Up axis](xref:xrhands-hand-orientation#origin-up) in a hand pose. For example, you can specify that the palm is facing toward or away from the user, but you cannot specify that the palm is facing another object in a scene. To specify a target-relative orientation for a gesture, you must use the orientation properties of the [XR Static Hand Gesture](xref:xrhands-static-gesture-component) component used to add the gesture to the scene containing the target object.
-  
+
 ### XR Hand Pose properties
- 
+
 The **XR Hand Pose** class is a ScriptableObject that you can use to define the hand poses to use with gestures.
 
 ![XR Hand Pose Inspector](../images/gestures/hand-pose.png) <br /> *Hand Pose Inspector example*
@@ -48,7 +48,7 @@ The **XR Hand Pose** object has the following properties:
 | **Hand Shape** | The [XRHandShape](xref:xrhands-hand-shapes) asset to use for this pose. |
 | **User Conditions** list | A list of user conditions that the gesture must satisfy to be recognized. All orientations in the list must evaluate to true. Refer to [User Relative Conditions](#user-relative-conditions) for more information about the individual properties of a condition. |
 | **Target Conditions** | An optional collection of target-relative orientation conditions that must be met for the gesture to be detected. Refer to [Target Relative Orientation](#target-relative-conditions) for information about the properties of the elements of this list. |
-  
+
 ### User Relative Conditions
 
 A user relative condition defines the required angular relationship between an axis of the hand and a reference direction. To evaluate to true, the hand axis and the reference direction must be aligned within the number of degrees set by the **Angle Tolerance** property.

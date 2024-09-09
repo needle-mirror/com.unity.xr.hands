@@ -173,15 +173,16 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
                 m_LowerRangeImage.color = m_UpperRangeImage.color;
 
                 var currentValue = m_ValueBar.localScale.x;
-                var withinToleranceRange = Math.Abs(currentValue - m_TargetAmount) > m_UpperToleranceAmount ||
-                    m_LowerToleranceAmount < Math.Clamp((m_TargetAmount - currentValue), 0f, 1f);
+                var withinToleranceRange =
+                    (m_TargetAmount + m_UpperToleranceAmount) > currentValue &&
+                    (m_TargetAmount - m_LowerToleranceAmount) < currentValue;
 
                 var positionIndent = m_RangeStatusText.transform.localPosition;
                 if (value)
                 {
                     positionIndent.x = 226f;
 
-                    if (!withinToleranceRange)
+                    if (withinToleranceRange)
                     {
                         m_RangeStatusText.color = m_InRangeColor;
                         m_RangeStatusText.text = k_InRangeText;

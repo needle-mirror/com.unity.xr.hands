@@ -48,12 +48,12 @@ namespace UnityEngine.XR.Hands.Gestures
             }
 
             /// <summary>
-            /// If the <see cref="alignmentCondition"/> is <see cref="AlignmentCondition.AlignsWith"/>, 
+            /// If the <see cref="alignmentCondition"/> is <see cref="AlignmentCondition.AlignsWith"/>,
             /// this is the maximum angle between the <see cref="handAxis"/> and the reference direction for the condition to be met.
             ///
             /// If the <see cref="alignmentCondition"/> is <see cref="AlignmentCondition.OppositeTo"/>,
             /// this is the maximum angle between the <see cref="handAxis"/> and the opposite of the reference direction for the condition to be met.
-            /// 
+            ///
             /// If the <see cref="alignmentCondition"/> is <see cref="AlignmentCondition.PerpendicularTo"/>,
             /// this is the maximum angle difference from 90 degrees (perpendicular) between the <see cref="handAxis"/> and the reference direction for the condition to be met.
             /// </summary>
@@ -229,12 +229,12 @@ namespace UnityEngine.XR.Hands.Gestures
             }
 
             /// <summary>
-            /// If the <see cref="alignmentCondition"/> is <see cref="XRHandAlignmentCondition.AlignsWith"/>, 
+            /// If the <see cref="alignmentCondition"/> is <see cref="XRHandAlignmentCondition.AlignsWith"/>,
             /// this is the maximum angle between the <see cref="handAxis"/> and the reference direction for the condition to be met.
             ///
             /// If the <see cref="alignmentCondition"/> is <see cref="XRHandAlignmentCondition.OppositeTo"/>,
             /// this is the maximum angle between the <see cref="handAxis"/> and the opposite of the reference direction for the condition to be met.
-            /// 
+            ///
             /// If the <see cref="alignmentCondition"/> is <see cref="XRHandAlignmentCondition.PerpendicularTo"/>,
             /// this is the maximum angle difference from 90 degrees (perpendicular) between the <see cref="handAxis"/> and the reference direction for the condition to be met.
             /// </summary>

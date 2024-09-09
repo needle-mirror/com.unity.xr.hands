@@ -1,6 +1,7 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SubsystemsImplementation.Extensions;
 using UnityEngine.TestTools;
@@ -175,7 +176,7 @@ class Tests
             var id = XRHandJointIDUtility.FromIndex(jointIndex);
 
             var leftJoint = subsystem.leftHand.GetJoint(id);
-            Assert.AreEqual(XRHandJointTrackingState.Pose, leftJoint.trackingState);
+            Assert.AreEqual(XRHandJointTrackingState.Pose | XRHandJointTrackingState.HighFidelityPose, leftJoint.trackingState);
             Assert.IsFalse(leftJoint.TryGetRadius(out var leftRadius));
             Assert.IsFalse(leftJoint.TryGetLinearVelocity(out var leftLinearVelocity));
             Assert.IsFalse(leftJoint.TryGetAngularVelocity(out var leftAngularVelocity));
@@ -184,7 +185,7 @@ class Tests
             Assert.AreEqual(Vector3.zero, leftAngularVelocity);
 
             var rightJoint = subsystem.rightHand.GetJoint(id);
-            Assert.AreEqual(XRHandJointTrackingState.Pose, rightJoint.trackingState);
+            Assert.AreEqual(XRHandJointTrackingState.Pose | XRHandJointTrackingState.HighFidelityPose, rightJoint.trackingState);
             Assert.IsFalse(rightJoint.TryGetRadius(out var rightRadius));
             Assert.IsFalse(rightJoint.TryGetLinearVelocity(out var rightLinearVelocity));
             Assert.IsFalse(rightJoint.TryGetAngularVelocity(out var rightAngularVelocity));
@@ -515,6 +516,142 @@ class Tests
         finally
         {
             Object.DestroyImmediate(go);
+            updater.Stop();
+            updater.Destroy();
+            subsystem.Destroy();
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator HandTrackingPoseStatusUpdates()
+    {
+        var subsystem = CreateTestSubsystem();
+        var updater = new XRHandProviderUtility.SubsystemUpdater(subsystem);
+        var provider = (TestHandProvider)subsystem.GetProvider();
+
+        int[] fingerTipIndices =
+        {
+            XRHandJointID.ThumbTip.ToIndex(),
+            XRHandJointID.IndexTip.ToIndex(),
+            XRHandJointID.MiddleTip.ToIndex(),
+            XRHandJointID.RingTip.ToIndex(),
+            XRHandJointID.LittleTip.ToIndex()
+        };
+
+        XRHandJointTrackingState[] expectedLeftHandJointsTrackingStates = new XRHandJointTrackingState[XRHandJointID.EndMarker.ToIndex()];
+        XRHandJointTrackingState[] expectedRightHandJointsTrackingStates = new XRHandJointTrackingState[XRHandJointID.EndMarker.ToIndex()];
+
+        System.Array.Fill(expectedLeftHandJointsTrackingStates, XRHandJointTrackingState.Pose | XRHandJointTrackingState.HighFidelityPose);
+        System.Array.Fill(expectedRightHandJointsTrackingStates, XRHandJointTrackingState.Pose | XRHandJointTrackingState.HighFidelityPose);
+
+        bool leftHandJointsUpdatedThisFrame = false;
+        XRHandJointTrackingState[] actualLeftHandJointsTrackingStates = new XRHandJointTrackingState[XRHandJointID.EndMarker.ToIndex()];
+
+        bool rightHandJointsUpdatedThisFrame = false;
+        XRHandJointTrackingState[] actualRightHandJointsTrackingStates = new XRHandJointTrackingState[XRHandJointID.EndMarker.ToIndex()];
+
+        void OnUpdatedHands(
+            XRHandSubsystem xrHandSubsystem,
+            XRHandSubsystem.UpdateSuccessFlags successFlags,
+            XRHandSubsystem.UpdateType updateType)
+        {
+            if (updateType != XRHandSubsystem.UpdateType.Dynamic)
+                return;
+
+            leftHandJointsUpdatedThisFrame = successFlags.HasFlag(XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose)
+                && successFlags.HasFlag(XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints);
+            rightHandJointsUpdatedThisFrame = successFlags.HasFlag(XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose)
+                && successFlags.HasFlag(XRHandSubsystem.UpdateSuccessFlags.RightHandJoints);
+
+            for (int jointIndex = XRHandJointID.BeginMarker.ToIndex();
+                    jointIndex < XRHandJointID.EndMarker.ToIndex();
+                    ++jointIndex)
+            {
+                if (leftHandJointsUpdatedThisFrame)
+                {
+                    actualLeftHandJointsTrackingStates[jointIndex] =
+                        xrHandSubsystem.leftHand.GetJoint(XRHandJointIDUtility.FromIndex(jointIndex)).trackingState;
+                }
+
+                if (rightHandJointsUpdatedThisFrame)
+                {
+                    actualRightHandJointsTrackingStates[jointIndex] =
+                        xrHandSubsystem.rightHand.GetJoint(XRHandJointIDUtility.FromIndex(jointIndex)).trackingState;
+                }
+            }
+        }
+        subsystem.updatedHands += OnUpdatedHands;
+
+        try
+        {
+            subsystem.Start();
+            updater.Start();
+            yield return null;
+
+            Assert.IsTrue(leftHandJointsUpdatedThisFrame);
+            Assert.IsTrue(rightHandJointsUpdatedThisFrame);
+            Assert.IsTrue(expectedLeftHandJointsTrackingStates.SequenceEqual(actualLeftHandJointsTrackingStates));
+            Assert.IsTrue(expectedRightHandJointsTrackingStates.SequenceEqual(actualRightHandJointsTrackingStates));
+
+
+            // Mark some of the joints as having low-fidelity poses, as if they are occluded. Only mark the left hand.
+            foreach (var fingerTipIndex in fingerTipIndices)
+            {
+                expectedLeftHandJointsTrackingStates[fingerTipIndex] = XRHandJointTrackingState.Pose;
+            }
+            expectedLeftHandJointsTrackingStates.CopyTo(provider.leftHandJointsTrackingStates, 0);
+
+            yield return null;
+
+            Assert.IsTrue(leftHandJointsUpdatedThisFrame);
+            Assert.IsTrue(rightHandJointsUpdatedThisFrame);
+            Assert.IsTrue(expectedLeftHandJointsTrackingStates.SequenceEqual(actualLeftHandJointsTrackingStates));
+            Assert.IsTrue(expectedRightHandJointsTrackingStates.SequenceEqual(actualRightHandJointsTrackingStates));
+
+            // Now mark the finger tips of the right hand as occluded.
+            foreach (var fingerTipIndex in fingerTipIndices)
+            {
+                expectedRightHandJointsTrackingStates[fingerTipIndex] = XRHandJointTrackingState.Pose;
+            }
+            expectedRightHandJointsTrackingStates.CopyTo(provider.rightHandJointsTrackingStates, 0);
+
+            yield return null;
+
+            Assert.IsTrue(leftHandJointsUpdatedThisFrame);
+            Assert.IsTrue(rightHandJointsUpdatedThisFrame);
+            Assert.IsTrue(expectedLeftHandJointsTrackingStates.SequenceEqual(actualLeftHandJointsTrackingStates));
+            Assert.IsTrue(expectedRightHandJointsTrackingStates.SequenceEqual(actualRightHandJointsTrackingStates));
+
+            // Unocclude the left hand.
+            foreach (var fingerTipIndex in fingerTipIndices)
+            {
+                expectedLeftHandJointsTrackingStates[fingerTipIndex] = XRHandJointTrackingState.Pose | XRHandJointTrackingState.HighFidelityPose;
+            }
+            expectedLeftHandJointsTrackingStates.CopyTo(provider.leftHandJointsTrackingStates, 0);
+
+            yield return null;
+
+            Assert.IsTrue(leftHandJointsUpdatedThisFrame);
+            Assert.IsTrue(rightHandJointsUpdatedThisFrame);
+            Assert.IsTrue(expectedLeftHandJointsTrackingStates.SequenceEqual(actualLeftHandJointsTrackingStates));
+            Assert.IsTrue(expectedRightHandJointsTrackingStates.SequenceEqual(actualRightHandJointsTrackingStates));
+
+            // ...and now the right hand.
+            foreach (var fingerTipIndex in fingerTipIndices)
+            {
+                expectedRightHandJointsTrackingStates[fingerTipIndex] = XRHandJointTrackingState.Pose | XRHandJointTrackingState.HighFidelityPose;
+            }
+            expectedRightHandJointsTrackingStates.CopyTo(provider.rightHandJointsTrackingStates, 0);
+
+            yield return null;
+
+            Assert.IsTrue(leftHandJointsUpdatedThisFrame);
+            Assert.IsTrue(rightHandJointsUpdatedThisFrame);
+            Assert.IsTrue(expectedLeftHandJointsTrackingStates.SequenceEqual(actualLeftHandJointsTrackingStates));
+            Assert.IsTrue(expectedRightHandJointsTrackingStates.SequenceEqual(actualRightHandJointsTrackingStates));
+        }
+        finally
+        {
             updater.Stop();
             updater.Destroy();
             subsystem.Destroy();

@@ -328,6 +328,7 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
             GameObject[] m_DrawJoints = new GameObject[XRHandJointID.EndMarker.ToIndex()];
             GameObject[] m_VelocityParents = new GameObject[XRHandJointID.EndMarker.ToIndex()];
             LineRenderer[] m_Lines = new LineRenderer[XRHandJointID.EndMarker.ToIndex()];
+            JointVisualizer[] m_JointVisualizers = new JointVisualizer[XRHandJointID.EndMarker.ToIndex()];
 
             static Vector3[] s_LinePointsReuse = new Vector3[2];
             XRHandMeshController m_MeshController;
@@ -358,6 +359,9 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
                     m_Lines[jointIndex].startWidth = m_Lines[jointIndex].endWidth = k_LineWidth;
                     s_LinePointsReuse[0] = s_LinePointsReuse[1] = jointDrivenTransform.position;
                     m_Lines[jointIndex].SetPositions(s_LinePointsReuse);
+
+                    if (m_DrawJoints[jointIndex].TryGetComponent<JointVisualizer>(out var jointVisualizer))
+                        m_JointVisualizers[jointIndex] = jointVisualizer;
                 }
 
                 var isSceneObject = meshPrefab.scene.IsValid();
@@ -519,6 +523,8 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
                     return;
 
                 var jointIndex = joint.id.ToIndex();
+                m_JointVisualizers[jointIndex].NotifyTrackingState(joint.trackingState);
+
                 if (!joint.TryGetPose(out var pose))
                     return;
 

@@ -189,7 +189,9 @@ namespace UnityEngine.XR.Hands.Gestures
                         throw new ArgumentOutOfRangeException($"Finger shape type {target.shapeType} is invalid for finger shape target condition.");
                 }
 
-                if (!hasValue || Math.Abs(value - target.desired) > target.upperTolerance || target.lowerTolerance < Math.Clamp((target.desired - value), 0f, 1f))
+                if (!hasValue ||
+                    value < (target.desired - target.lowerTolerance) ||
+                    value > (target.desired + target.upperTolerance))
                 {
                     return false;
                 }

@@ -11,7 +11,7 @@ namespace UnityEngine.XR.Hands.Processing
         /// <summary>
         /// Sets the subsystem's hand corresponding to hand passed in, which must
         /// have been initially retrieved from the <see cref="XRHandSubsystem"/>'s
-        /// <see cref="XRHandSubsystem.leftHand"/> or <see cref="XRHandSubsystem.rightHand"/> 
+        /// <see cref="XRHandSubsystem.leftHand"/> or <see cref="XRHandSubsystem.rightHand"/>
         /// property.
         /// </summary>
         /// <param name="subsystem">
@@ -65,7 +65,7 @@ namespace UnityEngine.XR.Hands.Processing
         /// </param>
         /// <param name="rootPose">
         /// The root <see cref="Pose"/> to set for the <paramref name="hand"/>.
-        /// </param> 
+        /// </param>
         /// <remarks>
         /// Be sure to follow this with a call to <c>yourHandSubsystem.SetCorrespondingHand(modifiedHand)</c>,
         /// or you will only update the root pose of a copy of a hand.
@@ -101,7 +101,7 @@ namespace UnityEngine.XR.Hands.Processing
         /// </param>
         /// <param name="pose">
         /// The <see cref="Pose"/> to set for the <paramref name="joint"/>.
-        /// </param> 
+        /// </param>
         /// <remarks>
         /// After manipulating data for a particular joint, be sure to assign it
         /// back to the array you got it from, as you can only manipulate copies
