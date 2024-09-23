@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.hands",
   "displayName": "XR Hands",
-  "version": "1.5.0-pre.4",
+  "version": "1.5.0",
   "unity": "2021.3",
   "description": "Surfaces the cross-platform subsystem API for hand-tracking. Implementations of providers will be found in the package for that platform.",
   "keywords": [
@@ -22,16 +22,16 @@
     "com.unity.mathematics": "1.2.6"
   },
   "_upm": {
-    "changelog": "### Added\n\n- Added support for a new `XRHandJointTrackingState.HighFidelityPose` flag to the XR Hands Subsystem.\n    - Added support for the HighFidelityPose tracking flag to the OpenXRHandProvider.\n    - Updated hand visualization sample to color debug joint cubes based on tracking fidelity: opaque white for joints which have a pose and are high fidelity; translucent red for joints which have a pose and are not high fidelity.\n\n### Fixed\n\n- Fixed runtime invalidation, which resulted in crashes on some OpenXR runtimes. Runtime is invalidated when the `XrInstance` is destroyed.\n- Fixed threshold-checking on gesture conditions to allow for the full range in `XRFingerShapeCondition`.\n- `XRCommonHandGestures` data retrieval no longer GC.Allocs.\n- Updated app space change behavior for XR provider to no longer destroy hand trackers only to recreate them the next update.\n- Fixed issue where XrHands would try to update hand joints with an uninitialized XrTime value of XR_INFINITE_DURATION."
+    "changelog": "### Added\n\n- Added `XRCommonHandGestures` and surfaced related data from the OpenXR Hand Interaction Profile extension.\n- Added public `subsystem` property to `XRHandTrackingEvents` to let users get the `XRHandSubsystem` that is the source of the hand tracking data. Also added public `subsystem` property to `XRHandJointsUpdatedEventArgs` so it is available in the `XRHandTrackingEvents.jointsUpdated` event callback.\n- Added support for a new `XRHandJointTrackingState.HighFidelityPose` flag to the XR Hands Subsystem.\n    - Added support for the HighFidelityPose tracking flag to the OpenXRHandProvider.\n    - Updated hand visualization sample to color debug joint cubes based on tracking fidelity: opaque white for joints which have a pose and are high fidelity; translucent red for joints which have a pose and are not high fidelity.\n- Added OpenXR callbacks `HandTracking.subsystemCreated` and `HandTracking.destroyingSubsystem` for lifecycle response.\n- Added OpenXR APIs `HandTracking.automaticallyInitializeSubsystem` and `HandTracking.EnsureSubsystemInitialized` to allow for delayed initialization of the `XRHandSubsystem`. To disable automatic creation in time, set `HandTracking.automaticallyInitializeSubsystem` to `false` in a `static` method decorated with `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]`, then call `HandTracking.EnsureSubsystemInitialized` when ready.\n\n### Changed\n\n- Allows for ignoring tip-most knuckle when calculating full curl when the `XRFingerShapeConfiguration`'s `minimumFullCurlDegrees3` or `maximumFullCurlDegrees3` is non-positive.\n\n### Fixed\n\n- Fixed reference direction when using `XRHandUserRelativeDirection.NoseDirection` for gesture detection.\n- Fixed runtime invalidation, which resulted in crashes on some OpenXR runtimes. Runtime is invalidated when the `XrInstance` is destroyed.\n- Fixed threshold-checking on gesture conditions to allow for the full range in `XRFingerShapeCondition`.\n- `XRCommonHandGestures` data retrieval no longer GC.Allocs.\n- Updated app space change behavior for XR provider to no longer destroy hand trackers only to recreate them the next update.\n- Fixed issue where XrHands would try to update hand joints with an uninitialized XrTime value of XR_INFINITE_DURATION.\n- Fixed an issue with packaging that prevented MacOS compatible libraries from being included as part of the package."
   },
   "upmCi": {
-    "footprint": "b7df8d512e62c5f09e163b786c2b72ae932c6461"
+    "footprint": "755b8b1fcccdc38baf4cc31f81a83797e9f5a1f5"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.5/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.xr.hands.git",
     "type": "git",
-    "revision": "84872d01463fbf1aed145ce41d0e8f63f76efba4"
+    "revision": "4885d8ead84d87a2b2a38945923fbbc7b1ef8131"
   },
   "samples": [
     {

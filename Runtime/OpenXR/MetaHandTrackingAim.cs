@@ -78,12 +78,23 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// <summary>See <see cref="OpenXRFeature.OnSubsystemStart"/>.</summary>
         protected override void OnSubsystemStart()
         {
+            if (HandTracking.subsystem == null)
+            {
+                HandTracking.subsystemCreated += OnHandSubsystemCreated;
+                return;
+            }
+
+            Init(HandTracking.subsystem);
+        }
+
+        void OnHandSubsystemCreated(HandTracking.SubsystemCreatedEventArgs eventArgs) => Init(eventArgs.subsystem);
+
+        void Init(XRHandSubsystem subsystem)
+        {
             if (NativeApi.ToggleMetaAim(true))
             {
                 CreateHands();
-                var subsystem = XRGeneralSettings.Instance?.Manager?.activeLoader?.GetLoadedSubsystem<XRHandSubsystem>();
-                if (subsystem != null)
-                    subsystem.updatedHands += OnUpdatedHands;
+                subsystem.updatedHands += OnUpdatedHands;
             }
             else
             {
@@ -96,11 +107,11 @@ namespace UnityEngine.XR.Hands.OpenXR
         {
             NativeApi.ToggleMetaAim(false);
 
-            var subsystem = XRGeneralSettings.Instance?.Manager?.activeLoader?.GetLoadedSubsystem<XRHandSubsystem>();
-            if (subsystem != null)
-                subsystem.updatedHands -= OnUpdatedHands;
+            if (HandTracking.subsystem != null)
+                HandTracking.subsystem.updatedHands -= OnUpdatedHands;
 
             DestroyHands();
+            HandTracking.subsystemCreated -= OnHandSubsystemCreated;
         }
 
         void CreateHands()

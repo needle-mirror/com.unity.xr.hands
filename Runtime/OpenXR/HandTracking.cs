@@ -68,6 +68,89 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </summary>
         public static XRHandSubsystem subsystem => s_Subsystem;
 
+        /// <summary>
+        /// Event-args struct passed to <see cref="subsystemCreated"/> when
+        /// the subsystem is created.
+        /// </summary>
+        public struct SubsystemCreatedEventArgs
+        {
+            /// <summary>
+            /// The subsystem that was just created.
+            /// </summary>
+            public XRHandSubsystem subsystem { get; internal set; }
+        }
+
+        /// <summary>
+        /// Event-args struct passed to <see cref="destroyingSubsystem"/> when
+        /// the subsystem is about to be destroyed.
+        /// </summary>
+        public struct DestroyingSubsystemEventArgs
+        {
+            /// <summary>
+            /// The subsystem about to be destroyed.
+            /// </summary>
+            public XRHandSubsystem subsystem { get; internal set; }
+        }
+
+        /// <summary>
+        /// Called when this feature creates an <see cref="XRHandSubsystem"/>.
+        /// </summary>
+        public static Action<SubsystemCreatedEventArgs> subsystemCreated;
+
+        /// <summary>
+        /// Called just before this feature destroys an <see cref="XRHandSubsystem"/>.
+        /// </summary>
+        public static Action<DestroyingSubsystemEventArgs> destroyingSubsystem;
+
+        /// <summary>
+        /// Whether an <see cref="XRHandSubsystem"/> should be created when the
+        /// session is. Defaults to <see langword="true"/>.
+        /// </summary>
+        /// <remarks>
+        /// If you wish to set this to <see langword="false"/> in time to stop
+        /// automatic creation, do so in a <c>static</c> method decorated with
+        /// <c>[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]</c>.
+        /// When you wish to initialize the subsystem, you can then call
+        /// <see cref="EnsureSubsystemInitialized"/>.
+        /// </remarks>
+        public static bool automaticallyInitializeSubsystem { get; set; } = true;
+
+        /// <summary>
+        /// Ensures an <see cref="XRHandSubsystem"/> is created.
+        /// </summary>
+        /// <remarks>
+        /// Will be automatically called at start-up if
+        /// <see cref="automaticallyInitializeSubsystem"/> is <see langword="true"/>,
+        /// which it is by default. If called later, will automatically start
+        /// the subsystem if the session is running.
+        /// </remarks>
+        public static void EnsureSubsystemInitialized()
+        {
+            if (s_Subsystem != null)
+                return;
+
+            var descriptors = new List<XRHandSubsystemDescriptor>();
+            s_This.CreateSubsystem<XRHandSubsystemDescriptor, XRHandSubsystem>(descriptors, OpenXRHandProvider.id);
+            s_Subsystem = XRGeneralSettings.Instance?.Manager?.activeLoader?.GetLoadedSubsystem<XRHandSubsystem>();
+
+            if (s_Subsystem == null)
+            {
+                Debug.LogError($"Failed to find descriptor '{OpenXRHandProvider.id}' - HandTracking OpenXR feature will not do anything!");
+                return;
+            }
+
+            s_This.m_Updater = new XRHandProviderUtility.SubsystemUpdater(s_Subsystem);
+
+            if (s_This.m_ShouldBeRunning)
+            {
+                s_Subsystem.Start();
+                s_This.m_Updater.Start();
+            }
+
+            if (subsystemCreated != null)
+                subsystemCreated.Invoke(new SubsystemCreatedEventArgs {subsystem = s_Subsystem});
+        }
+
         /// <summary>See <see cref="OpenXRFeature.OnSystemChange(ulong)"/>.</summary>
         protected override void OnSystemChange(ulong xrSystem)
         {
@@ -78,6 +161,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// <summary>See <see cref="OpenXRFeature.OnInstanceCreate(ulong)"/>.</summary>
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
+            s_This = this;
             if (!base.OnInstanceCreate(xrInstance))
                 return false;
 
@@ -102,21 +186,8 @@ namespace UnityEngine.XR.Hands.OpenXR
             base.OnSessionCreate(xrSession);
             NativeApi.OnSessionCreate(xrSession);
 
-            var descriptors = new List<XRHandSubsystemDescriptor>();
-            SubsystemManager.GetSubsystemDescriptors(descriptors);
-            if (descriptors.Count < 1)
-                return;
-
-            CreateSubsystem<XRHandSubsystemDescriptor, XRHandSubsystem>(descriptors, OpenXRHandProvider.id);
-            s_Subsystem = XRGeneralSettings.Instance?.Manager?.activeLoader?.GetLoadedSubsystem<XRHandSubsystem>();
-
-            if (s_Subsystem == null)
-            {
-                Debug.LogError($"Failed to find descriptor '{OpenXRHandProvider.id}' - HandTracking OpenXR feature will not do anything!");
-                return;
-            }
-
-            m_Updater = new XRHandProviderUtility.SubsystemUpdater(s_Subsystem);
+            if (automaticallyInitializeSubsystem)
+                EnsureSubsystemInitialized();
         }
 
         /// <summary>See <see cref="OpenXRFeature.OnAppSpaceChange(ulong)"/>.</summary>
@@ -149,6 +220,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </remarks>
         protected override void OnSubsystemStart()
         {
+            m_ShouldBeRunning = true;
             if (s_Subsystem == null)
                 return;
 
@@ -164,6 +236,8 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </remarks>
         protected override void OnSubsystemStop()
         {
+            m_ShouldBeRunning = false;
+
             m_Updater?.Stop();
             s_Subsystem?.Stop();
         }
@@ -178,6 +252,9 @@ namespace UnityEngine.XR.Hands.OpenXR
         {
             m_Updater?.Destroy();
             m_Updater = null;
+
+            if (destroyingSubsystem != null)
+                destroyingSubsystem.Invoke(new DestroyingSubsystemEventArgs {subsystem = s_Subsystem});
 
             s_Subsystem?.Destroy();
             s_Subsystem = null;
@@ -256,7 +333,10 @@ namespace UnityEngine.XR.Hands.OpenXR
 #endif
 
         XRHandProviderUtility.SubsystemUpdater m_Updater;
+        bool m_ShouldBeRunning;
+
         static XRHandSubsystem s_Subsystem;
+        static HandTracking s_This;
     }
 }
 
