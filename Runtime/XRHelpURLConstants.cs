@@ -24,6 +24,11 @@ namespace UnityEngine.XR.Hands
         internal const string k_CurrentManualDocsBaseUrl = k_CurrentDocsBaseUrl + k_ManualFolder + "/";
 
         /// <summary>
+        /// Auxiliary path for the OpenXR-related features documented in the Hands manual pages.
+        /// </summary>
+        internal const string k_OpenXRFeaturesDocsBaseUrl = k_CurrentManualDocsBaseUrl + "openxr-features/";
+
+        /// <summary>
         /// Scripting API URL for <see cref="XRHandSkeletonDriver"/>.
         /// </summary>
         internal const string k_XRHandSkeletonDriver = k_CurrentApiDocsBaseUrl + k_NamespaceRoot + nameof(XRHandSkeletonDriver) + ".html";

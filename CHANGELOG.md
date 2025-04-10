@@ -7,6 +7,18 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2025-04-10
+
+### Added
+
+- Added support for Android XR as a part of the `HandVisualizer` sample. This update includes an OpenXR runtime check to determine the hand meshes to use for visualization.
+- Added Android XR variants of the sample hand meshes provided in the `HandVisualizer` sample package.
+
+### Fixed
+
+- Fixed the help documentation links in the OpenXR Project Settings where hands features were exposed in the Feature Groups editor window.
+- Recompiled the native plug-in with support for [16 KB page sizes](https://developer.android.com/guide/practices/page-sizes) on Android 15 or newer.
+
 ## [1.5.0] - 2024-09-23
 
 ### Added
