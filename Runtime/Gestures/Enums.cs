@@ -49,7 +49,7 @@ namespace UnityEngine.XR.Hands.Gestures
     }
 
     /// <summary>
-    /// Set which types you want to calculate for the the corresponding fields calculated when
+    /// Set which types you want to calculate for the corresponding fields calculated when
     /// calling <see cref="XRFingerShapeMath.Calculate(XRHand, XRHandFingerID, XRFingerShapeTypes)"/>.
     /// Any cleared types will result in a value of <c>0</c> for its corresponding field in the
     /// returned <see cref="XRFingerShape"/>.

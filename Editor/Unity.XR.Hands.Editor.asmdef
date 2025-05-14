@@ -6,7 +6,9 @@
         "Unity.XR.OpenXR",
         "Unity.XR.OpenXR.Editor",
         "Unity.XR.OpenXR.Features.MetaQuestSupport",
-        "Unity.XR.Hands.Analytics.Editor"
+        "Unity.XR.Hands.Analytics.Editor",
+        "Unity.XR.CoreUtils",
+        "Unity.XR.CoreUtils.Editor"
     ],
     "includePlatforms": [
         "Editor"

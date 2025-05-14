@@ -304,7 +304,7 @@ namespace UnityEngine.XR.Hands.Gestures
             var nextID1 = (fingerID + 1).GetFrontJointID() + 1;
             var nextID2 = nextID1 + 1;
 
-            // ...but in practice, these specific joints work best for the the thumb instead
+            // ...but in practice, these specific joints work best for the thumb instead
             if (fingerID == XRHandFingerID.Thumb)
             {
                 thisID1 = XRHandJointID.ThumbMetacarpal;

@@ -110,7 +110,7 @@ namespace UnityEngine.XR.Hands
         /// <remarks>
         /// Hand data providers might not support tracking every joint in the
         /// <see cref="XRHandJointID"/> list. This array contains an element for
-        /// each possible joint. A value of true indicates the the current provider
+        /// each possible joint. A value of true indicates the current provider
         /// supports tracking the associated joint.
         ///
         /// To get the correct array index for a joint, call

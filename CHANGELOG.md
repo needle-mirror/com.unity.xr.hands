@@ -7,13 +7,22 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.6.0-pre.2] - 2024-04-10
+## [1.6.0-pre.3] - 2025-05-14
+
+### Added
+
+- Added project validation rules to the Gestures sample to check if the HandVisualizer sample is missing and needs to be imported, and to verify whether the package version needs to be updated.
+
+### Fixed
+- Fixed meta file collision with Polyspatial.
+
+## [1.6.0-pre.2] - 2025-04-10
 
 ### Added
 
 - Added ability to switch between hand meshes depending on the underlying runtime and vendor. The initial support provides a mesh for OpenXR conformant devices such as Android XR and a mesh to support Meta Quest devices by way of OpenXR.
 
-## [1.6.0-pre.1] - 2024-04-02
+## [1.6.0-pre.1] - 2025-04-02
 
 ### Added
 
