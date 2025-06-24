@@ -1,6 +1,6 @@
 using System;
 using Unity.Mathematics;
-using UnityObject = UnityEngine.Object;
+using UnityEngine.XR.Hands.ProviderImplementation;
 #if BURST_PRESENT
 using Unity.Burst;
 #endif
@@ -18,21 +18,27 @@ namespace UnityEngine.XR.Hands.Gestures
 #endif
     public static class XRFingerShapeMath
     {
+        static XRFingerShapeMath()
+        {
+            SetDefaultFingerShapeConfiguration(XRHandFingerID.Thumb, XRHandSubsystemProvider.FingerConfigDefaults.k_Thumb);
+            SetDefaultFingerShapeConfiguration(XRHandFingerID.Index, XRHandSubsystemProvider.FingerConfigDefaults.k_Index);
+            SetDefaultFingerShapeConfiguration(XRHandFingerID.Middle, XRHandSubsystemProvider.FingerConfigDefaults.k_Middle);
+            SetDefaultFingerShapeConfiguration(XRHandFingerID.Ring, XRHandSubsystemProvider.FingerConfigDefaults.k_Ring);
+            SetDefaultFingerShapeConfiguration(XRHandFingerID.Little, XRHandSubsystemProvider.FingerConfigDefaults.k_Little);
+        }
+
         /// <summary>
-        /// Calculate values useful for pose detection for a single finger. Will
-        /// only calculate fields of <see cref="XRFingerShape"/> for
-        /// corresponding flags that are set in <paramref name="shapeTypes"/>.
+        /// Calculate values useful for pose detection for a single finger.
+        /// Only the fields indicated by the <paramref name="shapeTypes"/> flags will be computed.
         /// </summary>
         /// <param name="xrHand">
-        /// The <see cref="XRHand"/> from which to get  finger joint data.
+        /// The <see cref="XRHand"/> from which to get finger joint data.
         /// </param>
         /// <param name="fingerID">
-        /// Denotes which finger to calculate <see cref="XRFingerState"/> values
-        /// for.
+        /// Denotes which finger to calculate <see cref="XRFingerShape"/> values for.
         /// </param>
         /// <param name="shapeTypes">
-        /// Denotes which fields to calculate in the returned
-        /// <see cref="XRFingerShape"/>.
+        /// Denotes which fields to calculate in the returned <see cref="XRFingerShape"/>.
         /// </param>
         /// <returns>
         /// Returns an <see cref="XRFingerShape"/> with values calculated if
@@ -56,16 +62,50 @@ namespace UnityEngine.XR.Hands.Gestures
         }
 
         /// <summary>
+        /// Calculate <see cref="XRFingerShape"/> values from scratch, without any attempt to save on
+        /// performance by using previously cached results.
+        /// Only the fields indicated by the <paramref name="shapeTypes"/> flags will be computed.
+        /// </summary>
+        /// <param name="xrHand">
+        /// The <see cref="XRHand"/> from which to get finger joint data.
+        /// </param>
+        /// <param name="fingerID">
+        /// Denotes which finger to calculate <see cref="XRFingerShape"/> values for.
+        /// </param>
+        /// <param name="shapeTypes">
+        /// Denotes which fields to calculate in the returned <see cref="XRFingerShape"/>.
+        /// </param>
+        /// <returns>
+        /// An <see cref="XRFingerShape"/> populated with the computed values for each requested shape type.
+        /// </returns>
+        /// <remarks>
+        /// This “uncached” overload ignores any prior cache and performs a full computation from scratch
+        /// using the default <see cref="XRFingerShapeConfiguration"/> provided by the platform.
+        /// Use this when you need guaranteed fresh results without relying on cached data.
+        /// </remarks>
+        public static XRFingerShape CalculateFingerShapeUncached(
+            this XRHand xrHand,
+            XRHandFingerID fingerID,
+            XRFingerShapeTypes shapeTypes)
+        {
+            var fingerShape = new XRFingerShape();
+
+            CalculateFingerShapeUncached(
+                xrHand, fingerID, shapeTypes, s_CurrentConfigurations[(int)fingerID], ref fingerShape);
+
+            return fingerShape;
+        }
+
+        /// <summary>
         /// Calculate values useful for pose detection for a single finger. Will
         /// only calculate fields of <see cref="XRFingerShape"/> for
         /// corresponding flags that are set in <paramref name="shapeTypes"/>.
         /// </summary>
         /// <param name="xrHand">
-        /// The <see cref="XRHand"/> from which to get  finger joint data.
+        /// The <see cref="XRHand"/> from which to get finger joint data.
         /// </param>
         /// <param name="fingerID">
-        /// Denotes which finger to calculate <see cref="XRFingerShape"/> values
-        /// for.
+        /// Denotes which finger to calculate <see cref="XRFingerShape"/> values for.
         /// </param>
         /// <param name="shapeTypes">
         /// Denotes which fields to calculate in the returned <see cref="XRFingerShape"/>.
@@ -86,11 +126,22 @@ namespace UnityEngine.XR.Hands.Gestures
             ref var fingerShape = ref k_CachedFingerShapes[(int)xrHand.handedness, (int)fingerID];
 
             // if all the requested values are already calculated, return the
-            // cached value - otherwise, try to calculate missing fields before
-            // returning
+            // cached value - otherwise, try to calculate missing fields before returning
             if ((fingerShape.m_Types & shapeTypes) == shapeTypes)
                 return fingerShape;
 
+            CalculateFingerShapeUncached(xrHand, fingerID, shapeTypes, configuration, ref fingerShape);
+
+            return fingerShape;
+        }
+
+        static void CalculateFingerShapeUncached(
+            this XRHand xrHand,
+            XRHandFingerID fingerID,
+            XRFingerShapeTypes shapeTypes,
+            XRFingerShapeConfiguration configuration,
+            ref XRFingerShape fingerShape)
+        {
             if ((shapeTypes & XRFingerShapeTypes.FullCurl) != 0 &&
                 (fingerShape.m_Types & XRFingerShapeTypes.FullCurl) == 0 &&
                 xrHand.TryCalculateFullCurl(fingerID, ref fingerShape.m_FullCurl, configuration))
@@ -115,13 +166,11 @@ namespace UnityEngine.XR.Hands.Gestures
                 (fingerShape.m_Types & XRFingerShapeTypes.Spread) == 0 &&
                 xrHand.TryCalculateSpread(fingerID, ref fingerShape.m_Spread, configuration))
                 fingerShape.m_Types |= XRFingerShapeTypes.Spread;
-
-            return fingerShape;
         }
 
         /// <summary>
         /// Set the finger state configuration to use for all future calls to
-        /// <see cref="XRFingerStateMathUtilities.CalculateFingerStates"/> for
+        /// <see cref="CalculateFingerShape"/> for
         /// the given finger.
         /// </summary>
         /// <param name="fingerID">
@@ -147,7 +196,7 @@ namespace UnityEngine.XR.Hands.Gestures
 
         /// <summary>
         /// Resets the finger state configuration to default for all future calls to
-        /// <see cref="XRFingerStateMathUtilities.CalculateFingerStates"/> for
+        /// <see cref="CalculateFingerShape"/> for
         /// the given finger.
         /// </summary>
         /// <param name="fingerID">

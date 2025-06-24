@@ -2,37 +2,31 @@
 uid: xrhands-changelog
 ---
 # Changelog
+
 All notable changes to this package will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.6.0-pre.3] - 2025-05-14
-
-### Added
-
-- Added project validation rules to the Gestures sample to check if the HandVisualizer sample is missing and needs to be imported, and to verify whether the package version needs to be updated.
-
-### Fixed
-- Fixed meta file collision with Polyspatial.
-
-## [1.6.0-pre.2] - 2025-04-10
-
-### Added
-
-- Added ability to switch between hand meshes depending on the underlying runtime and vendor. The initial support provides a mesh for OpenXR conformant devices such as Android XR and a mesh to support Meta Quest devices by way of OpenXR.
-
-## [1.6.0-pre.1] - 2025-04-02
+## [1.6.0] - 2025-06-24
 
 ### Added
 
 - Added new custom editor inspector for hand shapes.
 - Added `XRHandSubsystem.TryGetMeshData` to attempt retrieval of runtime-supplied hand mesh data, if it's supported on that platform and enabled.
+- Added ability to switch between hand meshes depending on the underlying runtime and vendor. The initial support provides a mesh for OpenXR conformant devices such as Android XR and a mesh to support Meta Quest devices by way of OpenXR.
+- Added project validation rules to the Gestures sample to check if the HandVisualizer sample is missing and needs to be imported, and to verify whether the package version needs to be updated.
+- Added `XRHandProviderUtility.CreateHand` for manually creating and initializing an `XRHand` instance. This is intended for advanced scenarios where `XRHand` is used independently of the `XRHandSubsystem`.
+- Added `XRHandProviderUtility.DisposeHand` to release allocated resources for `XRHand` instances created manually via `XRHandProviderUtility.CreateHand`. This should not be used for `XRHand` managed by the `XRHandSubsystem`.
+- Added `CalculateFingerShapeUncached`, which always calculates the requested `XRFingerShape` values without any attempt to save on performance by using previously requested results.
 
 ### Fixed
 
 - Fixed the help documentation links in the OpenXR Project Settings where hands features were exposed in the Feature Groups editor window.
 - Recompiled the native plug-in with support for [16 KB page sizes](https://developer.android.com/guide/practices/page-sizes) on Android 15 or newer.
+- Fixed meta file collision with PolySpatial.
+- Fixed URP material importing by adding a `MaterialPipelineHandler` script along with the corresponding asset to detect and reassign material shaders for the HandVisualizer Sample. [XRHB-78](https://issuetracker.unity3d.com/product/unity/issues/guid/XRHB-78)
+- Fixed hand model references for the Hand Visualizer in the HandGesture scene of the Gestures sample.
 
 ## [1.5.0] - 2024-09-23
 

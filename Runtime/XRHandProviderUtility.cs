@@ -1,4 +1,6 @@
 using System;
+using Unity.Collections;
+using UnityEngine.XR.Hands.Gestures;
 
 namespace UnityEngine.XR.Hands.ProviderImplementation
 {
@@ -67,6 +69,42 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
                 m_AngularVelocity = angularVelocity,
             };
         }
+
+        /// <summary>
+        /// Create and initialize a new <see cref="XRHand"/> instance. This method offers direct control over
+        /// hand creation, bypassing the <see cref="XRHandSubsystem"/>.
+        /// </summary>
+        /// <param name="handedness">
+        /// Indicates whether to create a left or right hand.
+        /// </param>
+        /// <param name="allocator">
+        /// The allocator to use for native memory allocation of the <see cref="XRHandJoint"/> data.
+        /// </param>
+        /// <returns>
+        /// A new <c>XRHand</c> instance.
+        /// </returns>
+        /// <remarks>
+        /// You shouldn't need to create <see cref="XRHand"/> manually if you are using <see cref="XRHandSubsystem"/>.
+        /// This function is more for advanced scenarios where you wish to use <c>XRHand</c> independent
+        /// of <c>XRHandSubsystem</c>. Most applications should access hands through the subsystem's
+        /// leftHand and rightHand properties instead. Refer to [Access hand data](xref:xr-hand-access-data) for details.
+        /// </remarks>
+        public static XRHand CreateHand(Handedness handedness, Allocator allocator) => new XRHand(handedness, allocator);
+
+        /// <summary>
+        /// Release resources allocated by an <see cref="XRHand"/> instance.
+        /// </summary>
+        /// <param name="hand">
+        /// The <c>XRHand</c> instance to dispose.
+        /// </param>
+        /// <remarks>
+        /// This method should only be called if you created the <c>XRHand</c> using <see cref="CreateHand"/>.
+        /// Do not call this method on <c>XRHand</c> instances obtained through an <c>XRHandSubsystem</c>,
+        /// as those are managed by the subsystem itself and will be disposed automatically.
+        /// This method is a wrapper for the internal Dispose method that handles the cleanup
+        /// of all native arrays allocated by the <c>XRHand</c>.
+        /// </remarks>
+        public static void DisposeHand(XRHand hand) => hand.Dispose();
 
         /// <summary>
         /// Use this with your provider (if hand-tracking is enabled in your

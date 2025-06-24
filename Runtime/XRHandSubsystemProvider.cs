@@ -300,9 +300,9 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         public virtual XRDetectedHandMeshLayout detectedHandMeshLayout => XRDetectedHandMeshLayout.OpenXRMetaQuest;
 
         // these defaults were captured using a Meta Quest 2
-        static class FingerConfigDefaults
+        internal static class FingerConfigDefaults
         {
-            static internal readonly XRFingerShapeConfiguration k_Thumb = new XRFingerShapeConfiguration
+            internal static readonly XRFingerShapeConfiguration k_Thumb = new XRFingerShapeConfiguration
             {
                 minimumFullCurlDegrees1 = 132f,
                 maximumFullCurlDegrees1 = 162f,
@@ -326,7 +326,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
                 maximumSpreadDegrees = 57f,
             };
 
-            static internal readonly XRFingerShapeConfiguration k_Index = new XRFingerShapeConfiguration
+            internal static readonly XRFingerShapeConfiguration k_Index = new XRFingerShapeConfiguration
             {
                 minimumFullCurlDegrees1 = 102f,
                 maximumFullCurlDegrees1 = 180f,
@@ -350,7 +350,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
                 maximumSpreadDegrees = 18f,
             };
 
-            static internal readonly XRFingerShapeConfiguration k_Middle = new XRFingerShapeConfiguration
+            internal static readonly XRFingerShapeConfiguration k_Middle = new XRFingerShapeConfiguration
             {
                 minimumFullCurlDegrees1 = 92f,
                 maximumFullCurlDegrees1 = 180f,
@@ -374,7 +374,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
                 maximumSpreadDegrees = 20f,
             };
 
-            static internal readonly XRFingerShapeConfiguration k_Ring = new XRFingerShapeConfiguration
+            internal static readonly XRFingerShapeConfiguration k_Ring = new XRFingerShapeConfiguration
             {
                 minimumFullCurlDegrees1 = 90f,
                 maximumFullCurlDegrees1 = 180f,
@@ -398,7 +398,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
                 maximumSpreadDegrees = 20f,
             };
 
-            static internal readonly XRFingerShapeConfiguration k_Little = new XRFingerShapeConfiguration
+            internal static readonly XRFingerShapeConfiguration k_Little = new XRFingerShapeConfiguration
             {
                 minimumFullCurlDegrees1 = 90f,
                 maximumFullCurlDegrees1 = 180f,

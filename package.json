@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.hands",
   "displayName": "XR Hands",
-  "version": "1.6.0-pre.3",
+  "version": "1.6.0",
   "unity": "2021.3",
   "description": "Surfaces the cross-platform subsystem API for hand-tracking. Implementations of providers will be found in the package for that platform.",
   "keywords": [
@@ -22,16 +22,16 @@
     "com.unity.mathematics": "1.2.6"
   },
   "_upm": {
-    "changelog": "### Added\n\n- Added project validation rules to the Gestures sample to check if the HandVisualizer sample is missing and needs to be imported, and to verify whether the package version needs to be updated.\n\n### Fixed\n- Fixed meta file collision with Polyspatial."
+    "changelog": "### Added\n\n- Added new custom editor inspector for hand shapes.\n- Added `XRHandSubsystem.TryGetMeshData` to attempt retrieval of runtime-supplied hand mesh data, if it's supported on that platform and enabled.\n- Added ability to switch between hand meshes depending on the underlying runtime and vendor. The initial support provides a mesh for OpenXR conformant devices such as Android XR and a mesh to support Meta Quest devices by way of OpenXR.\n- Added project validation rules to the Gestures sample to check if the HandVisualizer sample is missing and needs to be imported, and to verify whether the package version needs to be updated.\n- Added `XRHandProviderUtility.CreateHand` for manually creating and initializing an `XRHand` instance. This is intended for advanced scenarios where `XRHand` is used independently of the `XRHandSubsystem`.\n- Added `XRHandProviderUtility.DisposeHand` to release allocated resources for `XRHand` instances created manually via `XRHandProviderUtility.CreateHand`. This should not be used for `XRHand` managed by the `XRHandSubsystem`.\n- Added `CalculateFingerShapeUncached`, which always calculates the requested `XRFingerShape` values without any attempt to save on performance by using previously requested results.\n\n### Fixed\n\n- Fixed the help documentation links in the OpenXR Project Settings where hands features were exposed in the Feature Groups editor window.\n- Recompiled the native plug-in with support for [16 KB page sizes](https://developer.android.com/guide/practices/page-sizes) on Android 15 or newer.\n- Fixed meta file collision with PolySpatial.\n- Fixed URP material importing by adding a `MaterialPipelineHandler` script along with the corresponding asset to detect and reassign material shaders for the HandVisualizer Sample. [XRHB-78](https://issuetracker.unity3d.com/product/unity/issues/guid/XRHB-78)\n- Fixed hand model references for the Hand Visualizer in the HandGesture scene of the Gestures sample."
   },
   "upmCi": {
-    "footprint": "c7f226b8b4f15fbe3b748c62b2b22361c632ccb4"
+    "footprint": "11d5634a00ca5c40c4454d00a499a72aa949ef36"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.6/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.xr.hands.git",
     "type": "git",
-    "revision": "82f2bc321cd970e6411e10d3a0a5350afd74fa86"
+    "revision": "3d7f2c75477f076365ef7f40e667cce1f595ad62"
   },
   "samples": [
     {
