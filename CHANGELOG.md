@@ -8,6 +8,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2025-07-23
+
+### Fixed
+
+- Fixed some deformations in the authored hand mesh provided for Android XR development that is a part of the Hand Visualizer sample. Note: A firmware update on the Android XR devices may be required for the meshes to appear correctly since they depend on an updated hand tracking data model.
+
 ## [1.6.0] - 2025-06-24
 
 ### Added

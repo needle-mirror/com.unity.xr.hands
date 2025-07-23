@@ -7,7 +7,6 @@
   * [Hand data model](xref:xrhands-data-model)
   * [Access hand data](xref:xrhands-access-data)
   * [Hand visuals](xref:xrhands-visuals)
-* [Implement a provider](xref:xrhands-implement-a-provider)
 * [OpenXR features](xref:xrhands-openxr-features)
   * [Hand tracking feature](xref:xrhands-openxr-hands-feature)
   * [Meta Aim Hand feature](xref:xrhands-meta-aim-feature)
@@ -25,3 +24,5 @@
     * [Understand the gesture debugger](xref:xrhands-understand-gesture-debugger)
     * [Customize the gesture debugger](xref:xrhands-customize-gesture-debugger)
     * [Understand Hand Shape Completeness Calculator](xref:xrhands-handshape-completeness-calculator)
+* [Joint pre-processing](xref:xrhands-process-joints)
+* [Implement a provider](xref:xrhands-implement-a-provider)
