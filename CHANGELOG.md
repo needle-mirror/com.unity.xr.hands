@@ -8,6 +8,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.7.0-pre.1] - 2025-08-08
+
+### Fixed
+
+- Deprecated `XRHandSkeletonDriver.m_HasRootTransform` in favor of `XRHandSkeletonDriver.hasRootTransform`.
+
 ## [1.6.1] - 2025-07-23
 
 ### Fixed

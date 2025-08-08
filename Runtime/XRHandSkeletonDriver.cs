@@ -50,7 +50,7 @@ namespace UnityEngine.XR.Hands
 #if BURST_PRESENT
     [BurstCompile]
 #endif
-    public class XRHandSkeletonDriver : MonoBehaviour, ISerializationCallbackReceiver
+    public partial class XRHandSkeletonDriver : MonoBehaviour, ISerializationCallbackReceiver
     {
         [SerializeField]
         [Tooltip("The XR Hand Tracking Events component that will be used to subscribe to hand tracking events.")]
@@ -83,7 +83,19 @@ namespace UnityEngine.XR.Hands
         /// A boolean tracking whether the root transform is valid. This is calculated once when the root transform
         /// changes to avoid a null check every time the root is updated.
         /// </summary>
-        protected bool m_HasRootTransform;
+        protected bool hasRootTransform
+        {
+#pragma warning disable CS0618
+            get => m_IsRootTransformValid || m_HasRootTransform;
+            set
+            {
+                m_IsRootTransformValid = value;
+                m_HasRootTransform = value;
+            }
+#pragma warning restore CS0618
+        }
+
+        bool m_IsRootTransformValid;
 
         /// <summary>
         /// The array of joint local poses indexed by the <see cref="XRHandJointID"/> which is updated by the method
@@ -131,7 +143,10 @@ namespace UnityEngine.XR.Hands
             set
             {
                 m_RootTransform = value;
-                m_HasRootTransform = m_RootTransform != null;
+                m_IsRootTransformValid = m_RootTransform != null;
+#pragma warning disable CS0618
+                m_HasRootTransform = m_IsRootTransformValid;
+#pragma warning restore CS0618
             }
         }
 
@@ -252,7 +267,7 @@ namespace UnityEngine.XR.Hands
         /// </remarks>
         protected virtual void OnRootPoseUpdated(Pose rootPose)
         {
-            if (!m_HasRootTransform)
+            if (!hasRootTransform)
                 return;
 
             if (hasRootOffset)
@@ -378,7 +393,7 @@ namespace UnityEngine.XR.Hands
         public void InitializeFromSerializedReferences()
         {
             if (m_RootTransform != null)
-                m_HasRootTransform = true;
+                hasRootTransform = true;
 
             m_HasJointTransformMask = new bool[XRHandJointID.EndMarker.ToIndex()];
             m_JointTransforms = new Transform[XRHandJointID.EndMarker.ToIndex()];

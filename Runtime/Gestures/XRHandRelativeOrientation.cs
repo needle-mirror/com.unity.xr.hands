@@ -7,6 +7,9 @@ namespace UnityEngine.XR.Hands.Gestures
     /// <summary>
     /// Defines hand orientation relative to the user and a target <c>Transform</c>.
     /// </summary>
+#if BURST_PRESENT
+    [BurstCompile]
+#endif
     [Serializable]
     public class XRHandRelativeOrientation
     {
