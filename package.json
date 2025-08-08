@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.hands",
   "displayName": "XR Hands",
-  "version": "1.7.0-pre.1",
+  "version": "1.7.0-pre.2",
   "unity": "2021.3",
   "description": "Surfaces the cross-platform subsystem API for hand-tracking. Implementations of providers will be found in the package for that platform.",
   "keywords": [
@@ -25,13 +25,13 @@
     "changelog": "### Fixed\n\n- Deprecated `XRHandSkeletonDriver.m_HasRootTransform` in favor of `XRHandSkeletonDriver.hasRootTransform`."
   },
   "upmCi": {
-    "footprint": "2d5c4a79641bf5e82b72b931afa3d8ef2d50f2fd"
+    "footprint": "58730cf0aa71b9870e659b9079fd038686f91f42"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.7/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.xr.hands.git",
     "type": "git",
-    "revision": "49a8ad271bd4b6a3052e7003c857e1f41b420f75"
+    "revision": "d09b8b9937b83c6f4a70efbe4561bcfc17f6ac5b"
   },
   "samples": [
     {
