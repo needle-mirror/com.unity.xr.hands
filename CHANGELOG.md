@@ -8,6 +8,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.6.2] - 2025-09-26
+
+### Fixed
+
+- Fixed the Hand Tracking feature so that if you deinitialize the OpenXR Loader and re-initialize it while your app is running, `XRHandProviderUtility` no longer throws a `NullReferenceException`.
+- Fixed missing Tracking State reference in the HandVisualizer and Input Action configuration in HandGestures sample scenes.
+- Fixed an issue with the build tooling where the native libraries were not getting correctly compiled with support for [16 KB page sizes](https://developer.android.com/guide/practices/page-sizes).
+- Updated Android XR hand meshes and hand rigs in order to address visual feedback.
+
 ## [1.6.1] - 2025-07-23
 
 ### Fixed
