@@ -22,7 +22,8 @@ For more information about designing and configuring custom gestures with the XR
 | [Hand Shape](xref:xrhands-hand-shapes) | How to create and edit Hand Shape assets. |
 | [Hand Pose](xref:xrhands-hand-poses) | How to create and edit Hand Pose assets. |
 | [Static Hand Gesture component](xref:xrhands-static-gesture-component) | Describes the properties of the **Static Hand Gesture** component. |
-| [Add a custom gesture](xref:xrhands-define-custom-gesture) | Covers the mechanics of adding a recognizer for a custom gesture to a scene. |
+| [Add a Custom Gesture](xref:xrhands-define-custom-gesture) | Covers the mechanics of adding a recognizer for a custom gesture to a scene. |
+| [Create Custom Gestures from Hand Recordings](xref:xrhands-xrhandcapture) | Discover how to record hand data and generate custom gestures using the XR Hand Capture workflow. |
 | [Hand Shape Completeness Calculator component](xref:xrhands-handshape-completeness-calculator) | Describes how the hand shape completeness score is calculated and how to implement a custom completeness calculation method. |
 
 > [!IMPORTANT]

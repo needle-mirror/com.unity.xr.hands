@@ -1,9 +1,7 @@
 #if ENABLE_CLOUD_SERVICES_ANALYTICS
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Analytics;
-using UnityEngine.Serialization;
 
 namespace UnityEditor.XR.Hands.Analytics
 {
@@ -11,7 +9,7 @@ namespace UnityEditor.XR.Hands.Analytics
     /// Editor event used to send editor usage <see cref="XRHandsAnalytics"/> data.
     /// Only accepts <see cref="XRHandsPlaymodeUsageEvent.Payload"/> parameters.
     /// </summary>
-#if  UNITY_2023_2_OR_NEWER
+#if UNITY_2023_2_OR_NEWER
     [AnalyticInfo(k_EventName, XRHandsAnalytics.k_VendorKey, k_EventVersion, k_MaxEventPerHour, k_MaxItems)]
     class XRHandsPlaymodeUsageEvent : XRHandsEditorAnalyticsEvent<XRHandsPlaymodeUsageEvent.Payload>
 #else

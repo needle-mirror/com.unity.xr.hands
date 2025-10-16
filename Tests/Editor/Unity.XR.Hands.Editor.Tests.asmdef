@@ -4,7 +4,8 @@
         "Unity.XR.Hands",
         "Unity.XR.Hands.OpenXR",
         "Unity.XR.OpenXR",
-        "Unity.XR.OpenXR.Features"
+        "Unity.XR.OpenXR.Features",
+        "Unity.XR.Hands.Analytics.Editor"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

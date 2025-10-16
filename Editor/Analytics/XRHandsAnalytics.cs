@@ -19,6 +19,7 @@ namespace UnityEditor.XR.Hands.Analytics
 #endif
 
         internal static XRHandsPlaymodeUsageEvent playmodeUsageEvent { get; } = new();
+        internal static XRHandsEditmodeUsageEvent editmodeUsageEvent { get; } = new();
     }
 }
 #endif //ENABLE_CLOUD_SERVICES_ANALYTICS

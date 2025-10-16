@@ -378,7 +378,7 @@ namespace UnityEngine.XR.Hands
 #if BURST_PRESENT
         [BurstCompile]
 #endif
-        static void CalculateLocalTransformPose(in Pose parentPose, in Pose jointPose, out Pose jointLocalPose)
+        internal static void CalculateLocalTransformPose(in Pose parentPose, in Pose jointPose, out Pose jointLocalPose)
         {
             var inverseParentRotation = Quaternion.Inverse(parentPose.rotation);
             jointLocalPose.position = inverseParentRotation * (jointPose.position - parentPose.position);

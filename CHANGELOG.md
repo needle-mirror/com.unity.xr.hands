@@ -8,11 +8,33 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.7.0-pre.2] - 2025-08-08
+## [1.7.0] - 2025-10-16
+
+### Added
+
+- Added subsystem APIs and data types for configuring the behavior of `XRHandDevice`:
+    - Added `XRHandSubsystemConfiguration` and `XRHandSubsystem.UpdateHandsConfiguration` to enable subsystem configuration.
+    - Added `XRHandSubsystemConfiguration.XRHandDevicePoseSource` to enable configuration of the `XRHandDevice` pose data, allowing `XRHandDevice` to report OpenXR compliant poses for existing controls.
+- Added additional controls to the `XRHandDevice` for parity with the OpenXR Hand Interaction Profile.
+- Added **XR Hand Capture** feature for recording and replaying hand data. Refer to the [XR Hand Capture manual](xref:xrhands-xrhandcapture). Also added a new sample [Hand Capture](xref:xrhands-xrhandcapture-recording) for recording the hand data from XR devices.
 
 ### Fixed
 
 - Deprecated `XRHandSkeletonDriver.m_HasRootTransform` in favor of `XRHandSkeletonDriver.hasRootTransform`.
+- Fixed missing Tracking State reference in the HandVisualizer and Input Action configuration in HandGestures sample scenes.
+- Fixed the Hand Tracking feature so that if you deinitialize the OpenXR Loader and re-initialize it while your app is running, `XRHandProviderUtility` no longer throws a `NullReferenceException`.
+- Fixed an issue with the build tooling where the native libraries were not getting correctly compiled with support for [16 KB page sizes](https://developer.android.com/guide/practices/page-sizes).
+- Updated Android XR hand meshes and hand rigs in order to address visual feedback.
+
+### Changed
+
+- Marked `XRHand.GetJoint(XRHandJointID id)` as `readonly`.
+- Made `XRHandJoint` serializable and its fields serialized.
+
+### Known Issues
+
+- **Hand Capture** sample scene: Quest Link is not currently supported.
+- **Gestures** sample scene: Exiting Play Mode will emit `ObjectDisposedException` errors and related error output.
 
 ## [1.6.1] - 2025-07-23
 

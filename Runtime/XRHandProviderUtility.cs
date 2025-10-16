@@ -311,6 +311,15 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
                     return;
 #endif // UNITY_EDITOR
 
+                // SetPlayerLoop doesn't take effect until the next full Player loop iteration.
+                // https://docs.unity3d.com/6000.2/Documentation/ScriptReference/LowLevel.PlayerLoop.SetPlayerLoop.html
+                //
+                // Therefore after the Updater is destroyed, there is one frame where Update might still be called,
+                // attempting to update using a now-destroyed Updater.
+                // So if the subsystem doesn't exist, ignore the zombie Update call.
+                if (m_Subsystem == null)
+                    return;
+
                 var updateSuccessFlags = m_Subsystem.TryUpdateHands(updateType);
                 if (updateSuccessFlags != XRHandSubsystem.UpdateSuccessFlags.None)
                     EnsureDevicesCreated(updateSuccessFlags, updateType);

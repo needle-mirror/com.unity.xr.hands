@@ -1,7 +1,8 @@
 {
     "name": "Unity.XR.Hands.Tests",
     "references": [
-        "Unity.XR.Hands"
+        "Unity.XR.Hands",
+        "Unity.InputSystem"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

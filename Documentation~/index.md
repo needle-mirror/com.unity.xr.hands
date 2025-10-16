@@ -39,6 +39,13 @@ This package provides samples that you can import into your project through the 
 | Sample | Description |
 | :----- | :---------- |
 | **Gestures** | Provides a sample scene, prefabs, and components for [debugging](xref:xrhands-gesture-debugger) and testing hand shapes and hand poses. The [Static Hand Gesture](xref:xrhands-static-gesture-component) component is part of this sample, so you must import the **Gestures** sample to use the hand gesture feature provided by the XR Hands package. The **HandGestures** sample scene depends on components in the **HandVisualizer** sample, so you must import both samples to use it. |
-| **HandVisualizer** | Provides a sample scene, prefabs, and components to visualize hands with a mesh. The **HandVisualizer** sample has a mesh and script based on the OpenXR hand data layout, so you should use the sample with the OpenXR plug-in or one that conforms to the OpenXR hand joint layout.
+| **HandVisualizer** | Provides a sample scene, prefabs, and components to visualize hands with a mesh. The **HandVisualizer** sample has a mesh and script based on the OpenXR hand data layout, so you should use the sample with the OpenXR plug-in or one that conforms to the OpenXR hand joint layout. |
+| **HandCapture** | Provides a [sample scene](xref:xrhands-xrhandcapture-recording) for recording real-time hand data with your XR headset. Recordings can be imported into the Unity Editor and used to [create reusable XRHandShape assets](xref:xrhands-xrhandcapture-playback) for gesture-based interactions. |
 
 ![Import the XR Hands samples](images/import-vis-sample.png)<br/>*Import the XR Hands samples*
+
+## Known Limitations
+
+- **Gestures** sample scene: Exiting Play Mode will emit `ObjectDisposedException` errors and related error output.
+- **Hand Capture** sample scene: Quest Link is not currently supported.
+- **Hand Capture** sample scene: If you encounter double-vision artifacts (such as raycast tear drops), this is a [known limitation](https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@latest?subfolder=/manual/index.html#known-limitations) when using Shader Graph shaders on the Build-in Render Pipeline. Please refer to the [troubleshooting](xref:xrhands-xrhandcapture-recording#incorrect-scene-appearance) section for potential solutions.

@@ -687,7 +687,8 @@ namespace UnityEditor.XR.Hands.Gestures
         /// </summary>
         void SetupEmptyFingerShapeConditions()
         {
-            serializedObject.ApplyModifiedProperties();
+            if (target == null)
+                return;
 
             var targetDataDuplicate = (XRHandShape)target;
 

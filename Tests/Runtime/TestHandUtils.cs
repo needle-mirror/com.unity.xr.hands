@@ -215,4 +215,21 @@ static class TestHandUtils
 
         return null;
     }
+
+    public static void CreateTwoTestSubsystems(out XRHandSubsystem subsystem1, out XRHandSubsystem subsystem2)
+    {
+        var subsystemCinfo1 = new XRHandSubsystemDescriptor.Cinfo
+        {
+            id = "TestHandProvider1",
+            providerType = typeof(TestHandProvider)
+        };
+        subsystem1 = TestHandUtils.CreateTestSubsystem(subsystemCinfo1);
+
+        var subsystemCinfo2 = new XRHandSubsystemDescriptor.Cinfo
+        {
+            id = "TestHandProvider2",
+            providerType = typeof(TestHandProvider)
+        };
+        subsystem2 = TestHandUtils.CreateTestSubsystem(subsystemCinfo2);
+    }
 }

@@ -1,6 +1,23 @@
 ---
 uid: xrhands-whats-new
 ---
+
+# What's new in version 1.7
+
+The main updates in this release include:
+
+## Added
+
+### XR Hand Capture feature
+
+The new [XR Hand Capture](xref:xrhands-xrhandcapture) feature streamlines the creation of custom hand gestures for XR applications.
+
+You can now record hand data directly on supported XR devices using an intuitive in-headset UI, and import these recordings into the Unity Editor for further processing. With built-in visualization and editing tools, you can easily convert captured data into reusable XRHandShape assets and fine-tune gestures for robust recognition.
+
+![XR Hand Capture feature visual](../images/XRHandCapture/hand-capture-sample/feature-visual.png)
+
+![XR Hand Capture window visual](../images/XRHandCapture/playback-window/playback-visual.png)
+
 # What's new in version 1.6
 
 Summary of changes in XR Hands package version 1.6. The main updates in this release include:
@@ -32,6 +49,7 @@ Support for common hand gestures has been added with initial support for gesture
 The XR Hands package now enables the detection of high or low fidelity hand tracking data via `XRHandJointTrackingState.HighFidelityPose`. For OpenXR based devices, this is set if and only if a joint has its position and orientation marked as tracked by the underlying runtime. For other platforms, consult the supporting package's documentation.
 
 ## Fixed
+
 - Fixed performance regression in hand gesture debug UI.
 
 ---

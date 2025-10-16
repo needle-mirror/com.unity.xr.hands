@@ -4,6 +4,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.SubsystemsImplementation;
 using UnityEngine.XR.Hands.Analytics;
+using UnityEngine.XR.Hands.Configuration;
 using UnityEngine.XR.Hands.Gestures;
 using UnityEngine.XR.Hands.Meshing;
 using UnityEngine.XR.Hands.Processing;
@@ -95,6 +96,34 @@ namespace UnityEngine.XR.Hands
         /// </remarks>
         public XRHand rightHand => m_RightHand;
         XRHand m_RightHand;
+
+        /// <summary>
+        /// Invoked when UpdateHandsConfiguration is called and after subsystem processing has occurred.
+        /// </summary>
+        internal Action<XRHandSubsystemConfigurationUpdatedEventArgs> configurationUpdated { get; set; }
+
+        XRHandSubsystemConfiguration m_XRHandSubsystemConfiguration;
+        internal XRHandSubsystemConfiguration handSubsystemConfiguration => m_XRHandSubsystemConfiguration;
+
+        /// <summary>
+        /// Updates the current subsystem configuration to newConfiguration. Invokes <see cref="configurationUpdated"/>
+        /// once local processing has been completed to notify consumers that they may need to update their
+        /// configuration.
+        ///
+        /// See <see cref="XRHandSubsystemConfiguration"/> for more details on individual parameters, what they
+        /// affect, and when the update takes effect.
+        /// </summary>
+        /// <param name="newConfiguration">The new configuration to be used by the hands subsystem.</param>
+        public void UpdateHandsConfiguration(XRHandSubsystemConfiguration newConfiguration)
+        {
+            m_XRHandSubsystemConfiguration = newConfiguration;
+
+            if (configurationUpdated != null)
+            {
+                configurationUpdated(
+                    new XRHandSubsystemConfigurationUpdatedEventArgs(this, m_XRHandSubsystemConfiguration));
+            }
+        }
 
         internal unsafe void SetRightHand(XRHand hand)
         {

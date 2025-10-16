@@ -27,7 +27,7 @@ namespace UnityEngine.XR.Hands
         /// </remarks>
         /// <param name="id">ID of the required joint.</param>
         /// <returns>The <see cref="XRHandJoint"/> corresponding the ID passed in.</returns>
-        public XRHandJoint GetJoint(XRHandJointID id) => m_Joints[id.ToIndex()];
+        public readonly XRHandJoint GetJoint(XRHandJointID id) => m_Joints[id.ToIndex()];
         internal NativeArray<XRHandJoint> m_Joints;
 
         /// <summary>

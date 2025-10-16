@@ -117,7 +117,7 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample.Editor
             }
         }
 
-        internal static void ShowWindow()
+        static void ShowWindow()
         {
             // Delay opening the window since sometimes other settings in the player settings provider redirect to the
             // project validation window causing serialized objects to be nullified.

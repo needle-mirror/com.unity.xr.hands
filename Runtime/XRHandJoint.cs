@@ -17,6 +17,7 @@ namespace UnityEngine.XR.Hands
     /// and the data they contain.
     /// </remarks>
     [StructLayout(LayoutKind.Sequential)]
+    [Serializable]
     public struct XRHandJoint : IEquatable<XRHandJoint>
     {
         /// <summary>
@@ -248,11 +249,22 @@ namespace UnityEngine.XR.Hands
         /// <returns>Returns the negation of <see cref="Equals(UnityEngine.XR.Hands.XRHandJoint)"/>.</returns>
         public static bool operator !=(XRHandJoint lhs, XRHandJoint rhs) => !lhs.Equals(rhs);
 
+        [SerializeField]
         internal int m_IdAndHandedness;
+
+        [SerializeField]
         internal Pose m_Pose;
+
+        [SerializeField]
         internal float m_Radius;
+
+        [SerializeField]
         internal Vector3 m_LinearVelocity;
+
+        [SerializeField]
         internal Vector3 m_AngularVelocity;
+
+        [SerializeField]
         internal XRHandJointTrackingState m_TrackingState;
 
         internal const int k_IsRightHandBit = 1 << 31;
