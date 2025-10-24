@@ -62,11 +62,21 @@ namespace UnityEditor.XR.Hands.Capture
                 commandOutput = process.StandardOutput.ReadToEnd();
                 process.WaitForExit();
 
-                if (!string.IsNullOrEmpty(errorOut))
+                // Check the exit code to determine success. A non-zero exit code indicates an error.
+                if (process.ExitCode != 0)
                 {
                     UnityEngine.Debug.LogError(
-                        $"ADB command failed. Error: \"{errorOut}\". ADB command arguments: {startInfo.Arguments}");
+                        $"ADB command failed with exit code {process.ExitCode}.\n" +
+                        $"Error: \"{errorOut}\"\n" +
+                        $"ADB command arguments: {startInfo.Arguments}");
                     return false;
+                }
+
+                if (!string.IsNullOrWhiteSpace(errorOut))
+                {
+                    // Do not return false here, as some adb commands output to stderr even when successful.
+                    UnityEngine.Debug.LogWarning(
+                        $"ADB command succeeded, but there was output in the error stream: \"{errorOut}\"");
                 }
 
                 return true;

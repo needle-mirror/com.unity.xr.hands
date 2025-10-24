@@ -1,5 +1,5 @@
 using UnityEngine.XR.Hands.Analytics;
-#if UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS
+#if UNITY_EDITOR && (ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER)
 namespace UnityEngine.XR.Hands
 {
     /// <summary>
@@ -18,4 +18,4 @@ namespace UnityEngine.XR.Hands
         }
     }
 }
-#endif // UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS
+#endif // UNITY_EDITOR && (ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER)

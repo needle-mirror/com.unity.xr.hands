@@ -183,6 +183,8 @@ namespace UnityEngine.XR.Hands.Gestures
                     case XRFingerShapeType.Spread:
                         hasValue = fingerShape.TryGetSpread(out value);
                         break;
+                    case XRFingerShapeType.Unspecified:
+                        return false;
 
                     default:
                         throw new ArgumentOutOfRangeException($"Finger shape type {target.shapeType} is invalid for finger shape target condition.");

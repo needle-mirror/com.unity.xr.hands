@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+#if UNITY_EDITOR && (ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER)
 using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
@@ -37,4 +37,4 @@ namespace Unity.XR.Hands.Runtime.Tests
         }
     }
 }
-#endif // UNITY_EDITOR
+#endif // UNITY_EDITOR && (ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER)

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER
 using UnityEditor.XR.Hands.Analytics;
+#endif
 using UnityEditor.XR.Hands.Gestures;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -462,7 +464,7 @@ namespace UnityEditor.XR.Hands.Capture
                 EditorUtility.SetDirty(m_CapturePlayback.handShapeToOverwrite);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
-#if ENABLE_CLOUD_SERVICES_ANALYTICS
+#if ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER
                  var analyticsData = new XRHandCaptureAnalyticsData();
                  analyticsData.newHandShapeSaved = true;
                  analyticsData.Send();
@@ -573,7 +575,7 @@ namespace UnityEditor.XR.Hands.Capture
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
 
-#if ENABLE_CLOUD_SERVICES_ANALYTICS
+#if ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER
                 var analyticsData = new XRHandCaptureAnalyticsData();
                 analyticsData.recordingsImported = true;
                 analyticsData.Send();

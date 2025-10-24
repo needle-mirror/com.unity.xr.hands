@@ -1,3 +1,4 @@
+#if ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER
 using NUnit.Framework;
 using UnityEditor.XR.Hands.Analytics;
 
@@ -51,3 +52,4 @@ namespace UnityEditor.XR.Hands.Tests
         }
     }
 }
+#endif // ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER

@@ -74,7 +74,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
         void Awake()
         {
-#if UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS
+#if UNITY_EDITOR && (ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER)
             XRHandAnalyticsData.xrHandCustomGestureDebugActive = true;
 #endif
             m_HandShape = m_HandShapeOrPose as XRHandShape;

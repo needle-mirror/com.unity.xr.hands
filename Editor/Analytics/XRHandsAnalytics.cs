@@ -1,4 +1,4 @@
-#if ENABLE_CLOUD_SERVICES_ANALYTICS
+#if ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER
 #if !UNITY_2023_2_OR_NEWER
 using System.Reflection;
 #endif // !UNITY_2023_2_OR_NEWER
@@ -22,4 +22,4 @@ namespace UnityEditor.XR.Hands.Analytics
         internal static XRHandsEditmodeUsageEvent editmodeUsageEvent { get; } = new();
     }
 }
-#endif //ENABLE_CLOUD_SERVICES_ANALYTICS
+#endif //ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER

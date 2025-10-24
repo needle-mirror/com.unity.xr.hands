@@ -1,4 +1,4 @@
-#if ENABLE_CLOUD_SERVICES_ANALYTICS
+#if ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER
 using System;
 using UnityEngine;
 using UnityEngine.Analytics;
@@ -53,4 +53,4 @@ namespace UnityEditor.XR.Hands.Analytics
         }
     }
 }
-#endif //ENABLE_CLOUD_SERVICES_ANALYTICS
+#endif //ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER

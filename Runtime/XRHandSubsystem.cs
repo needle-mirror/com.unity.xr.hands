@@ -309,7 +309,7 @@ namespace UnityEngine.XR.Hands
         /// </remarks>
         public virtual unsafe UpdateSuccessFlags TryUpdateHands(UpdateType updateType)
         {
-#if UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS
+#if UNITY_EDITOR && (ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER)
             XRHandFeatureUsageData.xrHandSubsystemRuntimeUsed = true;
 #endif
 

@@ -46,7 +46,7 @@ namespace UnityEngine.XR.Hands.Gestures
         /// </returns>
         public bool CheckConditions(XRHandJointsUpdatedEventArgs eventArgs)
         {
-#if UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS
+#if UNITY_EDITOR && (ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER)
             XRHandFeatureUsageData.xrHandCustomGestureUsed = true;
 #endif
 
@@ -120,7 +120,11 @@ namespace UnityEngine.XR.Hands.Gestures
                 if (fingerShapeCondition != null && conditionTargetPosition >= 0 &&
                     conditionTargetPosition < fingerShapeCondition.targets.Length)
                 {
-                    fingerShapeCondition.targets[conditionTargetPosition].shapeType = fingerShapeType;
+                    var targets = fingerShapeCondition.targets;
+                    var target = targets[conditionTargetPosition];
+                    target.shapeType = fingerShapeType;
+                    targets[conditionTargetPosition] = target;
+                    fingerShapeCondition.targets = targets;
                 }
             }
         }

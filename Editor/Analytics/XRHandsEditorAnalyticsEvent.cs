@@ -1,5 +1,5 @@
 // Add DEBUG_XR_HANDS_ANALYTICS_EVENT to the scripting defines to debug analytics events, you can also use the Analytics Debugger window (Unity 2023.1+)
-#if ENABLE_CLOUD_SERVICES_ANALYTICS
+#if ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER
 using UnityEngine.Analytics;
 
 #if UNITY_2023_2_OR_NEWER
@@ -40,4 +40,4 @@ namespace UnityEditor.XR.Hands.Analytics
 #endif // UNITY_2023_2_OR_NEWER
     }
 }
-#endif //ENABLE_CLOUD_SERVICES_ANALYTICS
+#endif //ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER
