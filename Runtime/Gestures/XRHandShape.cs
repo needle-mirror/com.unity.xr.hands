@@ -120,7 +120,11 @@ namespace UnityEngine.XR.Hands.Gestures
                 if (fingerShapeCondition != null && conditionTargetPosition >= 0 &&
                     conditionTargetPosition < fingerShapeCondition.targets.Length)
                 {
-                    fingerShapeCondition.targets[conditionTargetPosition].shapeType = fingerShapeType;
+                    var targets = fingerShapeCondition.targets;
+                    var target = targets[conditionTargetPosition];
+                    target.shapeType = fingerShapeType;
+                    targets[conditionTargetPosition] = target;
+                    fingerShapeCondition.targets = targets;
                 }
             }
         }
