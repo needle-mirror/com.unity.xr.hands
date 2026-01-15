@@ -8,6 +8,26 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.7.3] - 2026-01-15
+
+### Added
+
+- Added a project validation rule to Gestures sample to detect missing TMP and provide fix actions.
+
+### Fixed
+
+- Fixed high frame times when rendering the Joints in the `HandVisualizer`.
+- Fixed the `OpenXRHandProvider` constructor being stripped when the Managed Stripping Level is set to High.
+- Mitigated UI flicker in the XR Hand Capture sample scene.
+- Fixed the name of the Material Pipeline Handler object type when using the Create menu.
+- Guarded TMP usages in Gestures sample to prevent compilation errors when TMP is not installed.
+- Fixed MaterialPipelineHandler script to properly convert and save materials.
+
+### Changed
+
+- Changed the minimum supported editor version to `2022.3`.
+
+
 ## [1.7.2] - 2025-11-26
 
 ### Changed

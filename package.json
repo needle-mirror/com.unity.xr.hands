@@ -1,8 +1,8 @@
 {
   "name": "com.unity.xr.hands",
   "displayName": "XR Hands",
-  "version": "1.7.2",
-  "unity": "2021.3",
+  "version": "1.7.3",
+  "unity": "2022.3",
   "description": "Surfaces the cross-platform subsystem API for hand-tracking. Implementations of providers will be found in the package for that platform.",
   "keywords": [
     "xr",
@@ -39,15 +39,15 @@
     "com.unity.mathematics": "1.2.6"
   },
   "_upm": {
-    "changelog": "### Changed\n\n- Signed MacOS binaries for Apple notarization."
+    "changelog": "### Added\n\n- Added a project validation rule to Gestures sample to detect missing TMP and provide fix actions.\n\n### Fixed\n\n- Fixed high frame times when rendering the Joints in the `HandVisualizer`.\n- Fixed the `OpenXRHandProvider` constructor being stripped when the Managed Stripping Level is set to High.\n- Mitigated UI flicker in the XR Hand Capture sample scene.\n- Fixed the name of the Material Pipeline Handler object type when using the Create menu.\n- Guarded TMP usages in Gestures sample to prevent compilation errors when TMP is not installed.\n- Fixed MaterialPipelineHandler script to properly convert and save materials.\n\n### Changed\n\n- Changed the minimum supported editor version to `2022.3`."
   },
   "upmCi": {
-    "footprint": "d19b76b9aa2cc0ed6f15b3ea3aa6850e49622e68"
+    "footprint": "cf02c92037f5284f4aad1620f7a74f0f7a6a8010"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.7/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.xr.hands.git",
     "type": "git",
-    "revision": "3e401c04779feb43ff8067da8a77474bdbc37d94"
+    "revision": "fec468dbeb1985e74ea23797f41f6b00253bf25a"
   }
 }

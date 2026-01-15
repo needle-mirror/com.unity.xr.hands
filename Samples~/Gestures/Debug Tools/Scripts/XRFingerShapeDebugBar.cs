@@ -1,11 +1,13 @@
 using System;
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
 using TMPro;
+#endif
 using UnityEngine.UI;
 
 namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 {
     /// <summary>
-    /// Controls the debug UI for a single <see cref="XRFingerState"/> that shows the value and optionally a target
+    /// Controls the debug UI for a single <see cref="XRFingerShape"/> that shows the value and optionally a target
     /// and range on the UI controlled.
     /// </summary>
     public class XRFingerShapeDebugBar : MonoBehaviour
@@ -42,8 +44,10 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         [Tooltip("The Image component that displays the lower range")]
         Image m_LowerRangeImage;
 
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
         [SerializeField]
         TextMeshProUGUI m_RangeStatusText;
+#endif
 
         [SerializeField]
         [Tooltip("The Image component that displays the cross icon, denoting that input is within range for a detected gesture")]
@@ -69,10 +73,11 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
         bool m_NoFingerShapeCondition;
 
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
         Transform m_RangeStatusTextTransform;
         Vector3 m_RangeStatusPositionWithIcon;
         Vector3 m_RangeStatusPositionWithoutIcon;
-
+#endif
         /// <summary>
         /// The container that determines the width of the max length bar, and holds the target and range indicators.
         /// </summary>
@@ -139,6 +144,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             set => m_LowerRangeImage = value;
         }
 
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
         /// <summary>
         /// The text component that displays the status of a tracked fingerstate being within a target range
         /// </summary>
@@ -147,6 +153,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             get => m_RangeStatusText;
             set => m_RangeStatusText = value;
         }
+#endif
 
         /// <summary>
         /// The Image component that displays the check mark image when within the valid range
@@ -181,14 +188,18 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
                     (m_TargetAmount + m_UpperToleranceAmount) > currentValue &&
                     (m_TargetAmount - m_LowerToleranceAmount) < currentValue;
 
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
+                m_RangeStatusTextTransform.localPosition = value
+                    ? m_RangeStatusPositionWithIcon : m_RangeStatusPositionWithoutIcon;
+#endif
                 if (value)
                 {
-                    m_RangeStatusTextTransform.localPosition = m_RangeStatusPositionWithIcon;
-
                     if (withinToleranceRange)
                     {
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
                         m_RangeStatusText.color = m_InRangeColor;
                         m_RangeStatusText.text = k_InRangeText;
+#endif
                         m_UpperRangeImage.color = m_InRangeColor;
                         m_LowerRangeImage.color = m_InRangeColor;
                         m_CheckMarkImage.enabled = true;
@@ -196,8 +207,10 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
                     }
                     else
                     {
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
                         m_RangeStatusText.color = m_OutOfRangeColor;
                         m_RangeStatusText.text = k_OutOfRangeText;
+#endif
                         m_UpperRangeImage.color = m_OutOfRangeColor;
                         m_LowerRangeImage.color = m_OutOfRangeColor;
                         m_CheckMarkImage.enabled = false;
@@ -206,13 +219,12 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
                 }
                 else
                 {
-                    m_RangeStatusTextTransform.localPosition = m_RangeStatusPositionWithoutIcon;
-
                     if (m_NoFingerShapeCondition)
                     {
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
                         m_RangeStatusText.text = k_NoTargetSetText;
                         m_RangeStatusText.color = m_NoSetTargetColor;
-
+#endif
                         m_CheckMarkImage.enabled = false;
                         m_CrossImage.enabled = false;
                     }
@@ -225,7 +237,9 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             m_RangeRectHeight = m_UpperRangeIndicator.rect.height;
             m_RangeActiveColor = m_UpperRangeImage.color;
             m_RangeDeactivatedColor = new Color(m_RangeActiveColor.r, m_RangeActiveColor.g, m_RangeActiveColor.b, 0.35f);
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
             m_RangeStatusTextTransform = m_RangeStatusText.transform;
+#endif
             fingerShapeDetected = false;
 
             m_CheckMarkImage.enabled = false;
@@ -234,6 +248,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
         void Start()
         {
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
             // RangeStatus text should position itself horizontally accordingly if a range-status icon is visible
             var positionIndent = m_RangeStatusTextTransform.localPosition;
             const float kWithoutIconXOffset = 226f;
@@ -242,6 +257,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             const float kWithIconXOffset = 210f;
             positionIndent.x = kWithIconXOffset;
             m_RangeStatusPositionWithoutIcon = positionIndent;
+#endif
         }
 
         /// <summary>
@@ -295,10 +311,11 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             m_CheckMarkImage.enabled = false;
             m_CrossImage.enabled = false;
 
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
             m_RangeStatusText.text = k_NoTargetSetText;
             m_RangeStatusText.color = m_NoSetTargetColor;
-
             m_RangeStatusTextTransform.localPosition = m_RangeStatusPositionWithoutIcon;
+#endif
         }
     }
 }

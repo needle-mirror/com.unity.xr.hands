@@ -5,7 +5,7 @@ namespace UnityEngine.XR.Hands.Gestures
     /// <summary>
     /// Configuration values for how to calculate <see cref="XRFingerShape"/>.
     /// Defines minimum and maximum angles or distances between joints to normalize finger joints into each
-    /// <see cref="XRFingerStateType"/>'s' <c>0</c> to <c>1</c> value.
+    /// <see cref="XRFingerShapeType"/>'s' <c>0</c> to <c>1</c> value.
     /// </summary>
     [Serializable]
     public class XRFingerShapeConfiguration

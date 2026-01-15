@@ -1,12 +1,16 @@
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
 using TMPro;
+#endif
 using UnityEngine.XR.Hands.Gestures;
 
 namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 {
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
     /// <summary>
     /// Updates the text label that denotes the currently detected hand gesture
     /// </summary>
     [RequireComponent(typeof(TextMeshProUGUI))]
+#endif
     public class XRSelectedHandShapeDebugUI : MonoBehaviour
     {
         /// <summary>
@@ -14,6 +18,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         /// </summary>
         const string k_NoGestureDetectedString = "None Detected";
 
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
         [SerializeField]
         [Tooltip("The label that will be used to display the name of the hand shape.")]
         TextMeshProUGUI m_HandShapeNameLabel;
@@ -26,10 +31,14 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             get => m_HandShapeNameLabel;
             set => m_HandShapeNameLabel = value;
         }
+#endif
 
         void Awake()
         {
-            m_HandShapeNameLabel.text = k_NoGestureDetectedString;
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
+            if (m_HandShapeNameLabel != null)
+                m_HandShapeNameLabel.text = k_NoGestureDetectedString;
+#endif
         }
 
         /// <summary>
@@ -38,6 +47,10 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         /// <param name="handPoseOrShape">The pose or shape whose name will be displayed</param>
         public void UpdateSelectedHandShapeTextUI(ScriptableObject handPoseOrShape)
         {
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
+            if (m_HandShapeNameLabel == null)
+                return;
+
             var handShape = handPoseOrShape as XRHandShape;
             var handPose = handPoseOrShape as XRHandPose;
 
@@ -45,6 +58,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
                 m_HandShapeNameLabel.text = handShape.name;
             else if (handPose)
                 m_HandShapeNameLabel.text = handPose.name;
+#endif
         }
 
         /// <summary>
@@ -52,7 +66,10 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         /// </summary>
         public void ResetUI()
         {
-            m_HandShapeNameLabel.text = k_NoGestureDetectedString;
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
+            if (m_HandShapeNameLabel != null)
+                m_HandShapeNameLabel.text = k_NoGestureDetectedString;
+#endif
         }
     }
 }

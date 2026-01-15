@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
 using TMPro;
+#endif
 
 namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 {
@@ -12,10 +14,11 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         [Tooltip("The list of 5 bars to display the finger state values.")]
         List<XRFingerShapeDebugBar> m_Bars = new List<XRFingerShapeDebugBar>();
 
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
         [SerializeField]
         [Tooltip("The label that will be used to display the name of the finger.")]
         TextMeshProUGUI m_FingerNameLabel;
-
+#endif
         /// <summary>
         /// The list of 5 bars to display the finger state values
         /// </summary>
@@ -48,8 +51,10 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         /// <param name="fingerName">The string to put on the label.</param>
         public void SetFingerName(string fingerName)
         {
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
             if (m_FingerNameLabel != null)
                 m_FingerNameLabel.text = fingerName;
+#endif
         }
     }
 }

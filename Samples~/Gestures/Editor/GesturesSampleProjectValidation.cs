@@ -10,6 +10,10 @@ using UnityEditor.PackageManager.Requests;
 using UnityEditor.PackageManager.UI;
 using UnityEditor.XR.Hands.ProjectValidation;
 using UnityEngine;
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
+using System.IO;
+using TMPro;
+#endif
 
 namespace UnityEngine.XR.Hands.Samples.GestureSample.Editor
 {
@@ -28,6 +32,16 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample.Editor
         const string k_InternalTestProjectName = "XRHandsSample";
         static readonly PackageVersion s_MinimumPackageVersion = new PackageVersion("1.2.1");
         static readonly PackageVersion s_RecommendedPackageVersion = new PackageVersion("1.5.0");
+#if UNITY_6000_0_OR_NEWER
+        static readonly PackageVersion s_MinimumUIPackageVersion = new PackageVersion("2.0.0");
+        const string k_UIPackageName = "com.unity.ugui";
+        const string k_UIPackageDisplayName = "Unity UI";
+#else
+        static readonly PackageVersion s_MinimumUIPackageVersion = new PackageVersion("3.0.8");
+        const string k_UIPackageName = "com.unity.textmeshpro";
+        const string k_UIPackageDisplayName = "TextMeshPro";
+#endif
+        static AddRequest s_UIPackageAddRequest;
 
         static readonly BuildTargetGroup[] s_SupportedBuildTargets =
         {
@@ -67,7 +81,40 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample.Editor
                 },
                 FixItAutomatic = true,
                 Error = !ProjectValidationUtility.HasSampleImported(k_HandsPackageDisplayName, k_HandVisualizerSampleName),
-            }
+            },
+            new BuildValidationRule
+            {
+                IsRuleEnabled = () => s_UIPackageAddRequest == null || s_UIPackageAddRequest.IsCompleted,
+                Message = $"[{k_SampleDisplayName}] {k_UIPackageDisplayName} ({k_UIPackageName}) package must be installed and at minimum version {s_MinimumUIPackageVersion}.",
+                Category = k_HandsPackageDisplayName,
+                CheckPredicate = () => PackageVersionUtility.GetPackageVersion(k_UIPackageName) >= s_MinimumUIPackageVersion,
+                FixIt = () =>
+                {
+                    ProjectValidationUtility.TryInstallPackage(k_UIPackageName, s_MinimumUIPackageVersion, ref s_UIPackageAddRequest);
+                    if(s_UIPackageAddRequest.Error != null)
+                    {
+                        Debug.LogError($"Package installation error: {s_UIPackageAddRequest.Error}: {s_UIPackageAddRequest.Error.message}");
+                    }
+                },
+                FixItAutomatic = true,
+                Error = true,
+            },
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
+            new BuildValidationRule
+            {
+                IsRuleEnabled = () => PackageVersionUtility.IsPackageInstalled(k_UIPackageName),
+                Message = $"[{k_SampleDisplayName}] TextMesh Pro - TMP Essentials must be installed for this sample.",
+                HelpText = "Can be installed using Window > TextMeshPro > Import TMP Essential Resources or by clicking this Edit button and then Import TMP Essentials in the window that appears.",
+                Category = k_HandsPackageDisplayName,
+                CheckPredicate = () => PackageVersionUtility.IsPackageInstalled(k_UIPackageName) && TextMeshProEssentialsInstalled(),
+                FixIt = () =>
+                {
+                    TMP_PackageResourceImporterWindow.ShowPackageImporterWindow();
+                },
+                FixItAutomatic = false,
+                Error = true,
+            },
+#endif
         };
 
         static AddRequest s_HandsPackageAddRequest;
@@ -75,17 +122,18 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample.Editor
         [InitializeOnLoadMethod]
         static void RegisterProjectValidationRules()
         {
-            // Don't register validation rules for the internal test project.
-            if (IsInternalTestProject())
-                return;
+            // Delay evaluating conditions for issues to give time for Package Manager and UPM cache to fully initialize.
+            EditorApplication.delayCall += AddRulesAndRunCheck;
+        }
 
+        static void AddRulesAndRunCheck()
+        {
             foreach (var buildTargetGroup in s_SupportedBuildTargets)
             {
                 BuildValidator.AddRules(buildTargetGroup, s_BuildValidationRules);
             }
 
-            // Delay evaluating conditions for issues to give time for Package Manager and UPM cache to fully initialize.
-            EditorApplication.delayCall += ShowWindowIfIssuesExist;
+            ShowWindowIfIssuesExist();
         }
 
         static bool IsInternalTestProject()
@@ -164,6 +212,14 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample.Editor
             return false;
         }
 
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
+        static bool TextMeshProEssentialsInstalled()
+        {
+            // Matches logic in Project Settings window, see TMP_PackageResourceImporter.cs.
+            // For simplicity, we don't also copy the check if the asset needs to be updated.
+            return File.Exists("Assets/TextMesh Pro/Resources/TMP Settings.asset");
+        }
+#endif
         static string ToString(string packageName, string packageVersion)
         {
             return string.IsNullOrEmpty(packageVersion) ? packageName : $"{packageName}@{packageVersion}";

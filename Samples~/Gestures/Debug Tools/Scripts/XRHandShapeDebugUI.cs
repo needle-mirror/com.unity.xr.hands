@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
 using TMPro;
+#endif
 using UnityEngine.UI;
 using UnityEngine.XR.Hands.Analytics;
 using UnityEngine.XR.Hands.Gestures;
@@ -9,7 +11,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 {
     /// <summary>
     /// Controls the debug UI for <see cref="XRHandShape"/> that shows the target and tolerances on the UI controlled
-    /// by a <see cref="XRAllFingerStatesDebugUI"/>.
+    /// by a <see cref="XRAllFingerShapesDebugUI"/>.
     /// </summary>
     public class XRHandShapeDebugUI : MonoBehaviour
     {
@@ -21,9 +23,10 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
         [Tooltip("The target hand shape to be displayed in the debugger. If an XRHandPose is set, its underlying XRHandShape properties will be displayed.")]
         ScriptableObject m_HandShapeOrPose;
 
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
         [SerializeField]
         TextMeshProUGUI SelectedHandShapeName;
-
+#endif
         [SerializeField]
         XRSelectedHandShapeDebugUI m_XRSelectedHandShapeDebugUI;
 
@@ -90,9 +93,12 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
             if (m_HandShapeDetected)
             {
-                SelectedHandShapeName.text = m_HandShape.name;
                 handShapeOrPose = m_HandShape;
+
+#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
+                SelectedHandShapeName.text = m_HandShape.name;
                 m_XRSelectedHandShapeDebugUI.UpdateSelectedHandShapeTextUI(m_HandShape);
+#endif
             }
 
             if (k_Bars.Count == 0)

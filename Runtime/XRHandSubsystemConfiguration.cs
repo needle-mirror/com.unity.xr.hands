@@ -7,7 +7,7 @@ namespace UnityEngine.XR.Hands.Configuration
     {
         /// <summary>
         /// The pose source to be used by <see cref="XRHandDevice"/>. This will take effect the next time
-        /// XRHandSbusystem invokes <see cref="XRHandSubsystem.updatedHands"/>.
+        /// XRHandSubsystem invokes <see cref="XRHandSubsystem.updatedHands"/>.
         /// </summary>
         /// <remarks>
         /// The transition to the new pose source will be immediate. The device will not attempt to transition or cancel

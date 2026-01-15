@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.Scripting;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.Meshing;
 using UnityEngine.XR.Hands.OpenXR.Meshing;
@@ -22,6 +23,7 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// <summary>
     /// Hand tracking provider for the OpenXR platform.
     /// </summary>
+    [Preserve]
     public unsafe class OpenXRHandProvider : XRHandSubsystemProvider
     {
         /// <summary>

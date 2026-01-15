@@ -4,7 +4,7 @@ using UnityEngine.XR.Hands.Gestures;
 namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 {
     /// <summary>
-    /// Controls the debug UI for finger state values by setting that values in each <see cref="XRFingerStateDebugUI"/>.
+    /// Controls the debug UI for finger state values by setting that values in each <see cref="XRFingerShapeDebugUI"/>.
     /// </summary>
     public class XRAllFingerShapesDebugUI : MonoBehaviour
     {

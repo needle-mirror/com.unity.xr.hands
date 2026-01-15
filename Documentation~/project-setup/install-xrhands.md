@@ -25,7 +25,7 @@ To install this package in Unity 2021.3+, follow these steps to [Install a UPM p
 
 ## Editor compatibility
 
-XR Hands 1.7 is compatible with Unity 2021.3 and later.
+XR Hands 1.7 is compatible with Unity 2022.3 and later.
 
 > [!NOTE]
 > XR Hands <span class="short_version">X.Y</span> is compatible with Unity 2021.3 and up, but it does not appear in the Package Manager window.
