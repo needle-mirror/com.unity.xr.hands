@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Profiling;
 using UnityEngine.SubsystemsImplementation;
 using UnityEngine.XR.Hands.Analytics;
 using UnityEngine.XR.Hands.Configuration;
@@ -71,15 +72,7 @@ namespace UnityEngine.XR.Hands
         /// Refer to [Hand data model](xref:xrhands-data-model) for a description of the
         /// available hand tracking data.
         /// </remarks>
-        public XRHand leftHand => m_LeftHand;
-        XRHand m_LeftHand;
-
-        internal unsafe void SetLeftHand(XRHand hand)
-        {
-            if (hand.m_Joints.GetUnsafePtr() != m_LeftHand.m_Joints.GetUnsafePtr())
-                throw new InvalidOperationException("Cannot overwrite the left hand with a hand that was not first retrieved from the subsystem's leftHand property!");
-            m_LeftHand = hand;
-        }
+        public XRHand leftHand => GetHand(Handedness.Left);
 
         /// <summary>
         /// Gets the right <see cref="XRHand"/> that is being tracked by this
@@ -94,8 +87,67 @@ namespace UnityEngine.XR.Hands
         /// Refer to [Hand data model](xref:xrhands-data-model) for a description of the
         /// available hand tracking data.
         /// </remarks>
-        public XRHand rightHand => m_RightHand;
-        XRHand m_RightHand;
+        public XRHand rightHand => GetHand(Handedness.Right);
+
+        /// <summary>
+        /// Gets the <see cref="XRHand"/> associated with the given <see cref="Handedness"/>.
+        /// </summary>
+        /// <param name="handedness">
+        /// The <see cref="Handedness"/> you wish to retrieve the associated
+        /// <see cref="XRHand"/> for. <c>GetHand</c> will throw an exception
+        /// if anything other than <see cref="Handedness.Left"/> or <see cref="Handedness.Right"/>
+        /// is supplied.
+        /// </param>
+        /// <returns>
+        /// The <see cref="XRHand"/> associated with the given <see cref="Handedness"/>.
+        /// </returns>
+        /// <remarks>
+        /// Will only ever return either <see cref="leftHand"/>
+        /// or <see cref="rightHand"/>.
+        /// </remarks>
+        public XRHand GetHand(Handedness handedness)
+        {
+            if (!handedness.IsValid())
+                throw new ArgumentException($"Cannot get hand for Handedness.{handedness}. Only Handedness.Left and Handedness.Right are valid.", nameof(handedness));
+
+            if (!TryGetHand(handedness, out var hand))
+                throw new InvalidOperationException("Hand subsystem state is not initialized.");
+
+            return hand;
+        }
+
+        /// <summary>
+        /// Attempts to get the <see cref="XRHand"/> associated with the given
+        /// <see cref="Handedness"/>.
+        /// </summary>
+        /// <param name="handedness">
+        /// The <see cref="Handedness"/> you wish to retrieve the associated
+        /// <see cref="XRHand"/> for.
+        /// </param>
+        /// <param name="hand">
+        /// If <c>TryGetHand</c> returns <see langword="true"/>, this will be filled
+        /// out with the associated hand data requested.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if a valid <see cref="Handedness.Left"/>
+        /// or <see cref="Handedness.Right"/> hand was requested and the subsystem
+        /// is initialized, returns <see langword="false"/> otherwise.
+        /// </returns>
+        /// <remarks>
+        /// Will only ever successfully retrieve either <see cref="leftHand"/>
+        /// or <see cref="rightHand"/>.
+        /// </remarks>
+        public bool TryGetHand(Handedness handedness, out XRHand hand)
+        {
+            if (!handedness.IsValid() || m_StatePerHand == null)
+            {
+                hand = default;
+                return false;
+            }
+
+            hand = m_StatePerHand[handedness.ToIndex()].m_Hand;
+            return true;
+        }
 
         /// <summary>
         /// Invoked when UpdateHandsConfiguration is called and after subsystem processing has occurred.
@@ -125,13 +177,6 @@ namespace UnityEngine.XR.Hands
             }
         }
 
-        internal unsafe void SetRightHand(XRHand hand)
-        {
-            if (hand.m_Joints.GetUnsafePtr() != m_RightHand.m_Joints.GetUnsafePtr())
-                throw new InvalidOperationException("Cannot overwrite the right hand with a hand that was not first retrieved from the subsystem's rightHand property!");
-            m_RightHand = hand;
-        }
-
         /// <summary>
         /// Indicates which joints in the <see cref="XRHandJointID"/> list are
         /// supported by the current hand data provider.
@@ -154,7 +199,6 @@ namespace UnityEngine.XR.Hands
         /// returned by a call to <c>XRHandSubsystemDescriptor.Create</c>).
         /// </remarks>
         public NativeArray<bool> jointsInLayout => m_JointsInLayout;
-        NativeArray<bool> m_JointsInLayout;
 
         /// <summary>
         /// Describes what data on either hand was updated during the most recent hand update.
@@ -168,7 +212,11 @@ namespace UnityEngine.XR.Hands
         /// </remarks>
         /// <value>The flags for the most recent update. Applies to the <see cref="leftHand"/>
         /// and <see cref="rightHand"/> properties.</value>
-        public UpdateSuccessFlags updateSuccessFlags { get; protected set; }
+        public UpdateSuccessFlags updateSuccessFlags
+        {
+            get => m_UpdateSuccessFlags;
+            protected set => m_UpdateSuccessFlags = value;
+        }
 
         /// <summary>
         /// Describes what data on either hand was updated during the call.
@@ -273,12 +321,72 @@ namespace UnityEngine.XR.Hands
         /// <summary>
         /// Gets common hand gestures getters and callbacks for the left hand.
         /// </summary>
-        public XRCommonHandGestures leftHandCommonGestures => m_LeftHandCommonGestures;
+        public XRCommonHandGestures leftHandCommonGestures => GetCommonGestures(Handedness.Left);
 
         /// <summary>
         /// Gets common hand gestures getters and callbacks for the right hand.
         /// </summary>
-        public XRCommonHandGestures rightHandCommonGestures => m_RightHandCommonGestures;
+        public XRCommonHandGestures rightHandCommonGestures => GetCommonGestures(Handedness.Right);
+
+        /// <summary>
+        /// Attempts to get the <see cref="XRCommonHandGestures"/> associated with the given
+        /// <see cref="Handedness"/>.
+        /// </summary>
+        /// <param name="handedness">
+        /// The <see cref="Handedness"/> you wish to retrieve the associated
+        /// <see cref="XRCommonHandGestures"/> for.
+        /// </param>
+        /// <param name="commonGestures">
+        /// If <c>TryGetCommonGestures</c> returns <see langword="true"/>, this will be filled
+        /// out with the associated common gestures data requested.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if a valid <see cref="Handedness.Left"/>
+        /// or <see cref="Handedness.Right"/> hand was requested and the subsystem
+        /// is initialized, returns <see langword="false"/> otherwise.
+        /// </returns>
+        /// <remarks>
+        /// Will only ever successfully retrieve either <see cref="leftHandCommonGestures"/>
+        /// or <see cref="rightHandCommonGestures"/>.
+        /// </remarks>
+        public bool TryGetCommonGestures(Handedness handedness, out XRCommonHandGestures commonGestures)
+        {
+            if (!handedness.IsValid() || m_StatePerHand == null)
+            {
+                commonGestures = null;
+                return false;
+            }
+
+            commonGestures = m_StatePerHand[handedness.ToIndex()].m_CommonGestures;
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="XRCommonHandGestures"/> associated with the given <see cref="Handedness"/>.
+        /// </summary>
+        /// <param name="handedness">
+        /// The <see cref="Handedness"/> you wish to retrieve the associated
+        /// <see cref="XRCommonHandGestures"/> for. <c>GetCommonGestures</c> will throw an exception
+        /// if anything other than <see cref="Handedness.Left"/> or <see cref="Handedness.Right"/>
+        /// is supplied.
+        /// </param>
+        /// <returns>
+        /// The <see cref="XRCommonHandGestures"/> associated with the given <see cref="Handedness"/>.
+        /// </returns>
+        /// <remarks>
+        /// Will only ever return either <see cref="leftHandCommonGestures"/>
+        /// or <see cref="rightHandCommonGestures"/>.
+        /// </remarks>
+        public XRCommonHandGestures GetCommonGestures(Handedness handedness)
+        {
+            if (!handedness.IsValid())
+                throw new ArgumentException($"Cannot get common gestures for Handedness.{handedness}. Only Handedness.Left and Handedness.Right are valid.", nameof(handedness));
+
+            if (!TryGetCommonGestures(handedness, out var commonGestures))
+                throw new InvalidOperationException("Hand subsystem state is not initialized.");
+
+            return commonGestures;
+        }
 
         /// <summary>
         /// Request an update from the hand data provider. Application developers
@@ -309,147 +417,139 @@ namespace UnityEngine.XR.Hands
         /// </remarks>
         public virtual unsafe UpdateSuccessFlags TryUpdateHands(UpdateType updateType)
         {
+            using (s_TryUpdateHandsMarker.Auto())
+            {
 #if UNITY_EDITOR && (ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER)
-            XRHandFeatureUsageData.xrHandSubsystemRuntimeUsed = true;
+                XRHandFeatureUsageData.xrHandSubsystemRuntimeUsed = true;
 #endif
 
-            if (!running)
-                return UpdateSuccessFlags.None;
+                if (!running)
+                    return UpdateSuccessFlags.None;
 
-            updateSuccessFlags = provider.TryUpdateHands(
-                updateType,
-                ref m_LeftHand.m_RootPose,
-                m_LeftHand.m_Joints,
-                ref m_RightHand.m_RootPose,
-                m_RightHand.m_Joints);
+                var leftHand = GetHand(Handedness.Left);
+                var rightHand = GetHand(Handedness.Right);
+                if (!leftHand.isValid || !rightHand.isValid)
+                    return UpdateSuccessFlags.None;
 
-            XRFingerShapeMath.ClearFingerStateCache(Handedness.Left);
-            XRFingerShapeMath.ClearFingerStateCache(Handedness.Right);
+                m_Actions.beginTryUpdateHands?.Invoke(updateType);
+                var leftPose = leftHand.m_RootPose;
+                var rightPose = rightHand.m_RootPose;
 
-            var wasLeftHandTracked = m_LeftHand.isTracked;
-            var success = UpdateSuccessFlags.LeftHandRootPose | UpdateSuccessFlags.LeftHandJoints;
-            m_LeftHand.isTracked = (updateSuccessFlags & success) == success;
-            if (!wasLeftHandTracked && m_LeftHand.isTracked)
-                trackingAcquired?.Invoke(m_LeftHand);
-            else if (wasLeftHandTracked && !m_LeftHand.isTracked)
-                trackingLost?.Invoke(m_LeftHand);
-
-            var wasRightHandTracked = m_RightHand.isTracked;
-            success = UpdateSuccessFlags.RightHandRootPose | UpdateSuccessFlags.RightHandJoints;
-            m_RightHand.isTracked = (updateSuccessFlags & success) == success;
-            if (!wasRightHandTracked && m_RightHand.isTracked)
-                trackingAcquired?.Invoke(m_RightHand);
-            else if (wasRightHandTracked && !m_RightHand.isTracked)
-                trackingLost?.Invoke(m_RightHand);
-
-            preprocessJoints?.Invoke(this, updateSuccessFlags, updateType);
-
-            for (int processorIndex = 0; processorIndex < m_Processors.Count; ++processorIndex)
-                m_Processors[processorIndex].ProcessJoints(this, updateSuccessFlags, updateType);
-
-            if (updateType == UpdateType.Dynamic && provider.canSurfaceCommonPoseData)
-            {
-                if (subsystemDescriptor.supportsAimPose)
+                using (s_ProviderTryUpdateHandsMarker.Auto())
                 {
-                    if (provider.TryGetAimPose(Handedness.Left, out var aimPoseLeft))
-                        m_LeftHandCommonGestures.UpdateAimPose(aimPoseLeft);
-                    else
-                        m_LeftHandCommonGestures.InvalidateAimPose();
-
-                    if (provider.TryGetAimPose(Handedness.Right, out var aimPoseRight))
-                        m_RightHandCommonGestures.UpdateAimPose(aimPoseRight);
-                    else
-                        m_RightHandCommonGestures.InvalidateAimPose();
+                    m_UpdateSuccessFlags = provider.TryUpdateHands(
+                        updateType,
+                        ref leftPose,
+                        leftHand.m_Joints,
+                        ref rightPose,
+                        rightHand.m_Joints);
                 }
 
-                if (subsystemDescriptor.supportsAimActivateValue)
-                {
-                    if (provider.TryGetAimActivateValue(Handedness.Left, out var aimActivateValueLeft))
-                        m_LeftHandCommonGestures.UpdateAimActivateValue(aimActivateValueLeft);
-                    else
-                        m_LeftHandCommonGestures.InvalidateAimActivateValue();
+                leftHand.m_RootPose = leftPose;
+                rightHand.m_RootPose = rightPose;
+                XRFingerShapeMath.ClearFingerStateCaches();
 
-                    if (provider.TryGetAimActivateValue(Handedness.Right, out var aimActivateValueRight))
-                        m_RightHandCommonGestures.UpdateAimActivateValue(aimActivateValueRight);
-                    else
-                        m_RightHandCommonGestures.InvalidateAimActivateValue();
+                using (s_TrackingEventsMarker.Auto())
+                {
+                    var wasLeftHandTracked = leftHand.isTracked;
+                    var success = UpdateSuccessFlags.LeftHandRootPose | UpdateSuccessFlags.LeftHandJoints;
+                    leftHand.isTracked = (updateSuccessFlags & success) == success;
+                    m_StatePerHand[Handedness.Left.ToIndex()].m_Hand = leftHand;
+                    if (!wasLeftHandTracked && leftHand.isTracked)
+                        trackingAcquired?.Invoke(leftHand);
+                    else if (wasLeftHandTracked && !leftHand.isTracked)
+                        trackingLost?.Invoke(leftHand);
+
+                    var wasRightHandTracked = rightHand.isTracked;
+                    success = UpdateSuccessFlags.RightHandRootPose | UpdateSuccessFlags.RightHandJoints;
+                    rightHand.isTracked = (updateSuccessFlags & success) == success;
+                    m_StatePerHand[Handedness.Right.ToIndex()].m_Hand = rightHand;
+                    if (!wasRightHandTracked && rightHand.isTracked)
+                        trackingAcquired?.Invoke(rightHand);
+                    else if (wasRightHandTracked && !rightHand.isTracked)
+                        trackingLost?.Invoke(rightHand);
                 }
 
-                if (subsystemDescriptor.supportsGraspValue)
+                using (s_PostUpdateMarker.Auto())
                 {
-                    if (provider.TryGetGraspValue(Handedness.Left, out var graspValueLeft))
-                        m_LeftHandCommonGestures.UpdateGraspValue(graspValueLeft);
-                    else
-                        m_LeftHandCommonGestures.InvalidateGraspValue();
+                    preprocessJoints?.Invoke(this, updateSuccessFlags, updateType);
 
-                    if (provider.TryGetGraspValue(Handedness.Right, out var graspValueRight))
-                        m_RightHandCommonGestures.UpdateGraspValue(graspValueRight);
-                    else
-                        m_RightHandCommonGestures.InvalidateGraspValue();
-                }
+                    // this needs to be an option (enabled by default?) instead of blanket disabling
+                    if (provider.AllowJointProcessing())
+                    {
+                        for (int processorIndex = 0; processorIndex < m_Processors.Count; ++processorIndex)
+                            m_Processors[processorIndex].ProcessJoints(this, updateSuccessFlags, updateType);
+                    }
 
-                if (subsystemDescriptor.supportsGripPose)
-                {
-                    if (provider.TryGetGripPose(Handedness.Left, out var gripPoseLeft))
-                        m_LeftHandCommonGestures.UpdateGripPose(gripPoseLeft);
-                    else
-                        m_LeftHandCommonGestures.InvalidateGripPose();
+                    if (updateType == UpdateType.Dynamic)
+                    {
+                        // Avoid foreach allocation by iterating handedness values directly
+                        using (s_RetrieveCommonPoseDataMarker.Auto())
+                        {
+                            RetrieveCommonPoseData(Handedness.Left, m_StatePerHand[Handedness.Left.ToIndex()].m_CommonGestures);
+                            RetrieveCommonPoseData(Handedness.Right, m_StatePerHand[Handedness.Right.ToIndex()].m_CommonGestures);
+                        }
 
-                    if (provider.TryGetGripPose(Handedness.Right, out var gripPoseRight))
-                        m_RightHandCommonGestures.UpdateGripPose(gripPoseRight);
-                    else
-                        m_RightHandCommonGestures.InvalidateGripPose();
-                }
+                    }
 
-                if (subsystemDescriptor.supportsPinchPose)
-                {
-                    if (provider.TryGetPinchPose(Handedness.Left, out var pinchPoseLeft))
-                        m_LeftHandCommonGestures.UpdatePinchPose(pinchPoseLeft);
-                    else
-                        m_LeftHandCommonGestures.InvalidatePinchPose();
+#if UNITY_OPENXR_PACKAGE
+                    if (provider is OpenXR.OpenXRHandProvider openXRProvider)
+                        openXRProvider.FlushMetaAimChanges();
+#endif // UNITY_OPENXR_PACKAGE
 
-                    if (provider.TryGetPinchPose(Handedness.Right, out var pinchPoseRight))
-                        m_RightHandCommonGestures.UpdatePinchPose(pinchPoseRight);
-                    else
-                        m_RightHandCommonGestures.InvalidatePinchPose();
-                }
+                    // Avoid foreach allocation by iterating handedness values directly
+                    {
+                        int handedIndex = Handedness.Left.ToIndex();
+                        var statePerHand = m_StatePerHand[handedIndex];
+                        statePerHand.m_IsAimStateValid = provider.TryGetAimState(
+                            Handedness.Left, out statePerHand.m_AimState);
+                    }
+                    {
+                        int handedIndex = Handedness.Right.ToIndex();
+                        var statePerHand = m_StatePerHand[handedIndex];
+                        statePerHand.m_IsAimStateValid = provider.TryGetAimState(
+                            Handedness.Right, out statePerHand.m_AimState);
+                    }
 
-                if (subsystemDescriptor.supportsPinchValue)
-                {
-                    if (provider.TryGetPinchValue(Handedness.Left, out var pinchValueLeft))
-                        m_LeftHandCommonGestures.UpdatePinchValue(pinchValueLeft);
-                    else
-                        m_LeftHandCommonGestures.InvalidatePinchValue();
-
-                    if (provider.TryGetPinchValue(Handedness.Right, out var pinchValueRight))
-                        m_RightHandCommonGestures.UpdatePinchValue(pinchValueRight);
-                    else
-                        m_RightHandCommonGestures.InvalidatePinchValue();
-                }
-
-                if (subsystemDescriptor.supportsPokePose)
-                {
-                    if (provider.TryGetPokePose(Handedness.Left, out var pokePoseLeft))
-                        m_LeftHandCommonGestures.UpdatePokePose(pokePoseLeft);
-                    else
-                        m_LeftHandCommonGestures.InvalidatePokePose();
-
-                    if (provider.TryGetPokePose(Handedness.Right, out var pokePoseRight))
-                        m_RightHandCommonGestures.UpdatePokePose(pokePoseRight);
-                    else
-                        m_RightHandCommonGestures.InvalidatePokePose();
-                }
-            }
-
-            if (updatedHands != null)
-                updatedHands.Invoke(this, updateSuccessFlags, updateType);
+                    if (updatedHands != null)
+                        updatedHands.Invoke(this, updateSuccessFlags, updateType);
 
 #pragma warning disable 618
-            if (handsUpdated != null)
-                handsUpdated.Invoke(updateSuccessFlags, updateType);
+                    if (handsUpdated != null)
+                        handsUpdated.Invoke(updateSuccessFlags, updateType);
 #pragma warning restore 618
 
-            return updateSuccessFlags;
+                    return updateSuccessFlags;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Attempts to get aim state for the given <see cref="Handedness"/>.
+        /// </summary>
+        /// <param name="handedness">
+        /// Denotes the hand you wish to obtain aim state for.
+        /// </param>
+        /// <param name="aimState">
+        /// If <c>TryGetAimState</c> returns <see langword="true"/>, this will
+        /// filled out with aim state data for the given <see cref="Handedness"/>.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if <c>TryGetAimState</c> succeeds and
+        /// fills out aim state for the given <see cref="Handedness"/>.
+        /// </returns>
+        public bool TryGetAimState(Handedness handedness, out XRHandAimState aimState)
+        {
+            if (!handedness.IsValid() || m_StatePerHand == null)
+            {
+                aimState = default;
+                return false;
+            }
+
+            int handedIndex = handedness.ToIndex();
+            var statePerHand = m_StatePerHand[handedIndex];
+            aimState = statePerHand.m_IsAimStateValid ? statePerHand.m_AimState : default;
+            return statePerHand.m_IsAimStateValid;
         }
 
         /// <summary>
@@ -468,8 +568,8 @@ namespace UnityEngine.XR.Hands
         /// </returns>
         /// <remarks>
         /// If this returns <see langword="true"/>, it is your responsibility to
-        /// to clean up the data by calling <see cref="XRHandMeshData.Dispose"/>
-        /// on each of those contained in the the filled-out <paramref name="result"/>,
+        /// clean up the data by calling <see cref="XRHandMeshData.Dispose"/>
+        /// on each of those contained in the filled-out <paramref name="result"/>,
         /// or by calling <see cref="XRHandMeshDataQueryResult.Dispose"/> on the
         /// <paramref name="result"/> itself.
         /// </remarks>
@@ -510,7 +610,7 @@ namespace UnityEngine.XR.Hands
         /// <summary>
         /// Describes which version of authored hand meshes is detected for use.
         /// </summary>
-        public XRDetectedHandMeshLayout detectedHandMeshLayout => provider.detectedHandMeshLayout;
+        public XRDetectedHandMeshLayout detectedHandMeshLayout => provider.detectedHandMeshLayout; // deprecate? should add new one either way
 
         /// <summary>
         /// Registers a processor for hand joint data.
@@ -551,35 +651,31 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         protected override void OnCreate()
         {
-            m_LeftHandCommonGestures = new XRCommonHandGestures(Handedness.Left);
-            m_RightHandCommonGestures = new XRCommonHandGestures(Handedness.Right);
+            m_StatePerHand = new StatePerHand[Constants.k_NumHands];
+            foreach (var handedness in HandsUtility.validHandednessValues)
+                m_StatePerHand[handedness.ToIndex()] = new StatePerHand(handedness);
 
-            m_JointsInLayout = new NativeArray<bool>(XRHandJointID.EndMarker.ToIndex(), Allocator.Persistent);
+            XRFingerShapeMath.OnCreateSubsystem(provider);
+
+            m_JointsInLayout = new NativeArray<bool>(Constants.k_NumJointsPerHand, Allocator.Persistent);
             provider.GetHandLayout(m_JointsInLayout);
+            foreach (var handedness in HandsUtility.validHandednessValues)
+                m_StatePerHand[handedness.ToIndex()].m_Hand.ApplyJointLayout(m_JointsInLayout);
+            provider.SubscribeToSubsystemActions(ref m_Actions);
+        }
 
-            m_LeftHand = new XRHand(Handedness.Left, Allocator.Persistent);
-            m_RightHand = new XRHand(Handedness.Right, Allocator.Persistent);
+        /// <inheritdoc/>
+        protected override void OnStart()
+        {
+            base.OnStart();
+            XRHandSubsystemDescriptor.OnSubsystemStarted(this);
+        }
 
-            for (int jointIndex = XRHandJointID.BeginMarker.ToIndex(); jointIndex < XRHandJointID.EndMarker.ToIndex(); ++jointIndex)
-            {
-                if (!m_JointsInLayout[jointIndex])
-                {
-                    var id = XRHandJointIDUtility.FromIndex(jointIndex);
-                    m_LeftHand.m_Joints[jointIndex] = XRHandProviderUtility.CreateJoint(
-                        Handedness.Left,
-                        XRHandJointTrackingState.WillNeverBeValid,
-                        id,
-                        Pose.identity);
-                    m_RightHand.m_Joints[jointIndex] = XRHandProviderUtility.CreateJoint(
-                        Handedness.Right,
-                        XRHandJointTrackingState.WillNeverBeValid,
-                        id,
-                        Pose.identity);
-                }
-            }
-
-            for (var fingerID = XRHandFingerID.Thumb; fingerID <= XRHandFingerID.Little; ++fingerID)
-                XRFingerShapeMath.SetDefaultFingerShapeConfiguration(fingerID, provider.GetFingerShapeConfiguration(fingerID));
+        /// <inheritdoc/>
+        protected override void OnStop()
+        {
+            base.OnStop();
+            XRHandSubsystemDescriptor.OnSubsystemStopped(this);
         }
 
         /// <summary>
@@ -588,14 +684,144 @@ namespace UnityEngine.XR.Hands
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            m_LeftHand.Dispose();
-            m_RightHand.Dispose();
-            m_JointsInLayout.Dispose();
+
+            var previousAllowDisposalFor = XRHand.allowDisposalFor;
+            XRHand.allowDisposalFor = XRHand.LifetimeType.Subsystem;
+            try
+            {
+                foreach (var perHandState in m_StatePerHand)
+                    perHandState.OnDestroy();
+            }
+            finally
+            {
+                XRHand.allowDisposalFor = previousAllowDisposalFor;
+            }
+
+            if (m_JointsInLayout.IsCreated)
+                m_JointsInLayout.Dispose();
+
+            XRHandSubsystemDescriptor.OnSubsystemDestroyed(this);
         }
 
+        internal unsafe void SetHand(XRHand hand)
+        {
+            if (hand.m_Joints.GetUnsafePtr() != GetHand(hand.handedness).m_Joints.GetUnsafePtr())
+            {
+                var handednessName = hand.handedness.ToString().ToLower();
+                throw new InvalidOperationException(
+                    $"Cannot overwrite the {handednessName} hand with a hand that was not first retrieved from the subsystem's {handednessName}Hand property!");
+            }
+            m_StatePerHand[hand.handedness.ToIndex()].m_Hand = hand;
+        }
+
+        void RetrieveCommonPoseData(Handedness handedness, XRCommonHandGestures commonGestures)
+        {
+            if (!provider.canSurfaceCommonPoseData)
+                return;
+
+            if (subsystemDescriptor.supportsAimPose)
+            {
+                if (provider.TryGetAimPose(handedness, out var aimPose))
+                    commonGestures.UpdateAimPose(aimPose);
+                else
+                    commonGestures.InvalidateAimPose();
+            }
+
+            if (subsystemDescriptor.supportsAimActivateValue)
+            {
+                if (provider.TryGetAimActivateValue(handedness, out var aimActiveValue))
+                    commonGestures.UpdateAimActivateValue(aimActiveValue);
+                else
+                    commonGestures.InvalidateAimActivateValue();
+
+                if (provider.TryGetAimActivatedState(handedness, out var isAimActivated))
+                    commonGestures.UpdateAimActivatedState(isAimActivated);
+                else
+                    commonGestures.InvalidateAimActivatedState();
+            }
+
+            if (subsystemDescriptor.supportsGraspValue)
+            {
+                if (provider.TryGetGraspValue(handedness, out var graspValue))
+                    commonGestures.UpdateGraspValue(graspValue);
+                else
+                    commonGestures.InvalidateGraspValue();
+
+                if (provider.TryGetGraspFirmState(handedness, out var isGraspFirm))
+                    commonGestures.UpdateGraspFirmState(isGraspFirm);
+                else
+                    commonGestures.InvalidateGraspFirmState();
+            }
+
+            if (subsystemDescriptor.supportsGripPose)
+            {
+                if (provider.TryGetGripPose(handedness, out var gripPose))
+                    commonGestures.UpdateGripPose(gripPose);
+                else
+                    commonGestures.InvalidateGripPose();
+            }
+
+            if (subsystemDescriptor.supportsPinchPose)
+            {
+                if (provider.TryGetPinchPose(handedness, out var pinchPose))
+                    commonGestures.UpdatePinchPose(pinchPose);
+                else
+                    commonGestures.InvalidatePinchPose();
+            }
+
+            if (subsystemDescriptor.supportsPinchValue)
+            {
+                if (provider.TryGetPinchValue(handedness, out var pinchValue))
+                    commonGestures.UpdatePinchValue(pinchValue);
+                else
+                    commonGestures.InvalidatePinchValue();
+
+                if (provider.TryGetPinchTouchedState(handedness, out var isPinchTouched))
+                    commonGestures.UpdatePinchTouchedState(isPinchTouched);
+                else
+                    commonGestures.InvalidatePinchTouchedState();
+            }
+
+            if (subsystemDescriptor.supportsPokePose)
+            {
+                if (provider.TryGetPokePose(handedness, out var pokePose))
+                    commonGestures.UpdatePokePose(pokePose);
+                else
+                    commonGestures.InvalidatePokePose();
+            }
+        }
+
+        class StatePerHand
+        {
+            internal StatePerHand(Handedness handedness)
+            {
+                m_Hand = new XRHand(Allocator.Persistent, handedness, XRHand.LifetimeType.Subsystem);
+                m_CommonGestures = new XRCommonHandGestures(handedness);
+            }
+
+            internal void OnDestroy() => m_Hand.Dispose();
+
+            internal XRHand m_Hand;
+            internal XRCommonHandGestures m_CommonGestures;
+            internal XRHandAimState m_AimState;
+            internal bool m_IsAimStateValid;
+        }
+
+        StatePerHand[] m_StatePerHand;
+
+        UpdateSuccessFlags m_UpdateSuccessFlags;
+        NativeArray<bool> m_JointsInLayout;
+
         List<IXRHandProcessor> m_Processors = new List<IXRHandProcessor>();
-        XRCommonHandGestures m_LeftHandCommonGestures;
-        XRCommonHandGestures m_RightHandCommonGestures;
+
+        // Profiler markers
+        static readonly ProfilerMarker s_TryUpdateHandsMarker = new ProfilerMarker("XRHandSubsystem.TryUpdateHands");
+        static readonly ProfilerMarker s_RetrieveCommonPoseDataMarker = new ProfilerMarker("XRHandSubsystem.RetrieveCommonPoseData");
+        static readonly ProfilerMarker s_TrackingEventsMarker = new ProfilerMarker("XRHandSubsystem.TrackingEvents");
+        static readonly ProfilerMarker s_ProviderTryUpdateHandsMarker = new ProfilerMarker("XRHandSubsystem.Provider.TryUpdateHands");
+        static readonly ProfilerMarker s_PostUpdateMarker = new ProfilerMarker("XRHandSubsystem.PostUpdate");
+
+        XRHandSubsystemActions m_Actions;
 
         static int CompareProcessors(IXRHandProcessor a, IXRHandProcessor b)
             => a.callbackOrder.CompareTo(b.callbackOrder);

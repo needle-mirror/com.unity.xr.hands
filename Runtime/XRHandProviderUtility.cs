@@ -1,6 +1,5 @@
 using System;
 using Unity.Collections;
-using UnityEngine.XR.Hands.Gestures;
 
 namespace UnityEngine.XR.Hands.ProviderImplementation
 {
@@ -62,12 +61,21 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
             return new XRHandJoint
             {
                 m_TrackingState = trackingState,
-                m_IdAndHandedness = idAndHandedness,
+                m_IdAndHandedness = GetIdAndHandedness(id, handedness),
                 m_Pose = pose,
                 m_Radius = radius,
                 m_LinearVelocity = linearVelocity,
                 m_AngularVelocity = angularVelocity,
             };
+        }
+
+        internal static int GetIdAndHandedness(XRHandJointID id, Handedness handedness)
+        {
+            int ret = (int)id;
+            if (handedness == Handedness.Right)
+                ret |= XRHandJoint.k_IsRightHandBit;
+
+            return ret;
         }
 
         /// <summary>
@@ -89,7 +97,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// of <c>XRHandSubsystem</c>. Most applications should access hands through the subsystem's
         /// leftHand and rightHand properties instead. Refer to [Access hand data](xref:xr-hand-access-data) for details.
         /// </remarks>
-        public static XRHand CreateHand(Handedness handedness, Allocator allocator) => new XRHand(handedness, allocator);
+        public static XRHand CreateHand(Handedness handedness, Allocator allocator) => new XRHand(allocator, handedness, XRHand.LifetimeType.ProviderUtility);
 
         /// <summary>
         /// Release resources allocated by an <see cref="XRHand"/> instance.
@@ -104,7 +112,19 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// This method is a wrapper for the internal Dispose method that handles the cleanup
         /// of all native arrays allocated by the <c>XRHand</c>.
         /// </remarks>
-        public static void DisposeHand(XRHand hand) => hand.Dispose();
+        public static void DisposeHand(XRHand hand)
+        {
+            var previous = XRHand.allowDisposalFor;
+            XRHand.allowDisposalFor = XRHand.LifetimeType.ProviderUtility;
+            try
+            {
+                hand.Dispose();
+            }
+            finally
+            {
+                XRHand.allowDisposalFor = previous;
+            }
+        }
 
         /// <summary>
         /// Use this with your provider (if hand-tracking is enabled in your

@@ -279,6 +279,8 @@ MonoBehaviour:
   m_HandShapeOrPose: {fileID: 0}
   SelectedHandShapeName: {fileID: 0}
   m_XRSelectedHandShapeDebugUI: {fileID: 0}
+  m_HandShapeCompletenessCalculator: {fileID: 0}
+  m_HandShapeCompletenessProgressBar: {fileID: 0}
 --- !u!1 &188285988559821586
 GameObject:
   m_ObjectHideFlags: 0
@@ -8158,6 +8160,8 @@ MonoBehaviour:
   m_HandShapeOrPose: {fileID: 0}
   SelectedHandShapeName: {fileID: 0}
   m_XRSelectedHandShapeDebugUI: {fileID: 0}
+  m_HandShapeCompletenessCalculator: {fileID: 0}
+  m_HandShapeCompletenessProgressBar: {fileID: 0}
 --- !u!1 &8383722839657248159
 GameObject:
   m_ObjectHideFlags: 0

@@ -74,6 +74,11 @@ namespace UnityEngine.XR.Hands
         public AxisControl graspValue { get; private set; }
 
         /// <summary>
+        /// [ButtonControl](xref:UnityEngine.InputSystem.Controls.ButtonControl) that indicates whether or not the user is making a fist.
+        /// </summary>
+        public ButtonControl graspFirm { get; private set; }
+
+        /// <summary>
         /// Whether the hand performing the grasp action is properly tracked by the hand tracking device
         /// and it is observed to be ready to perform or is performing the grasp action.
         /// </summary>
@@ -124,6 +129,12 @@ namespace UnityEngine.XR.Hands
         public AxisControl pinchValue { get; private set; }
 
         /// <summary>
+        /// [ButtonControl](xref:UnityEngine.InputSystem.Controls.ButtonControl) that represents whether or not a
+        /// pinch action is actively occurring.
+        /// </summary>
+        public ButtonControl pinchTouched { get; private set; }
+
+        /// <summary>
         /// Whether the fingers used to perform the "pinch" gesture are properly tracked by the hand tracking device
         /// and the hand shape is observed to be ready to perform or is performing a "pinch" gesture.
         /// </summary>
@@ -154,6 +165,13 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         public AxisControl aimActivateValue { get; private set; }
 
+        /// <summary>
+        /// [ButtonControl](xref:UnityEngine.InputSystem.Controls.ButtonControl) that indicates whether or not
+        /// the user activated the aim action on the target that the user is pointing at with the aim pose.
+        /// </summary>
+        public ButtonControl aimActivated { get; private set; }
+
+        /// <summary>
         /// Whether the fingers to perform the aim activate gesture are properly tracked by the hand tracking device
         /// and the hand shape is observed to be ready to perform or is performing an aim activate gesture.
         /// </summary>
@@ -174,6 +192,7 @@ namespace UnityEngine.XR.Hands
             gripRotation = GetChildControl<QuaternionControl>("gripRotation");
             gripTrackingState = GetChildControl<IntegerControl>("gripTrackingState");
             graspValue = GetChildControl<AxisControl>("graspValue");
+            graspFirm = GetChildControl<ButtonControl>("graspFirm");
             graspReady = GetChildControl<ButtonControl>("graspReady");
             pokePosition = GetChildControl<Vector3Control>("pokePosition");
             pokeRotation = GetChildControl<QuaternionControl>("pokeRotation");
@@ -182,11 +201,13 @@ namespace UnityEngine.XR.Hands
             pinchPosition = GetChildControl<Vector3Control>("pinchPosition");
             pinchRotation = GetChildControl<QuaternionControl>("pinchRotation");
             pinchValue = GetChildControl<AxisControl>("pinchValue");
+            pinchTouched = GetChildControl<ButtonControl>("pinchTouched");
             pinchReady = GetChildControl<ButtonControl>("pinchReady");
             aimTrackingState = GetChildControl<IntegerControl>("aimTrackingState");
             aimPosition = GetChildControl<Vector3Control>("aimPosition");
             aimRotation = GetChildControl<QuaternionControl>("aimRotation");
             aimActivateValue = GetChildControl<AxisControl>("aimActivateValue");
+            aimActivated = GetChildControl<ButtonControl>("aimActivated");
             aimActivateReady = GetChildControl<ButtonControl>("aimActivateReady");
 
             m_DeviceState.gripRotation = Quaternion.identity;
@@ -242,6 +263,11 @@ namespace UnityEngine.XR.Hands
                         },
                         new XRFeatureDescriptor
                         {
+                            name = "grasp_firm",
+                            featureType = FeatureType.Binary
+                        },
+                        new XRFeatureDescriptor
+                        {
                             name = "grasp_ready",
                             featureType = FeatureType.Binary
                         },
@@ -282,6 +308,11 @@ namespace UnityEngine.XR.Hands
                         },
                         new XRFeatureDescriptor
                         {
+                            name = "pinch_touched",
+                            featureType = FeatureType.Binary
+                        },
+                        new XRFeatureDescriptor
+                        {
                             name = "pinch_ready",
                             featureType = FeatureType.Binary
                         },
@@ -304,6 +335,11 @@ namespace UnityEngine.XR.Hands
                         {
                             name = "aim_activate_value",
                             featureType = FeatureType.Axis1D
+                        },
+                        new XRFeatureDescriptor
+                        {
+                            name = "aim_activated",
+                            featureType = FeatureType.Binary
                         },
                         new XRFeatureDescriptor
                         {
@@ -480,6 +516,15 @@ namespace UnityEngine.XR.Hands
                 m_DeviceState.graspReady = false;
             }
 
+            if (commonGestures.TryGetGraspFirmState(out var isGraspFirm))
+            {
+                m_DeviceState.graspFirm = isGraspFirm;
+            }
+            else
+            {
+                m_DeviceState.graspFirm = false;
+            }
+
             if (commonGestures.TryGetPokePose(out var pokePose))
             {
                 m_DeviceState.pokePosition = pokePose.position;
@@ -513,6 +558,15 @@ namespace UnityEngine.XR.Hands
                 m_DeviceState.pinchReady = false;
             }
 
+            if (commonGestures.TryGetPinchTouchedState(out var isPinchTouched))
+            {
+                m_DeviceState.pinchTouched = isPinchTouched;
+            }
+            else
+            {
+                m_DeviceState.pinchTouched = false;
+            }
+
             if (commonGestures.TryGetAimPose(out var aimPose))
             {
                 m_DeviceState.aimPosition = aimPose.position;
@@ -533,6 +587,15 @@ namespace UnityEngine.XR.Hands
             {
                 m_DeviceState.aimActivateValue = 0f;
                 m_DeviceState.aimActivateReady = false;
+            }
+
+            if (commonGestures.TryGetAimActivatedState(out var isAimActivated))
+            {
+                m_DeviceState.aimActivated = isAimActivated;
+            }
+            else
+            {
+                m_DeviceState.aimActivated = false;
             }
 
             InputSystem.InputSystem.QueueStateEvent(this, m_DeviceState);

@@ -145,6 +145,9 @@ The missing prefab error might also occur if you have not imported the **Hand Vi
 
 * If the sample scene appears incorrectly or displays missing materials, it may be due to the project using a Scriptable Render Pipeline (URP or HDRP), while some materials in the sample scene is designed for the Built-in Render Pipeline.
 
+> [!IMPORTANT]
+> In Unity 6.5 and newer, the Built-In Render Pipeline is deprecated and will be made obsolete in a future release. For more information, refer to [Migrating from the Built-In Render Pipeline to URP](https://docs.unity3d.com/6000.5/Documentation/Manual/urp/upgrading-from-birp.html) and [Render pipeline feature comparison](https://docs.unity3d.com/6000.5/Documentation/Manual/render-pipelines-feature-comparison.html).
+
   ![Broken materials screenshot](../images/XRHandCapture/hand-capture-sample/Broken-Materials.png)
 
   **Solution:** If you haven't already, import the **Hand Visualizer** sample. It includes a script that automatically converts materials for compatibility with the Universal Render Pipeline (URP).

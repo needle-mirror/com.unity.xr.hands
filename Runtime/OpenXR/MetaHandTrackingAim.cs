@@ -92,30 +92,23 @@ namespace UnityEngine.XR.Hands.OpenXR
         void Init(XRHandSubsystem subsystem)
         {
             if (NativeApi.ToggleMetaAim(true))
-            {
                 CreateHands();
-                subsystem.updatedHands += OnUpdatedHands;
-            }
             else
-            {
                 Debug.LogError("Couldn't enable Meta aim retrieval in plugin - please ensure you enabled the Hand Tracking Subsystem feature in the OpenXR project settings.");
-            }
         }
 
         /// <summary>See <see cref="OpenXRFeature.OnSubsystemStop"/>.</summary>
         protected override void OnSubsystemStop()
         {
             NativeApi.ToggleMetaAim(false);
-
-            if (HandTracking.subsystem != null)
-                HandTracking.subsystem.updatedHands -= OnUpdatedHands;
-
             DestroyHands();
             HandTracking.subsystemCreated -= OnHandSubsystemCreated;
         }
 
         void CreateHands()
         {
+            OpenXRHandProvider.SetMetaAim(this);
+
             if (Hands.MetaAimHand.left == null)
                 Hands.MetaAimHand.left = Hands.MetaAimHand.CreateHand(InputDeviceCharacteristics.Left);
 
@@ -136,14 +129,25 @@ namespace UnityEngine.XR.Hands.OpenXR
                 InputSystem.InputSystem.RemoveDevice(Hands.MetaAimHand.right);
                 Hands.MetaAimHand.right = null;
             }
+
+            OpenXRHandProvider.SetMetaAim(null);
         }
 
-        void OnUpdatedHands(XRHandSubsystem subsystem, XRHandSubsystem.UpdateSuccessFlags successFlags, XRHandSubsystem.UpdateType updateType)
+        internal void OnUpdatedHandsInProvider(XRHandSubsystem.UpdateSuccessFlags successFlags)
         {
             if ((successFlags & (XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints)) != 0)
                 Hands.MetaAimHand.left.UpdateHand(true, (successFlags & XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose) != 0);
             if ((successFlags & (XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints)) != 0)
                 Hands.MetaAimHand.right.UpdateHand(false, (successFlags & XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose) != 0);
+        }
+
+        internal void GetAimState(Handedness handedness, out XRHandAimState aimState)
+            => aimState = (handedness == Handedness.Left ? Hands.MetaAimHand.left : Hands.MetaAimHand.right).ConvertToHandAimState();
+
+        internal void FlushMetaAimChanges()
+        {
+            Hands.MetaAimHand.left.FlushChanges();
+            Hands.MetaAimHand.right.FlushChanges();
         }
 
         static class NativeApi

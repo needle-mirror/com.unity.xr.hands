@@ -53,8 +53,6 @@ namespace UnityEditor.XR.Hands.Capture
         HandGameObjects m_LeftHandGameObjects;
         HandGameObjects m_RightHandGameObjects;
         Transform m_HandObjectParentTransform;
-        XRHand m_LeftHand;
-        XRHand m_RightHand;
         XRFingerShape[] m_LeftFingerShapes = new XRFingerShape[k_FingerCount];
         XRFingerShape[] m_RightFingerShapes = new XRFingerShape[k_FingerCount];
         List<XRFingerShapeCondition> m_LeftFingerShapeConditions = new List<XRFingerShapeCondition>();
@@ -190,7 +188,6 @@ namespace UnityEditor.XR.Hands.Capture
 #else
             m_RecordingImporter = null;
 #endif
-            InitializeXRHands();
         }
 
         internal static XRHandCapturePlayback GetInstance()
@@ -292,34 +289,7 @@ namespace UnityEditor.XR.Hands.Capture
             if (m_RightHandShape != null)
                 ScriptableObject.DestroyImmediate(m_RightHandShape);
 
-            m_LeftHand.Dispose();
-            m_RightHand.Dispose();
-
             s_Instance = null;
-        }
-
-        void InitializeXRHands()
-        {
-            m_LeftHand = new XRHand(Handedness.Left, Allocator.Persistent);
-            m_RightHand = new XRHand(Handedness.Right, Allocator.Persistent);
-
-            var leftHandJoints = m_LeftHand.GetRawJointArray();
-            var rightHandJoints = m_RightHand.GetRawJointArray();
-
-            for (var jointID = XRHandJointID.BeginMarker; jointID < XRHandJointID.EndMarker; ++jointID)
-            {
-                leftHandJoints[jointID.ToIndex()] = XRHandProviderUtility.CreateJoint(
-                    Handedness.Left,
-                    XRHandJointTrackingState.Pose,
-                    jointID,
-                    Pose.identity);
-
-                rightHandJoints[jointID.ToIndex()] = XRHandProviderUtility.CreateJoint(
-                    Handedness.Right,
-                    XRHandJointTrackingState.Pose,
-                    jointID,
-                    Pose.identity);
-            }
         }
 
         internal void UpdateHandShapes()
@@ -350,6 +320,9 @@ namespace UnityEditor.XR.Hands.Capture
             return existingShape;
         }
 
+        static bool IsHandEverTracked(in XRHandCaptureFrame frame, Handedness handedness)
+            => frame.IsHandTracked(handedness, XRHandSubsystem.UpdateType.Dynamic) || frame.IsHandTracked(handedness, XRHandSubsystem.UpdateType.BeforeRender);
+
         void UpdateRenderingVisibility()
         {
             if (!IsFrameIDValid(m_SelectedFrameID))
@@ -359,14 +332,14 @@ namespace UnityEditor.XR.Hands.Capture
 
             if (m_LeftHandGameObjects != null)
             {
-                m_LeftHandGameObjects.ToggleDrawMesh(m_ShouldDrawMeshes && frameData.isLeftHandTracked);
-                m_LeftHandGameObjects.ToggleDebugDrawJoints(m_ShouldDrawJoints && frameData.isLeftHandTracked);
+                m_LeftHandGameObjects.ToggleDrawMesh(m_ShouldDrawMeshes && IsHandEverTracked(frameData, Handedness.Left));
+                m_LeftHandGameObjects.ToggleDebugDrawJoints(m_ShouldDrawJoints && IsHandEverTracked(frameData, Handedness.Left));
             }
 
             if (m_RightHandGameObjects != null)
             {
-                m_RightHandGameObjects.ToggleDrawMesh(m_ShouldDrawMeshes && frameData.isRightHandTracked);
-                m_RightHandGameObjects.ToggleDebugDrawJoints(m_ShouldDrawJoints && frameData.isRightHandTracked);
+                m_RightHandGameObjects.ToggleDrawMesh(m_ShouldDrawMeshes && IsHandEverTracked(frameData, Handedness.Right));
+                m_RightHandGameObjects.ToggleDebugDrawJoints(m_ShouldDrawJoints && IsHandEverTracked(frameData, Handedness.Right));
             }
         }
 
@@ -380,6 +353,21 @@ namespace UnityEditor.XR.Hands.Capture
             return IsRecordingDataAvailable() && frameID >= 0 && frameID < m_SelectedRecording.frames.Count;
         }
 
+        bool TryGetHandFromEitherUpdateType(int frameID, Handedness handedness, out XRHand hand)
+            => TryGetHandFromEitherUpdateType(m_SelectedRecording.frames[frameID], handedness, out hand);
+
+        static bool TryGetHandFromEitherUpdateType(in XRHandCaptureFrame frame, Handedness handedness, out XRHand hand)
+        {
+            if (!frame.TryGetHandSnapshot(handedness, out var handCaptureSnapshot))
+            {
+                hand = default;
+                return false;
+            }
+
+            return handCaptureSnapshot.TryGetHand(XRHandSubsystem.UpdateType.Dynamic, Allocator.Temp, out hand)
+                || handCaptureSnapshot.TryGetHand(XRHandSubsystem.UpdateType.BeforeRender, Allocator.Temp, out hand);
+        }
+
         void SyncHandDataToFrame(int frameID)
         {
             if (!IsFrameIDValid(frameID))
@@ -388,27 +376,43 @@ namespace UnityEditor.XR.Hands.Capture
             var frame = m_SelectedRecording.frames[frameID];
 
             // Update hand joints using the selected frame
-            UpdateHandJoints(ref m_LeftHand, frame, Handedness.Left);
-            UpdateHandJoints(ref m_RightHand, frame, Handedness.Right);
+            foreach (var handedness in HandsUtility.validHandednessValues)
+            {
+                if (TryGetHandFromEitherUpdateType(frame, handedness, out var hand))
+                    UpdateHandJoints(ref hand, frame, handedness);
+
+                hand.Dispose();
+            }
         }
 
         static void UpdateHandJoints(ref XRHand hand, in XRHandCaptureFrame frame, Handedness handedness)
         {
-            bool isFrameDataValid = frame.IsHandTracked(handedness);
+            bool isFrameDataValid = IsHandEverTracked(frame, handedness);
 
             if (!isFrameDataValid)
                 return;
 
             var dstHandJoints = hand.GetRawJointArray();
-
-            for (int jointIndex = XRHandJointID.BeginMarker.ToIndex(); jointIndex < XRHandJointID.EndMarker.ToIndex(); ++jointIndex)
+            if (!TryGetHandFromEitherUpdateType(frame, hand.handedness, out var sourceHand))
             {
-                XRHandJoint joint = dstHandJoints[jointIndex];
-                frame.TryGetJoint(out XRHandJoint srcJoint, handedness, XRHandJointIDUtility.FromIndex(jointIndex));
-                Pose pose = srcJoint.TryGetPose(out var srcPose) ? srcPose : Pose.identity;
-                joint.SetPose(pose);
-                dstHandJoints[jointIndex] = joint;
+                Debug.LogWarning("Expected to be able to display a hand that cannot be displayed.");
+                sourceHand.Dispose();
+                return;
             }
+
+            foreach (var jointID in HandsUtility.validJointIDs)
+            {
+                int jointIndex = jointID.ToIndex();
+                var sourceJoint = sourceHand.GetJoint(jointID);
+                var destinationJoint = dstHandJoints[jointIndex];
+                if (!sourceJoint.TryGetPose(out var pose))
+                    continue;
+
+                destinationJoint.SetPose(pose);
+                dstHandJoints[jointIndex] = destinationJoint;
+            }
+
+            sourceHand.Dispose();
         }
 
         XRFingerShapeCondition.Target CreateTarget(XRFingerShapeType fingerShapeType, float desired)
@@ -482,8 +486,22 @@ namespace UnityEditor.XR.Hands.Capture
             SyncHandDataToFrame(frameId);
 
             // Calculate and update the finger shapes
-            CalculateFingerShapes(in m_LeftHand, ref m_LeftFingerShapes);
-            CalculateFingerShapes(in m_RightHand, ref m_RightFingerShapes);
+            foreach (var handedness in HandsUtility.validHandednessValues)
+            {
+                if (!TryGetHandFromEitherUpdateType(frameId, handedness, out var hand))
+                {
+                    hand.Dispose();
+                    continue;
+                }
+
+                var shapes = handedness == Handedness.Left ? m_LeftFingerShapes : m_RightFingerShapes;
+                if (handedness == Handedness.Left)
+                    CalculateFingerShapes(in hand, ref m_LeftFingerShapes);
+                else
+                    CalculateFingerShapes(in hand, ref m_RightFingerShapes);
+
+                hand.Dispose();
+            }
 
             // Create the finger shape conditions using the calculated finger shapes
             CreateFingerShapeConditions();
@@ -570,8 +588,17 @@ namespace UnityEditor.XR.Hands.Capture
                 var isLeftHandTracked = frameData.IsHandTracked(Handedness.Left);
                 var isRightHandTracked = frameData.IsHandTracked(Handedness.Right);
 
-                m_LeftHandGameObjects.UpdateJoints(m_LeftHand, isLeftHandTracked);
-                m_RightHandGameObjects.UpdateJoints(m_RightHand, isRightHandTracked);
+                if (TryGetHandFromEitherUpdateType(frameData, Handedness.Left, out var leftHand))
+                {
+                    m_LeftHandGameObjects.UpdateJoints(leftHand, leftHand.isTracked);
+                    leftHand.Dispose();
+                }
+
+                if (TryGetHandFromEitherUpdateType(frameData, Handedness.Right, out var rightHand))
+                {
+                    m_RightHandGameObjects.UpdateJoints(rightHand, rightHand.isTracked);
+                    rightHand.Dispose();
+                }
 
                 UpdateRenderingVisibility();
             }

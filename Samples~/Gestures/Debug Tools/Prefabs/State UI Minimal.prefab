@@ -85,6 +85,9 @@ MonoBehaviour:
   m_LowerRangeIndicator: {fileID: 3065501413031834871}
   m_UpperRangeImage: {fileID: 5061850610764703637}
   m_LowerRangeImage: {fileID: 7719256522712289463}
+  m_RangeStatusText: {fileID: 0}
+  m_CheckMarkImage: {fileID: 0}
+  m_CrossImage: {fileID: 0}
 --- !u!1 &1966040542689825197
 GameObject:
   m_ObjectHideFlags: 0

@@ -221,6 +221,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_XRAllFingerShapesDebugUI: {fileID: 0}
+  m_HandShapeOrPose: {fileID: 0}
+  SelectedHandShapeName: {fileID: 0}
+  m_XRSelectedHandShapeDebugUI: {fileID: 0}
+  m_HandShapeCompletenessCalculator: {fileID: 0}
+  m_HandShapeCompletenessProgressBar: {fileID: 0}
 --- !u!223 &3887904000218865536
 Canvas:
   m_ObjectHideFlags: 0

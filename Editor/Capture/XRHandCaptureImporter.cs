@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Unity.Burst;
 using UnityEngine;
+using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.Capture;
 using UnityEngine.XR.Hands.Capture.Recording;
 
@@ -20,6 +22,7 @@ namespace UnityEditor.XR.Hands.Capture
             m_DeviceRecordingPathsReuse = new List<string>();
         }
 
+        [BurstDiscard]
         internal bool TryGetAllCaptureSequences(List<XRHandCaptureSequence> recordings)
         {
             string tmpSaveDir = Path.Combine(Application.dataPath, k_ImportTempFolder);
@@ -62,6 +65,7 @@ namespace UnityEditor.XR.Hands.Capture
             return true;
         }
 
+        [BurstDiscard]
         bool TryTransferAndConvertRecording(string deviceFilePath, string savePath, out XRHandCaptureSequence recording)
         {
             recording = null;
@@ -73,6 +77,21 @@ namespace UnityEditor.XR.Hands.Capture
             if (!m_FileService.TryPullFile(deviceFilePath, destPath))
             {
                 Debug.LogError($"Failed to transfer file: {fileName}");
+                return false;
+            }
+
+            // Check version before attempting to read — incompatible files should not be imported
+            if (!TryReadVersion(destPath, out int version))
+            {
+                Debug.LogError($"Failed to read version from file: {fileName}");
+                return false;
+            }
+
+            if (version != XRHandRecordingBinaryFileFormatConfigs.k_Version)
+            {
+                Debug.LogWarning($"Version mismatch detected in '{fileName}'. " +
+                    $"File uses v{version}, but this application requires v{XRHandRecordingBinaryFileFormatConfigs.k_Version}. " +
+                    "Please downgrade to Hands 1.7.x to import this recording.");
                 return false;
             }
 
@@ -89,6 +108,24 @@ namespace UnityEditor.XR.Hands.Capture
             }
             Debug.LogError($"Failed to read recording data from file: {fileName}");
             return false;
+        }
+
+        static bool TryReadVersion(string filePath, out int version)
+        {
+            version = 0;
+            try
+            {
+                using (var stream = File.Open(filePath, FileMode.Open))
+                using (var reader = new BinaryReader(stream))
+                {
+                    version = reader.ReadInt32();
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

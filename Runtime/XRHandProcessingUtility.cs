@@ -23,14 +23,7 @@ namespace UnityEngine.XR.Hands.Processing
         /// retrieved from that <see cref="XRHandSubsystem"/>
         /// </param>
         public static void SetCorrespondingHand(this XRHandSubsystem subsystem, XRHand hand)
-        {
-            if (hand.handedness == Handedness.Left)
-                subsystem.SetLeftHand(hand);
-            else if (hand.handedness == Handedness.Right)
-                subsystem.SetRightHand(hand);
-            else
-                throw new InvalidOperationException("Cannot set hand on subsystem that was not initially retrieved from a subsystem's leftHand or rightHand properties!");
-        }
+            => subsystem.SetHand(hand);
 
         /// <summary>
         /// Gets the <see cref="NativeArray"/> of <see cref="XRHandJoints"/>

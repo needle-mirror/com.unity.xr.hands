@@ -149,7 +149,7 @@ namespace UnityEngine.XR.Hands
         public Quaternion aimRotation;
 
         /// <summary>
-        /// Value corresponding to activiation by the aim pose.
+        /// Value corresponding to activation by the aim pose.
         /// </summary>
         [InputControl(usage = "PointerActivateValue", layout = "Axis", alias = "pointerActivateValue", offset = 140)]
         [FieldOffset(140)]

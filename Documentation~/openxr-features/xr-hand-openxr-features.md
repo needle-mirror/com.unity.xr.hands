@@ -11,7 +11,11 @@ The XR Hands package implements two hand-related features for applications using
 | [Hand tracking](xref:xrhands-openxr-hands-feature) | Implements the XRHandSubsystem for OpenXR. You must enable this feature to access any hand tracking data.|
 | [Meta Aim Hand](xref:xrhands-meta-aim-feature) | Implements the Meta Aim Hand extension to OpenXR. |
 
-You can enable these features on the OpenXR pages of your Project Settings (in the XR Plug-in Management section). The XR Hands package must be installed before the option to enable these features are shown.
+The package also provides a helper component for managing the hand subsystem lifecycle:
+
+| Component | Description |
+| :---        | :---               |
+| [OpenXR Hand Subsystem Manager](xref:xrhands-openxr-subsystem-manager) | A MonoBehaviour that manages the lifecycle of the XRHandSubsystem. Toggle the component's enabled state to start and stop the subsystem. |
 
 ## Additional resources
 

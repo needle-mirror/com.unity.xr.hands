@@ -7,10 +7,13 @@ static class TestCommonGestureData
     {
         public Pose aimPose { get; set; }
         public float aimActivateValue { get; set; }
+        public bool aimActivatedState { get; set; }
         public Pose gripPose { get; set; }
         public float graspValue { get; set; }
+        public bool graspFirmState { get; set; }
         public Pose pinchPose { get; set; }
         public float pinchValue { get; set; }
+        public bool pinchTouchedState { get; set; }
         public Pose pokePose { get; set; }
     }
 
@@ -33,12 +36,15 @@ static class TestCommonGestureData
         {
             aimPose = new Pose(new Vector3(1.0f, 2.0f, 3.0f), new Quaternion(0.1f, 0.2f, 0.3f, 0.4f)),
             aimActivateValue = 0.5f,
+            aimActivatedState = false,
 
             gripPose = new Pose(new Vector3(1.0f, 2.0f, 3.0f), new Quaternion(0.1f, 0.2f, 0.3f, 0.4f)),
             graspValue = 0.5f,
+            graspFirmState = false,
 
             pinchPose = new Pose(new Vector3(1.0f, 2.0f, 3.0f), new Quaternion(0.1f, 0.2f, 0.3f, 0.4f)),
             pinchValue = 0.5f,
+            pinchTouchedState = false,
 
             pokePose = new Pose(new Vector3(1.0f, 2.0f, 3.0f), new Quaternion(0.1f, 0.2f, 0.3f, 0.4f)),
         };
@@ -46,13 +52,16 @@ static class TestCommonGestureData
         rightHand = new PerHandCommonGestureData
         {
             aimPose = new Pose(new Vector3(4.0f, 5.0f, 6.0f), new Quaternion(0.5f, 0.6f, 0.7f, 0.8f)),
-            aimActivateValue = 0.75f,
+            aimActivateValue = 1.0f,
+            aimActivatedState = true,
 
             gripPose = new Pose(new Vector3(4.0f, 5.0f, 6.0f), new Quaternion(0.5f, 0.6f, 0.7f, 0.8f)),
-            graspValue = 0.75f,
+            graspValue = 1.0f,
+            graspFirmState = true,
 
             pinchPose = new Pose(new Vector3(4.0f, 5.0f, 6.0f), new Quaternion(0.5f, 0.6f, 0.7f, 0.8f)),
-            pinchValue = 0.75f,
+            pinchValue = 1.0f,
+            pinchTouchedState = true,
 
             pokePose = new Pose(new Vector3(4.0f, 5.0f, 6.0f), new Quaternion(0.5f, 0.6f, 0.7f, 0.8f)),
         };

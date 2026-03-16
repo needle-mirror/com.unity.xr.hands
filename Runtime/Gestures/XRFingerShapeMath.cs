@@ -20,11 +20,17 @@ namespace UnityEngine.XR.Hands.Gestures
     {
         static XRFingerShapeMath()
         {
-            SetDefaultFingerShapeConfiguration(XRHandFingerID.Thumb, XRHandSubsystemProvider.FingerConfigDefaults.k_Thumb);
-            SetDefaultFingerShapeConfiguration(XRHandFingerID.Index, XRHandSubsystemProvider.FingerConfigDefaults.k_Index);
-            SetDefaultFingerShapeConfiguration(XRHandFingerID.Middle, XRHandSubsystemProvider.FingerConfigDefaults.k_Middle);
-            SetDefaultFingerShapeConfiguration(XRHandFingerID.Ring, XRHandSubsystemProvider.FingerConfigDefaults.k_Ring);
-            SetDefaultFingerShapeConfiguration(XRHandFingerID.Little, XRHandSubsystemProvider.FingerConfigDefaults.k_Little);
+            s_CachedFingerShapes = new XRFingerShape[k_HandednessCacheSize, Constants.k_NumFingersPerHand];
+            var defaultStates = XRHandSubsystemProvider.FingerConfigDefaults.configurationStates;
+            s_Configurations = new XRFingerShapeConfiguration[Constants.k_NumFingersPerHand];
+            s_RestoreStatesWhenPlaybackEnds = new XRFingerShapeConfigurationState[Constants.k_NumFingersPerHand];
+            foreach (var fingerID in HandsUtility.validFingerIDs)
+            {
+                int fingerIndex = fingerID.ToIndex();
+                var defaultState = defaultStates[fingerIndex];
+                s_Configurations[fingerIndex] = new XRFingerShapeConfiguration(defaultState);
+                s_RestoreStatesWhenPlaybackEnds[fingerIndex] = defaultState;
+            }
         }
 
         /// <summary>
@@ -58,7 +64,7 @@ namespace UnityEngine.XR.Hands.Gestures
                 xrHand,
                 fingerID,
                 shapeTypes,
-                s_CurrentConfigurations[(int)fingerID]);
+                s_Configurations[fingerID.ToIndex()]);
         }
 
         /// <summary>
@@ -91,7 +97,7 @@ namespace UnityEngine.XR.Hands.Gestures
             var fingerShape = new XRFingerShape();
 
             CalculateFingerShapeUncached(
-                xrHand, fingerID, shapeTypes, s_CurrentConfigurations[(int)fingerID], ref fingerShape);
+                xrHand, fingerID, shapeTypes, s_Configurations[fingerID.ToIndex()], ref fingerShape);
 
             return fingerShape;
         }
@@ -123,7 +129,7 @@ namespace UnityEngine.XR.Hands.Gestures
             XRFingerShapeTypes shapeTypes,
             XRFingerShapeConfiguration configuration)
         {
-            ref var fingerShape = ref k_CachedFingerShapes[(int)xrHand.handedness, (int)fingerID];
+            ref var fingerShape = ref s_CachedFingerShapes[(int)xrHand.handedness, fingerID.ToIndex()];
 
             // if all the requested values are already calculated, return the
             // cached value - otherwise, try to calculate missing fields before returning
@@ -189,9 +195,9 @@ namespace UnityEngine.XR.Hands.Gestures
         public static void SetFingerShapeConfiguration(XRHandFingerID fingerID, XRFingerShapeConfiguration configuration)
         {
             if (configuration == null)
-                throw new ArgumentNullException("{nameof(configuration)} must not be null", nameof(configuration));
+                throw new ArgumentNullException(nameof(configuration));
 
-            s_CurrentConfigurations[(int)fingerID] = configuration;
+            s_Configurations[fingerID.ToIndex()] = configuration;
         }
 
         /// <summary>
@@ -207,19 +213,37 @@ namespace UnityEngine.XR.Hands.Gestures
         /// </remarks>
         public static void ResetFingerShapeConfiguration(XRHandFingerID fingerID)
         {
-            s_CurrentConfigurations[(int)fingerID] = k_DefaultConfigurations[(int)fingerID];
+            int fingerIndex = fingerID.ToIndex();
+            var defaultState = XRHandSubsystemProvider.FingerConfigDefaults.configurationStates[fingerIndex];
+            s_Configurations[fingerIndex] = new XRFingerShapeConfiguration(defaultState);
+
+            s_CachedFingerShapes[(int)Handedness.Left, fingerIndex].Clear();
+            s_CachedFingerShapes[(int)Handedness.Right, fingerIndex].Clear();
         }
 
         internal static void SetDefaultFingerShapeConfiguration(XRHandFingerID fingerID, XRFingerShapeConfiguration configuration)
+            => s_Configurations[fingerID.ToIndex()] = configuration;
+
+        internal static XRFingerShapeConfiguration GetActiveConfiguration(XRHandFingerID fingerID)
+            => s_Configurations[fingerID.ToIndex()];
+
+        internal static void ClearFingerStateCaches()
         {
-            k_DefaultConfigurations[(int)fingerID] = configuration;
-            s_CurrentConfigurations[(int)fingerID] = configuration;
+            // Avoid foreach allocation by iterating handedness values directly
+            for (var fingerShapeIndex = 0; fingerShapeIndex < Constants.k_NumFingersPerHand; ++fingerShapeIndex)
+            {
+                s_CachedFingerShapes[(int)Handedness.Left, fingerShapeIndex].Clear();
+                s_CachedFingerShapes[(int)Handedness.Right, fingerShapeIndex].Clear();
+            }
         }
 
-        internal static void ClearFingerStateCache(Handedness handedness)
+        internal static void OnCreateSubsystem(XRHandSubsystemProvider provider)
         {
-            for (var fingerShapeIndex = 0; fingerShapeIndex < k_FingerCacheSize; ++fingerShapeIndex)
-                k_CachedFingerShapes[(int)handedness, fingerShapeIndex].Clear();
+            foreach (var fingerID in HandsUtility.validFingerIDs)
+            {
+                int fingerIndex = fingerID.ToIndex();
+                s_Configurations[fingerIndex] = provider.GetFingerShapeConfiguration(fingerID);
+            }
         }
 
         static bool TryCalculateFullCurl(
@@ -563,10 +587,9 @@ namespace UnityEngine.XR.Hands.Gestures
             return math.degrees(math.acos(math.dot(to0, to2)));
         }
 
-        const int k_FingerCacheSize = 5;
         const int k_HandednessCacheSize = 3;
-        static readonly XRFingerShape[,] k_CachedFingerShapes = new XRFingerShape[k_HandednessCacheSize, k_FingerCacheSize];
-        static readonly XRFingerShapeConfiguration[] k_DefaultConfigurations = new XRFingerShapeConfiguration[k_FingerCacheSize];
-        static XRFingerShapeConfiguration[] s_CurrentConfigurations = new XRFingerShapeConfiguration[k_FingerCacheSize];
+        static readonly XRFingerShape[,] s_CachedFingerShapes;
+        static XRFingerShapeConfiguration[] s_Configurations;
+        static XRFingerShapeConfigurationState[] s_RestoreStatesWhenPlaybackEnds;
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine.XR.Hands.Capture;
 using UnityEngine.XR.Hands.Capture.Recording;
 
 namespace UnityEngine.XR.Hands.Samples.Capture
@@ -13,18 +14,18 @@ namespace UnityEngine.XR.Hands.Samples.Capture
         bool[] m_SlotsOccupied;
         string m_CurrentRecordingName;
         int m_CurrentRecordingSlotIdx;
-        XRHandRecordingBase m_CurrentRecording => m_RecordingSlots[m_CurrentRecordingSlotIdx];
         static readonly List<XRHandSubsystem> s_SubsystemsReuse = new List<XRHandSubsystem>();
         XRHandSubsystem m_Subsystem;
         XRHandRecordingInitializeArgs m_RecordingInitArgs;
         XRHandRecordingSaveArgs m_RecordingSaveArgs;
+        CaptureSessionManager m_CaptureSessionManager;
 
         public event Action<XRHandRecordingStatusChangedEventArgs> recordingStatusChanged;
         public event Action<XRHandRecordingFrameCapturedEventArgs> recordingFrameCaptured;
         public event Action<int> recordingDeleted;
         public int maxRecordingCount => k_MaxRecordingCount;
         public float recordingTimeLimitInSeconds => k_RecordingTimeLimitInSeconds;
-        public XRHandRecordingBase currentRecording => m_CurrentRecording;
+        public XRHandRecordingBase GetCurrentRecording() => m_RecordingSlots[m_CurrentRecordingSlotIdx];
         public int currentRecordingSlotIdx => m_CurrentRecordingSlotIdx;
 
         public string currentRecordingName
@@ -33,8 +34,9 @@ namespace UnityEngine.XR.Hands.Samples.Capture
             set => m_CurrentRecordingName = value;
         }
 
-        public RecordingController()
+        public RecordingController(CaptureSessionManager captureSessionManager)
         {
+            m_CaptureSessionManager = captureSessionManager;
             XRHandRecordingSettings.timeLimitInSeconds = k_RecordingTimeLimitInSeconds;
 
             m_CurrentRecordingSlotIdx = 0;
@@ -65,24 +67,23 @@ namespace UnityEngine.XR.Hands.Samples.Capture
             m_SlotsOccupied = new bool[m_RecordingSlots.Length];
 
             // Load previously saved recordings' metadata from the device's persistent data path
-            List<XRHandRecordingMetadata> existingRecordings = new List<XRHandRecordingMetadata>();
-            XRHandRecordingMetadata.GetSavedRecordingMetadata(existingRecordings);
+            XRHandRecordingMetadata.GetSavedRecordingMetadata(s_ExistingRecordingsReuse);
 
             // Populate recording slots with existing data or new blobs.
-            for (var i = 0; i < m_RecordingSlots.Length; ++i)
+            int recordingSlotIndex = 0;
+            for (; recordingSlotIndex < s_ExistingRecordingsReuse.Count; ++recordingSlotIndex)
             {
-                if (i < existingRecordings.Count)
-                {
-                    m_RecordingSlots[i] = existingRecordings[i];
-                    m_SlotsOccupied[i] = true;
-                }
-                else
-                {
-                    m_RecordingSlots[i] = new XRHandRecordingBlob();
-                    m_SlotsOccupied[i] = false;
-                }
+                m_RecordingSlots[recordingSlotIndex] = s_ExistingRecordingsReuse[recordingSlotIndex];
+                m_SlotsOccupied[recordingSlotIndex] = true;
+            }
+
+            for (; recordingSlotIndex < m_RecordingSlots.Length; ++recordingSlotIndex)
+            {
+                m_RecordingSlots[recordingSlotIndex] = new XRHandRecordingBlob();
+                m_SlotsOccupied[recordingSlotIndex] = false;
             }
         }
+        static List<XRHandRecordingMetadata> s_ExistingRecordingsReuse = new List<XRHandRecordingMetadata>();
 
         public XRHandRecordingBase GetRecordingAtSlot(int idx)
         {
@@ -92,7 +93,7 @@ namespace UnityEngine.XR.Hands.Samples.Capture
             return m_RecordingSlots[idx];
         }
 
-        public void StartRecording()
+        public void StartRecording(bool alsoCaptureBeforeRender = false)
         {
             if (m_Subsystem == null)
             {
@@ -100,12 +101,17 @@ namespace UnityEngine.XR.Hands.Samples.Capture
                 return;
             }
 
+            var recordingOptions = XRHandRecordingOptions.None;
+            if (alsoCaptureBeforeRender)
+                recordingOptions |= XRHandRecordingOptions.AlsoCaptureBeforeRender;
+
             m_RecordingInitArgs = new XRHandRecordingInitializeArgs
             {
-                subsystem = m_Subsystem
+                subsystem = m_Subsystem,
+                recordingOptions = recordingOptions,
             };
 
-            if (m_CurrentRecording is XRHandRecordingBlob recordingBlob)
+            if (GetCurrentRecording() is XRHandRecordingBlob recordingBlob)
             {
                 recordingBlob.TryInitialize(m_RecordingInitArgs);
             }
@@ -113,13 +119,13 @@ namespace UnityEngine.XR.Hands.Samples.Capture
 
         public void StopRecording()
         {
-            if (m_CurrentRecording is XRHandRecordingBlob recordingBlob)
+            if (GetCurrentRecording() is XRHandRecordingBlob recordingBlob)
                 recordingBlob.Stop();
         }
 
         public void SaveRecording()
         {
-            if (m_CurrentRecording is XRHandRecordingBlob recordingBlob)
+            if (GetCurrentRecording() is XRHandRecordingBlob recordingBlob)
             {
                 m_RecordingSaveArgs = new XRHandRecordingSaveArgs
                 {
@@ -131,7 +137,7 @@ namespace UnityEngine.XR.Hands.Samples.Capture
 
         public void DiscardRecording()
         {
-            if (m_CurrentRecording is XRHandRecordingBlob recordingBlob)
+            if (GetCurrentRecording() is XRHandRecordingBlob recordingBlob)
             {
                 recordingBlob.Dispose();
             }

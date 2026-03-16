@@ -55,6 +55,11 @@ namespace UnityEngine.XR.Hands.Capture.Recording
     public readonly struct XRHandRecordingStatusChangedEventArgs : IEquatable<XRHandRecordingStatusChangedEventArgs>
     {
         /// <summary>
+        /// The <see cref="XRHandRecordingBlob"/> currently recording tracking data.
+        /// </summary>
+        public XRHandRecordingBlob blob { get; internal init; }
+
+        /// <summary>
         /// The new status of the recording session.
         /// </summary>
         public XRHandRecordingStatus status { get; internal init; }
@@ -102,15 +107,13 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         /// <returns>Returns a hash code of this object.</returns>
         public override int GetHashCode()
         {
-            unchecked
-            {
-                int hash = status.GetHashCode();
-                hash = hash * 486187739 + elapsedTime.GetHashCode();
-                hash = hash * 486187739 + recordingName.GetHashCode();
-                hash = hash * 486187739 + errorMessage.GetHashCode();
-                hash = hash * 486187739 + subsystem.GetHashCode();
-                return hash;
-            }
+            return HashCodeUtil.Combine(
+                HashCodeUtil.ReferenceHash(blob),
+                status.GetHashCode(),
+                elapsedTime.GetHashCode(),
+                HashCodeUtil.ReferenceHash(recordingName),
+                HashCodeUtil.ReferenceHash(errorMessage),
+                HashCodeUtil.ReferenceHash(subsystem));
         }
 
         /// <summary>
@@ -124,11 +127,12 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         /// </returns>
         public bool Equals(XRHandRecordingStatusChangedEventArgs other)
         {
-            return status == other.status &&
+            return ReferenceEquals(blob, other.blob) &&
+                status == other.status &&
                 elapsedTime == other.elapsedTime &&
-                recordingName == other.recordingName &&
-                errorMessage == other.errorMessage &&
-                subsystem == other.subsystem;
+                string.Equals(recordingName, other.recordingName) &&
+                string.Equals(errorMessage, other.errorMessage) &&
+                ReferenceEquals(subsystem, other.subsystem);
         }
 
         /// <summary>
@@ -142,7 +146,7 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         /// returns <see langword="true"/>; otherwise returns <see langword="false"/>.
         /// </returns>
         public override bool Equals(object obj) =>
-            (obj is XRHandRecordingStatusChangedEventArgs) && Equals((XRHandRecordingStatusChangedEventArgs)obj);
+            (obj is XRHandRecordingStatusChangedEventArgs other) && Equals(other);
 
         /// <summary>
         /// Tests for equality. Same as <see cref="Equals(XRHandRecordingStatusChangedEventArgs)"/>.

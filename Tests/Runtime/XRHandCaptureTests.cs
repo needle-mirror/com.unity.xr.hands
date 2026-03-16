@@ -1,6 +1,8 @@
 using NUnit.Framework;
+using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.Capture;
 using UnityEngine.XR.Hands.Capture.Recording;
+using UnityEngine;
 
 class XRHandCaptureTests
 {
@@ -171,5 +173,31 @@ class XRHandCaptureTests
         Assert.IsFalse(args1.Equals(args2));
         Assert.IsFalse(args1 == args2);
         Assert.IsTrue(args1 != args2);
+    }
+
+    [Test]
+    public void TestMetaAimFlagsRoundTripThroughXRHandAimState()
+    {
+        // Verify that MetaAimFlags survive the round-trip:
+        //   XRHandAimState.UpdateToAimRepresentation -> MetaAimHandState(in XRHandAimState)
+        // The reserved0/reserved1 fields must encode low/high 32 bits consistently.
+        var testFlags = MetaAimFlags.Valid | MetaAimFlags.Computed | MetaAimFlags.IndexPinching
+            | MetaAimFlags.DominantHand | MetaAimFlags.MenuPressed;
+
+        var aimState = new XRHandAimState();
+        aimState.UpdateToAimRepresentation(
+            Handedness.Left,
+            testFlags,
+            Pose.identity,
+            pinchIndex: 0.5f,
+            pinchMiddle: 0.25f,
+            pinchRing: 0.1f,
+            pinchLittle: 0.75f);
+
+        var metaState = new MetaAimHandState(in aimState);
+        Assert.AreEqual(testFlags, metaState.aimFlags,
+            "MetaAimFlags must survive the XRHandAimState -> MetaAimHandState round-trip without corruption.");
+        Assert.AreEqual(Handedness.Left, metaState.handedness);
+        Assert.AreEqual(0.5f, metaState.pinchStrengthIndex, 0.0001f);
     }
 }

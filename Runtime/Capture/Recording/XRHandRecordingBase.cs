@@ -61,8 +61,12 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         /// </summary>
         internal static string GetDeviceStoragePath()
         {
-            string devicePersistentDataPath = Application.persistentDataPath;
-            return Path.Combine(devicePersistentDataPath, k_InternalStorageDirectory);
+            string path = Path.Combine(Application.persistentDataPath, k_InternalStorageDirectory);
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            return path;
         }
 
         internal static string GenerateUniqueID()

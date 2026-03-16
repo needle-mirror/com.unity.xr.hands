@@ -9,7 +9,6 @@ using UnityEngine.XR;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.Configuration;
 using UnityEngine.XR.Hands.ProviderImplementation;
-using static UnityEngine.XR.Hands.Configuration.XRHandSubsystemConfiguration;
 using Is = Unity.XR.Hands.Tests.NUnitExtensions.Is;
 
 class Tests
@@ -463,16 +462,19 @@ class Tests
         Assert.That(currentHandDevice.pinchPosition.ReadValue(), Is.EqualTo(Vector3.zero));
         Assert.That(currentHandDevice.pinchRotation.ReadValue(), Is.EqualTo(new Quaternion()));
         Assert.That(currentHandDevice.pinchValue.ReadValue(), Is.EqualTo(0.0f));
+        Assert.That(currentHandDevice.pinchTouched.IsPressed(), Is.False);
 
         Assert.That((InputTrackingState)currentHandDevice.aimTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
         Assert.That(currentHandDevice.aimPosition.ReadValue(), Is.EqualTo(Vector3.zero));
         Assert.That(currentHandDevice.aimRotation.ReadValue(), Is.EqualTo(new Quaternion()));
         Assert.That(currentHandDevice.aimActivateValue.ReadValue(), Is.EqualTo(0.0f));
+        Assert.That(currentHandDevice.aimActivated.IsPressed(), Is.False);
 
         Assert.That((InputTrackingState)currentHandDevice.gripTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
         Assert.That(currentHandDevice.gripPosition.ReadValue(), Is.EqualTo(Vector3.zero));
         Assert.That(currentHandDevice.gripRotation.ReadValue(), Is.EqualTo(new Quaternion()));
         Assert.That(currentHandDevice.graspValue.ReadValue(), Is.EqualTo(0.0f));
+        Assert.That(currentHandDevice.graspFirm.IsPressed(), Is.False);
 
         Assert.That((InputTrackingState)currentHandDevice.pokeTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
         Assert.That(currentHandDevice.pokePosition.ReadValue(), Is.EqualTo(Vector3.zero));
@@ -483,8 +485,11 @@ class Tests
         currentCommonGestures.UpdateAimPose(expectedData.aimPose);
         currentCommonGestures.UpdateGripPose(expectedData.gripPose);
         currentCommonGestures.UpdatePinchValue(expectedData.pinchValue);
+        currentCommonGestures.UpdatePinchTouchedState(expectedData.pinchTouchedState);
         currentCommonGestures.UpdateAimActivateValue(expectedData.aimActivateValue);
+        currentCommonGestures.UpdateAimActivatedState(expectedData.aimActivatedState);
         currentCommonGestures.UpdateGraspValue(expectedData.graspValue);
+        currentCommonGestures.UpdateGraspFirmState(expectedData.graspFirmState);
         currentCommonGestures.UpdatePokePose(expectedData.pokePose);
 
         subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic);
@@ -494,16 +499,19 @@ class Tests
         Vector3 pinchPosition = currentHandDevice.pinchPosition.ReadValue();
         Quaternion pinchRotation = currentHandDevice.pinchRotation.ReadValue();
         float pinchValue = currentHandDevice.pinchValue.ReadValue();
+        bool pinchTouched = currentHandDevice.pinchTouched.IsPressed();
         var pinchTrackingState = (InputTrackingState)currentHandDevice.pinchTrackingState.ReadValue();
 
         Vector3 aimPosition = currentHandDevice.aimPosition.ReadValue();
         Quaternion aimRotation = currentHandDevice.aimRotation.ReadValue();
         float aimValue = currentHandDevice.aimActivateValue.ReadValue();
+        bool aimActivated = currentHandDevice.aimActivated.IsPressed();
         var aimTrackingState = (InputTrackingState)currentHandDevice.aimTrackingState.ReadValue();
 
         Vector3 gripPosition = currentHandDevice.gripPosition.ReadValue();
         Quaternion gripRotation = currentHandDevice.gripRotation.ReadValue();
         float graspValue = currentHandDevice.graspValue.ReadValue();
+        bool graspFirm = currentHandDevice.graspFirm.IsPressed();
         var gripTrackingState = (InputTrackingState)currentHandDevice.gripTrackingState.ReadValue();
 
         Vector3 pokePosition = currentHandDevice.pokePosition.ReadValue();
@@ -513,16 +521,19 @@ class Tests
         Assert.That(pinchPosition, Is.EqualTo(expectedData.pinchPose.position));
         Assert.That(pinchRotation, Is.EqualTo(expectedData.pinchPose.rotation));
         Assert.That(pinchValue, Is.EqualTo(expectedData.pinchValue));
+        Assert.That(pinchTouched, Is.EqualTo(expectedData.pinchTouchedState));
         Assert.That(pinchTrackingState, Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
 
         Assert.That(aimPosition, Is.EqualTo(expectedData.aimPose.position));
         Assert.That(aimRotation, Is.EqualTo(expectedData.aimPose.rotation));
         Assert.That(aimValue, Is.EqualTo(expectedData.aimActivateValue));
+        Assert.That(aimActivated, Is.EqualTo(expectedData.aimActivatedState));
         Assert.That(aimTrackingState, Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
 
         Assert.That(gripPosition, Is.EqualTo(expectedData.gripPose.position));
         Assert.That(gripRotation, Is.EqualTo(expectedData.gripPose.rotation));
         Assert.That(graspValue, Is.EqualTo(expectedData.graspValue));
+        Assert.That(graspFirm, Is.EqualTo(expectedData.graspFirmState));
         Assert.That(gripTrackingState, Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
 
         Assert.That(pokePosition, Is.EqualTo(expectedData.pokePose.position));
@@ -931,14 +942,17 @@ class Tests
             var commonGestures =
                 handedness == Handedness.Left ? subsystem.leftHandCommonGestures : subsystem.rightHandCommonGestures;
 
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetAimPose), Is.EqualTo((false, Pose.identity)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPokePose), Is.EqualTo((false, Pose.identity)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPinchPose), Is.EqualTo((false, Pose.identity)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetGripPose), Is.EqualTo((false, Pose.identity)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<Pose>(commonGestures.TryGetAimPose), Is.EqualTo((false, Pose.identity)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<Pose>(commonGestures.TryGetPokePose), Is.EqualTo((false, Pose.identity)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<Pose>(commonGestures.TryGetPinchPose), Is.EqualTo((false, Pose.identity)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<Pose>(commonGestures.TryGetGripPose), Is.EqualTo((false, Pose.identity)));
 
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetGraspValue), Is.EqualTo((false, 0.0f)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetAimActivateValue), Is.EqualTo((false, 0.0f)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPinchValue), Is.EqualTo((false, 0.0f)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<float>(commonGestures.TryGetGraspValue), Is.EqualTo((false, 0.0f)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<bool>(commonGestures.TryGetGraspFirmState), Is.EqualTo((false, false)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<float>(commonGestures.TryGetAimActivateValue), Is.EqualTo((false, 0.0f)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<bool>(commonGestures.TryGetAimActivatedState), Is.EqualTo((false, false)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<float>(commonGestures.TryGetPinchValue), Is.EqualTo((false, 0.0f)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<bool>(commonGestures.TryGetPinchTouchedState), Is.EqualTo((false, false)));
         }
 
         void CheckUnsupportedCommonGestures(XRHandSubsystem subsystem, bool checkGestures)
@@ -1006,13 +1020,17 @@ class Tests
 
             var expectedGestures = TestCommonGestureData.GetCommonGestureData(handedness);
 
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetAimPose), Is.EqualTo((true, expectedGestures.aimPose)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPokePose), Is.EqualTo((true, expectedGestures.pokePose)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPinchPose), Is.EqualTo((true, expectedGestures.pinchPose)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<Pose>(commonGestures.TryGetAimPose), Is.EqualTo((true, expectedGestures.aimPose)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<Pose>(commonGestures.TryGetPokePose), Is.EqualTo((true, expectedGestures.pokePose)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<Pose>(commonGestures.TryGetPinchPose), Is.EqualTo((true, expectedGestures.pinchPose)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<Pose>(commonGestures.TryGetGripPose), Is.EqualTo((true, expectedGestures.gripPose)));
 
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetGraspValue), Is.EqualTo((true, expectedGestures.graspValue)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetAimActivateValue), Is.EqualTo((true, expectedGestures.aimActivateValue)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPinchValue), Is.EqualTo((true, expectedGestures.pinchValue)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<float>(commonGestures.TryGetGraspValue), Is.EqualTo((true, expectedGestures.graspValue)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<bool>(commonGestures.TryGetGraspFirmState), Is.EqualTo((true, expectedGestures.graspFirmState)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<float>(commonGestures.TryGetAimActivateValue), Is.EqualTo((true, expectedGestures.aimActivateValue)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<bool>(commonGestures.TryGetAimActivatedState), Is.EqualTo((true, expectedGestures.aimActivatedState)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<float>(commonGestures.TryGetPinchValue), Is.EqualTo((true, expectedGestures.pinchValue)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<bool>(commonGestures.TryGetPinchTouchedState), Is.EqualTo((true, expectedGestures.pinchTouchedState)));
         }
 
         void CheckSupportedCommonGestures(XRHandSubsystem subsystem, bool checkGestures)
@@ -1055,6 +1073,16 @@ class Tests
             .WithArgumentValidator(args => args.handedness == Handedness.Right)
             .Calls(args => TestHandUtils.AssertAimActivateUpdated(Handedness.Right, args));
 
+        mockGestureListener.leftHandMocks.aimActivatedStateUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertAimActivatedStateUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.aimActivatedStateUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertAimActivatedStateUpdated(Handedness.Right, args));
+
         mockGestureListener.leftHandMocks.gripPoseUpdated
             .WillBeCalled(1)
             .WithArgumentValidator(args => args.handedness == Handedness.Left)
@@ -1075,6 +1103,16 @@ class Tests
             .WithArgumentValidator(args => args.handedness == Handedness.Right)
             .Calls(args => TestHandUtils.AssertGraspValueUpdated(Handedness.Right, args));
 
+        mockGestureListener.leftHandMocks.graspFirmStateUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertGraspFirmStateUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.graspFirmStateUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertGraspFirmStateUpdated(Handedness.Right, args));
+
         mockGestureListener.leftHandMocks.pinchPoseUpdated
             .WillBeCalled(1)
             .WithArgumentValidator(args => args.handedness == Handedness.Left)
@@ -1094,6 +1132,16 @@ class Tests
             .WillBeCalled(1)
             .WithArgumentValidator(args => args.handedness == Handedness.Right)
             .Calls(args => TestHandUtils.AssertPinchValueUpdated(Handedness.Right, args));
+
+        mockGestureListener.leftHandMocks.pinchTouchedStateUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Left)
+            .Calls(args => TestHandUtils.AssertPinchTouchedStateUpdated(Handedness.Left, args));
+
+        mockGestureListener.rightHandMocks.pinchTouchedStateUpdated
+            .WillBeCalled(1)
+            .WithArgumentValidator(args => args.handedness == Handedness.Right)
+            .Calls(args => TestHandUtils.AssertPinchTouchedStateUpdated(Handedness.Right, args));
 
         mockGestureListener.leftHandMocks.pokePoseUpdated
             .WillBeCalled(1)
@@ -1146,13 +1194,16 @@ class Tests
 
             var expectedGestures = TestCommonGestureData.GetCommonGestureData(handedness);
 
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetAimPose), Is.EqualTo((true, expectedGestures.aimPose)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPokePose), Is.EqualTo((true, expectedGestures.pokePose)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPinchPose), Is.EqualTo((true, expectedGestures.pinchPose)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<Pose>(commonGestures.TryGetAimPose), Is.EqualTo((true, expectedGestures.aimPose)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<Pose>(commonGestures.TryGetPokePose), Is.EqualTo((true, expectedGestures.pokePose)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<Pose>(commonGestures.TryGetPinchPose), Is.EqualTo((true, expectedGestures.pinchPose)));
 
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetGraspValue), Is.EqualTo((false, 0.0f)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetAimActivateValue), Is.EqualTo((false, 0.0f)));
-            Assert.That(TestHandUtils.InvokeToTuple(commonGestures.TryGetPinchValue), Is.EqualTo((false, 0.0f)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<float>(commonGestures.TryGetGraspValue), Is.EqualTo((false, 0.0f)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<bool>(commonGestures.TryGetGraspFirmState), Is.EqualTo((false, false)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<float>(commonGestures.TryGetAimActivateValue), Is.EqualTo((false, 0.0f)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<bool>(commonGestures.TryGetAimActivatedState), Is.EqualTo((false, false)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<float>(commonGestures.TryGetPinchValue), Is.EqualTo((false, 0.0f)));
+            Assert.That(TestHandUtils.InvokeTryGetFunc<bool>(commonGestures.TryGetPinchTouchedState), Is.EqualTo((false, false)));
         }
 
         void CheckCommonGestures(XRHandSubsystem subsystem, bool checkGestures)

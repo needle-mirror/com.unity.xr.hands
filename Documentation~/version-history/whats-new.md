@@ -2,6 +2,30 @@
 uid: xrhands-whats-new
 ---
 
+# What's new in version 1.8
+
+The main updates in this release include:
+
+## Added
+
+### Additional XRHandDevice controls
+
+New controls have been added to `XRHandDevice` for parity with the OpenXR Hand Interaction Profile:
+
+| Control | Type | Description |
+| :------ | :--- | :---------- |
+| `graspFirm` | `ButtonControl` | Indicates whether the user is making a fist. |
+| `pinchTouched` | `ButtonControl` | Indicates whether the user is currently pinching. |
+| `aimActivated` | `ButtonControl` | Indicates whether the aim action is fully activated. |
+
+### OpenXR Hand Subsystem Manager component
+
+The new [OpenXRHandSubsystemManager](xref:xrhands-openxr-subsystem-manager) component provides control over the lifecycle of the `XRHandSubsystem` and its updater created by the OpenXR Hand Tracking feature. Toggle the component's enabled state to start and stop hand tracking.
+
+A new **Auto Start Subsystem** setting has also been added to the Hand Tracking OpenXR feature settings in Project Settings. Disabling this setting, combined with the `OpenXRHandSubsystemManager` component, supports [deferred initialization](xref:xrhands-openxr-subsystem-manager#deferred-initialization) workflows such as permission gating.
+
+The **HandVisualizer** sample also includes a new **Hand Debug Visualizer** prefab with this component already configured for easier scene setup.
+
 # What's new in version 1.7
 
 The main updates in this release include:

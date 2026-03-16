@@ -31,7 +31,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3662803955522979439}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -107,7 +106,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3662803955522979439}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -244,7 +242,6 @@ RectTransform:
   - {fileID: 2181607952993184513}
   - {fileID: 1602988461934174155}
   m_Father: {fileID: 7876530574118629640}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -320,7 +317,6 @@ RectTransform:
   m_Children:
   - {fileID: 3662803955522979439}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -341,8 +337,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HandTrackingEvents: {fileID: 0}
   m_HandShapeOrPose: {fileID: 0}
-  m_TargetRelativeOrientation:
-    m_HandOrientationConditions: []
+  m_TargetTransform: {fileID: 0}
+  m_Background: {fileID: 0}
   m_GesturePerformed:
     m_PersistentCalls:
       m_Calls:
@@ -375,3 +371,5 @@ MonoBehaviour:
         m_CallState: 2
   m_MinimumHoldTime: 0.2
   m_GestureDetectionInterval: 0.1
+  m_StaticGestures: []
+  m_Highlight: {fileID: 0}

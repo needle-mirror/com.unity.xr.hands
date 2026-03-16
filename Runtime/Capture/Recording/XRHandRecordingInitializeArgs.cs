@@ -16,17 +16,21 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         public XRHandSubsystem subsystem { get; init; }
 
         /// <summary>
+        /// Options for how to change the behavior of how to capture the
+        /// tracking data.
+        /// </summary>
+        /// <value>
+        /// This will be available on the resulting asset when imported through
+        /// <see cref="XRHandCaptureSequence"/><c>.</c><see cref="XRHandCaptureSequence.optionsRecordedWith"/>.
+        /// </value>
+        internal XRHandRecordingOptions recordingOptions { get; init; }
+
+        /// <summary>
         /// Computes a hash code from all fields of <see cref="XRHandRecordingInitializeArgs"/>.
         /// </summary>
         /// <returns>Returns a hash code of this object.</returns>
         public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = subsystem.GetHashCode();
-                return hash;
-            }
-        }
+            => HashCodeUtil.Combine(HashCodeUtil.ReferenceHash(subsystem), recordingOptions.GetHashCode());
 
         /// <summary>
         /// Tests for equality.
@@ -38,9 +42,8 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         /// Returns <see langword="false"/> otherwise.
         /// </returns>
         public bool Equals(XRHandRecordingInitializeArgs other)
-        {
-            return ReferenceEquals(subsystem, other.subsystem);
-        }
+            => ReferenceEquals(subsystem, other.subsystem)
+            && recordingOptions == other.recordingOptions;
 
         /// <summary>
         /// Tests for equality.
@@ -52,7 +55,7 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         /// also returns <see langword="true"/>; otherwise returns <see langword="false"/>.
         /// </returns>
         public override bool Equals(object obj) =>
-            (obj is XRHandRecordingInitializeArgs) && Equals((XRHandRecordingInitializeArgs)obj);
+            (obj is XRHandRecordingInitializeArgs other) && Equals(other);
 
         /// <summary>
         /// Tests for equality. Same as <see cref="Equals(XRHandRecordingInitializeArgs)"/>.

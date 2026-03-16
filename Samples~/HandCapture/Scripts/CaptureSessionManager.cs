@@ -1,5 +1,6 @@
 #if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
 using System;
+using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEngine;
@@ -10,6 +11,11 @@ namespace UnityEngine.XR.Hands.Samples.Capture
 {
     public class CaptureSessionManager : MonoBehaviour
     {
+        [Header("Options")]
+        [SerializeField]
+        [Tooltip("Attempts are always made to capture during the XRHandSubsystem's Dynamic update step. Enabling this option also captures just before rendering. Uses a lot more data.")]
+        bool m_AlsoCaptureBeforeRender;
+
         [Header("UI Panels")]
         [SerializeField]
         [Tooltip("The UI panel that shows starting scene for the user")]
@@ -131,11 +137,17 @@ namespace UnityEngine.XR.Hands.Samples.Capture
         const string k_RecordingFileDefaultPrefix = "Recording_";
         int m_CurrentRecordingNameIndexSuffix;
 
+        public bool alsoCaptureBeforeRender
+        {
+            get => m_AlsoCaptureBeforeRender;
+            set => m_AlsoCaptureBeforeRender = value;
+        }
+
         void Awake()
         {
             m_UserJourneyManager = new RecorderUserJourneyManager();
 
-            m_RecordingController = new RecordingController();
+            m_RecordingController = new RecordingController(this);
 
             CheckSerializedFields();
         }
@@ -159,7 +171,7 @@ namespace UnityEngine.XR.Hands.Samples.Capture
 
         void SetupButtonListeners()
         {
-            m_StartRecordingButton.onClick.AddListener(m_RecordingController.StartRecording);
+            m_StartRecordingButton.onClick.AddListener(HandleStartRecording);
             m_StopRecordingButton.onClick.AddListener(m_RecordingController.StopRecording);
             m_SaveButton.onClick.AddListener(m_RecordingController.SaveRecording);
             m_DiscardButton.onClick.AddListener(DiscardCurrentRecording);
@@ -177,7 +189,7 @@ namespace UnityEngine.XR.Hands.Samples.Capture
 
         void RemoveButtonListeners()
         {
-            m_StartRecordingButton.onClick.RemoveListener(m_RecordingController.StartRecording);
+            m_StartRecordingButton.onClick.RemoveListener(HandleStartRecording);
             m_StopRecordingButton.onClick.RemoveListener(m_RecordingController.StopRecording);
             m_SaveButton.onClick.RemoveListener(m_RecordingController.SaveRecording);
             m_DiscardButton.onClick.RemoveListener(DiscardCurrentRecording);
@@ -214,6 +226,11 @@ namespace UnityEngine.XR.Hands.Samples.Capture
             m_RecordingController.Tick();
         }
 
+        void HandleStartRecording()
+        {
+            m_RecordingController.StartRecording(m_AlsoCaptureBeforeRender);
+        }
+
         void HandleRecordingFrameCaptured(XRHandRecordingFrameCapturedEventArgs args)
         {
             m_RecordingTimeText.text = FormatTime(args.elapsedTime);
@@ -237,7 +254,7 @@ namespace UnityEngine.XR.Hands.Samples.Capture
                         RecorderUserJourneyManager.UserJourneyState.RecordingStopped);
                     break;
                 case XRHandRecordingStatus.Saved:
-                    var assetName = m_RecordingController.currentRecording.assetName;
+                    var assetName = m_RecordingController.GetCurrentRecording().assetName;
                     var slotIdx = m_RecordingController.currentRecordingSlotIdx;
 
                     m_RecordingItemViews[slotIdx].gameObject.SetActive(true);

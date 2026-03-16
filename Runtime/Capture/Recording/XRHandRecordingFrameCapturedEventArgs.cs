@@ -11,14 +11,31 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         public float elapsedTime { get; internal init; }
 
         /// <summary>
-        /// The <see cref="XRHandSubsystem"/> instance associated with the recording session.
+        /// The <see cref="XRHandSubsystem"/> instance associated with the
+        /// recording session.
         /// </summary>
         public XRHandSubsystem subsystem { get; internal init; }
 
         /// <summary>
-        /// The <see cref="XRHandSubsystem.updateSuccessFlags"/> flags indicating what data were updated in this frame.
+        /// The <see cref="XRHandSubsystem.updateSuccessFlags"/> flags
+        /// indicating what data were updated during the <c>Dynamic</c>
+        /// update step in this frame.
         /// </summary>
         public XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags { get; internal init; }
+
+        /// <summary>
+        /// The <see cref="XRHandSubsystem.updateSuccessFlags"/> flags indicating
+        /// what data were updated during the <c>BeforeRender</c> update step in this frame.
+        /// </summary>
+        /// <value>
+        /// This can only ever have success flags set if the <see cref="XRHandRecordingOptions"/>
+        /// option of <see cref="XRHandRecordingOptions.AlsoCaptureBeforeRender"/> was enabled on
+        /// <see cref="XRHandRecordingInitializeArgs"/><c>.</c><see cref="XRHandRecordingInitializeArgs.recordingOptions"/>
+        /// when <see cref="XRHandRecordingBlob"/><c>.</c><see cref="XRHandRecordingBlob.TryInitialize"/>
+        /// was called at the beginning of the recording that this <c>XRHandRecordingFrameCaptureEventArgs</c>
+        /// represents addition to.
+        /// </value>
+        public XRHandSubsystem.UpdateSuccessFlags updateSuccessFlagsBeforeRender { get; internal init; }
 
         /// <summary>
         /// The index of the captured frame in the recording session.

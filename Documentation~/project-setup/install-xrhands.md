@@ -5,7 +5,7 @@ uid: xrhands-install
 
 XR Hands is an official Unity package available via the [Package Manager](https://learn.unity.com/tutorial/the-package-manager).
 
-To install this package in Unity 2021.3+, follow these steps to [Install a UPM package by name](xref:upm-ui-quick):
+To install this package in Unity, follow these steps to [Install a UPM package by name](xref:upm-ui-quick):
 
 1. Open the project that you plan to use.
 2. Click the following link: [com.unity.xr.hands](com.unity3d.kharma:upmpackage/com.unity.xr.hands).

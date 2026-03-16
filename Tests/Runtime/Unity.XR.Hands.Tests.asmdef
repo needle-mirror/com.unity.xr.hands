@@ -1,15 +1,28 @@
 {
     "name": "Unity.XR.Hands.Tests",
+    "rootNamespace": "",
     "references": [
         "Unity.XR.Hands",
-        "Unity.InputSystem"
-    ],
-    "optionalUnityReferences": [
-        "TestAssemblies"
+        "Unity.InputSystem",
+        "Unity.XR.OpenXR"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "optionalUnityReferences": [
+      "TestAssemblies"
+    ],
+    "autoReferenced": false,
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS"
-    ]
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.xr.openxr",
+            "expression": "1.0.0",
+            "define": "UNITY_OPENXR_PACKAGE"
+        }
+    ],
+    "noEngineReferences": false
 }

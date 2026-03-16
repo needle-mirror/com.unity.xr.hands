@@ -8,8 +8,7 @@ static class TestHandUtils
 {
     static readonly float k_EpsilonSqrt = Mathf.Sqrt(Mathf.Epsilon);
 
-    internal delegate bool FloatTryGetFunc(out float param);
-    internal delegate bool PoseTryGetFunc(out Pose param);
+    internal delegate bool TryGetFunc<T>(out T param);
 
     public static void AssertSubsystemGestureSupport(XRHandSubsystemDescriptor.Cinfo cinfo, XRHandSubsystemDescriptor descriptor)
     {
@@ -89,15 +88,9 @@ static class TestHandUtils
         }
     }
 
-    internal static (bool, float) InvokeToTuple(FloatTryGetFunc func)
+    internal static (bool, T) InvokeTryGetFunc<T>(TryGetFunc<T> func)
     {
-        bool result = func(out float param);
-        return (result, param);
-    }
-
-    internal static (bool, Pose) InvokeToTuple(PoseTryGetFunc func)
-    {
-        bool result = func(out Pose param);
+        bool result = func(out T param);
         return (result, param);
     }
 
@@ -105,49 +98,70 @@ static class TestHandUtils
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
         Assert.IsTrue(args.m_IsAimPoseTracked);
-        Assert.That(InvokeToTuple(args.TryGetAimPose), Is.EqualTo((true, expectedData.aimPose)));
+        Assert.That(InvokeTryGetFunc<Pose>(args.TryGetAimPose), Is.EqualTo((true, expectedData.aimPose)));
     }
 
     public static void AssertAimActivateUpdated(Handedness handedness, XRCommonHandGestures.AimActivateValueUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
         Assert.IsTrue(args.m_IsAimActivateValueReady);
-        Assert.That(InvokeToTuple(args.TryGetAimActivateValue), Is.EqualTo((true, expectedData.aimActivateValue)));
+        Assert.That(InvokeTryGetFunc<float>(args.TryGetAimActivateValue), Is.EqualTo((true, expectedData.aimActivateValue)));
+    }
+
+    public static void AssertAimActivatedStateUpdated(Handedness handedness, XRCommonHandGestures.AimActivatedStateUpdatedEventArgs args)
+    {
+        var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
+        Assert.IsTrue(args.m_IsAimActivatedStateReady);
+        Assert.That(InvokeTryGetFunc<bool>(args.TryGetAimActivatedState), Is.EqualTo((true, expectedData.aimActivatedState)));
     }
 
     public static void AssertGripPoseUpdated(Handedness handedness, XRCommonHandGestures.GripPoseUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
         Assert.IsTrue(args.m_IsGripPoseTracked);
-        Assert.That(InvokeToTuple(args.TryGetGripPose), Is.EqualTo((true, expectedData.gripPose)));
+        Assert.That(InvokeTryGetFunc<Pose>(args.TryGetGripPose), Is.EqualTo((true, expectedData.gripPose)));
     }
 
     public static void AssertGraspValueUpdated(Handedness handedness, XRCommonHandGestures.GraspValueUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
         Assert.IsTrue(args.m_IsGraspValueReady);
-        Assert.That(InvokeToTuple(args.TryGetGraspValue), Is.EqualTo((true, expectedData.graspValue)));
+        Assert.That(InvokeTryGetFunc<float>(args.TryGetGraspValue), Is.EqualTo((true, expectedData.graspValue)));
+    }
+
+    public static void AssertGraspFirmStateUpdated(Handedness handedness, XRCommonHandGestures.GraspFirmStateUpdatedEventArgs args)
+    {
+        var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
+        Assert.IsTrue(args.m_IsGraspFirmStateReady);
+        Assert.That(InvokeTryGetFunc<bool>(args.TryGetGraspFirmState), Is.EqualTo((true, expectedData.graspFirmState)));
     }
 
     public static void AssertPinchPoseUpdated(Handedness handedness, XRCommonHandGestures.PinchPoseUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
         Assert.IsTrue(args.m_IsPinchPoseTracked);
-        Assert.That(InvokeToTuple(args.TryGetPinchPose), Is.EqualTo((true, expectedData.pinchPose)));
+        Assert.That(InvokeTryGetFunc<Pose>(args.TryGetPinchPose), Is.EqualTo((true, expectedData.pinchPose)));
     }
 
     public static void AssertPinchValueUpdated(Handedness handedness, XRCommonHandGestures.PinchValueUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
         Assert.IsTrue(args.m_IsPinchValueReady);
-        Assert.That(InvokeToTuple(args.TryGetPinchValue), Is.EqualTo((true, expectedData.pinchValue)));
+        Assert.That(InvokeTryGetFunc<float>(args.TryGetPinchValue), Is.EqualTo((true, expectedData.pinchValue)));
+    }
+
+    public static void AssertPinchTouchedStateUpdated(Handedness handedness, XRCommonHandGestures.PinchTouchedStateUpdatedEventArgs args)
+    {
+        var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
+        Assert.IsTrue(args.m_IsPinchTouchedStateReady);
+        Assert.That(InvokeTryGetFunc<bool>(args.TryGetPinchTouchedState), Is.EqualTo((true, expectedData.pinchTouchedState)));
     }
 
     public static void AssertPokePoseUpdated(Handedness handedness, XRCommonHandGestures.PokePoseUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
         Assert.IsTrue(args.m_IsPokePoseTracked);
-        Assert.That(InvokeToTuple(args.TryGetPokePose), Is.EqualTo((true, expectedData.pokePose)));
+        Assert.That(InvokeTryGetFunc<Pose>(args.TryGetPokePose), Is.EqualTo((true, expectedData.pokePose)));
     }
 
     public static void AssertAreApproximatelyEqual(float expected, float actual, string message = null)
@@ -223,13 +237,13 @@ static class TestHandUtils
             id = "TestHandProvider1",
             providerType = typeof(TestHandProvider)
         };
-        subsystem1 = TestHandUtils.CreateTestSubsystem(subsystemCinfo1);
+        subsystem1 = CreateTestSubsystem(subsystemCinfo1);
 
         var subsystemCinfo2 = new XRHandSubsystemDescriptor.Cinfo
         {
             id = "TestHandProvider2",
             providerType = typeof(TestHandProvider)
         };
-        subsystem2 = TestHandUtils.CreateTestSubsystem(subsystemCinfo2);
+        subsystem2 = CreateTestSubsystem(subsystemCinfo2);
     }
 }

@@ -8,6 +8,28 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+<!-- Headers should be listed in this order: Added, Changed, Deprecated, Removed, Fixed, Security -->
+
+## [1.8.0-pre.1] - 2026-03-16
+
+### Added
+
+- Added additional controls to `XRHandDevice` (`graspFirm`, `pinchTouched`, `aimActivated`) and corresponding `XRCommonHandGestures` APIs and events for parity with the OpenXR Hand Interaction Profile.
+- Added `OpenXRHandSubsystemManager` component that manages the lifecycle of the `XRHandSubsystem` and updater created by the `HandTracking` OpenXR feature. Refer to the [OpenXR Hand Subsystem Manager manual](xref:xrhands-openxr-subsystem-manager) for more information.
+- Added `Hand Debug Visualizer` prefab to the **HandVisualizer** sample for easier scene setup.
+
+### Changed
+
+- Reserialized all sample assets with Unity `2022.3`.
+
+### Deprecated
+
+- Deprecated [HandTracking.featureId](xref:UnityEngine.XR.Hands.OpenXR.HandTracking.featureId) due to a feature ID conflict with Microsoft Hand Interaction Profile in OpenXR. Use [HandTracking.featureId2](xref:UnityEngine.XR.Hands.OpenXR.HandTracking.featureId2) instead (id now changed from `com.unity.openxr.feature.input.handtracking` to `com.unity.openxr.feature.input.handtrackingsubsystem`).
+
+### Fixed
+
+- Fixed `MaterialPipelineHandler` sample script causing error "Calls to AssetDatabase.SaveAssets are restricted during asset importing." upon initial import.
+
 ## [1.7.3] - 2026-01-15
 
 ### Added
@@ -26,7 +48,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - Changed the minimum supported editor version to `2022.3`.
-
 
 ## [1.7.2] - 2025-11-26
 

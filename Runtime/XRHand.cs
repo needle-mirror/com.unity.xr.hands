@@ -1,5 +1,6 @@
 using System;
 using Unity.Collections;
+using UnityEngine.XR.Hands.ProviderImplementation;
 
 namespace UnityEngine.XR.Hands
 {
@@ -12,8 +13,26 @@ namespace UnityEngine.XR.Hands
     /// See [Hand tracking](xref:xrhands-tracking-data) for a description of the hand data model
     /// and how to access the tracking data.
     /// </remarks>
-    public struct XRHand : IEquatable<XRHand>
+    public struct XRHand : IEquatable<XRHand>, IDisposable
     {
+        /// <summary>
+        /// Dispose of memory held onto by this <c>XRHand</c>. Do not call <c>Dispose</c>
+        /// on <c>XRHand</c> retrieved from <see cref="XRHandSubsystem"/>.
+        /// </summary>
+        public void Dispose()
+        {
+            if (m_LifetimeType == LifetimeType.Invalid)
+                return;
+
+            if (s_AllowDisposalFor != m_LifetimeType)
+                throw new InvalidOperationException("Must get XRHand objects from APIs in the XR Hands package, do not construct your own!");
+
+            if (m_Joints.IsCreated)
+                m_Joints.Dispose();
+
+            m_LifetimeType = LifetimeType.Invalid;
+        }
+
         /// <summary>
         /// Retrieves an <see cref="XRHandJoint"/> by its ID.
         /// </summary>
@@ -28,7 +47,6 @@ namespace UnityEngine.XR.Hands
         /// <param name="id">ID of the required joint.</param>
         /// <returns>The <see cref="XRHandJoint"/> corresponding the ID passed in.</returns>
         public readonly XRHandJoint GetJoint(XRHandJointID id) => m_Joints[id.ToIndex()];
-        internal NativeArray<XRHandJoint> m_Joints;
 
         /// <summary>
         /// Root pose for the hand.
@@ -36,20 +54,22 @@ namespace UnityEngine.XR.Hands
         /// <value>Located at the wrist joint, the forward vector of the hand points in the direction
         /// of the fingers.</value>
         public Pose rootPose => m_RootPose;
-        internal Pose m_RootPose;
 
         /// <summary>
         /// Represents which hand this is.
         /// </summary>
         /// <value>Right, left, or invalid.</value>
         public Handedness handedness => m_Handedness;
-        Handedness m_Handedness;
 
         /// <summary>
         /// Whether the subsystem is currently tracking this hand's root pose and joints.
         /// </summary>
         /// <value>Indicates the tracking status as of the last hand data update.</value>
-        public bool isTracked { get; internal set; }
+        public bool isTracked
+        {
+            get => m_IsTracked;
+            internal set => m_IsTracked = value;
+        }
 
         /// <summary>
         /// Returns a string representation of the XRHand.
@@ -57,10 +77,7 @@ namespace UnityEngine.XR.Hands
         /// <returns>
         /// String representation of the value.
         /// </returns>
-        public override string ToString()
-        {
-            return m_Handedness + " XRHand";
-        }
+        public override string ToString() => m_Handedness + " XRHand";
 
         /// <summary>
         /// Tests for equality.
@@ -75,7 +92,7 @@ namespace UnityEngine.XR.Hands
             return m_Joints == other.m_Joints &&
                 m_RootPose == other.m_RootPose &&
                 m_Handedness == other.m_Handedness &&
-                isTracked == other.isTracked;
+                m_IsTracked == other.m_IsTracked;
         }
 
         /// <summary>
@@ -121,18 +138,62 @@ namespace UnityEngine.XR.Hands
         /// <returns>Returns the negation of <see cref="Equals(UnityEngine.XR.Hands.XRHand)"/>.</returns>
         public static bool operator !=(XRHand lhs, XRHand rhs) => !lhs.Equals(rhs);
 
-        internal XRHand(Handedness handedness, Allocator allocator)
+        internal XRHand(Allocator allocator, Handedness handedness, LifetimeType lifetimeType)
         {
+            m_Joints = new NativeArray<XRHandJoint>(Constants.k_NumJointsPerHand, allocator);
             m_RootPose = Pose.identity;
             m_Handedness = handedness;
-            m_Joints = new NativeArray<XRHandJoint>(XRHandJointID.EndMarker.ToIndex(), allocator);
-            isTracked = false;
+            m_IsTracked = false;
+
+            m_LifetimeType = lifetimeType;
         }
 
-        internal void Dispose()
+        internal XRHand(Handedness handedness, Allocator allocator, bool isTracked, in Pose rootPose)
         {
-            if (m_Joints.IsCreated)
-                m_Joints.Dispose();
+            m_Joints = new NativeArray<XRHandJoint>(Constants.k_NumJointsPerHand, allocator);
+            m_RootPose = rootPose;
+            m_Handedness = handedness;
+            m_IsTracked = isTracked;
+
+            m_LifetimeType = LifetimeType.FreelyDispose;
         }
+
+        internal void ApplyJointLayout(NativeArray<bool> jointsInLayout)
+        {
+            foreach (var jointID in HandsUtility.validJointIDs)
+            {
+                int jointIndex = jointID.ToIndex();
+                m_Joints[jointIndex] = XRHandProviderUtility.CreateJoint(
+                    m_Handedness,
+                    jointsInLayout[jointIndex] ? XRHandJointTrackingState.None : XRHandJointTrackingState.WillNeverBeValid,
+                    jointID,
+                    Pose.identity);
+            }
+        }
+
+        internal bool isValid => m_Handedness.IsValid() && m_Joints.IsCreated;
+
+        internal enum LifetimeType
+        {
+            Invalid,
+            FreelyDispose,
+            Subsystem,
+            ProviderUtility,
+        }
+
+        internal NativeArray<XRHandJoint> m_Joints;
+        internal Pose m_RootPose;
+        Handedness m_Handedness;
+        bool m_IsTracked;
+
+        LifetimeType m_LifetimeType;
+
+        static internal LifetimeType allowDisposalFor
+        {
+            get => s_AllowDisposalFor;
+            set => s_AllowDisposalFor = value;
+        }
+
+        static LifetimeType s_AllowDisposalFor = LifetimeType.FreelyDispose;
     }
 }

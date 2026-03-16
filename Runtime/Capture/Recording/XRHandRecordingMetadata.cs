@@ -1,3 +1,4 @@
+using Unity.Burst;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -47,6 +48,7 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         /// This method loads only essential metadata without loading the entire frame data,
         /// making it efficient for listing recordings or displaying recording summaries.
         /// </remarks>
+        [BurstDiscard]
         public static void GetSavedRecordingMetadata(List<XRHandRecordingMetadata> existingRecordings)
         {
             try
@@ -99,13 +101,18 @@ namespace UnityEngine.XR.Hands.Capture.Recording
                         int version = reader.ReadInt32();
                         if (version != XRHandRecordingBinaryFileFormatConfigs.k_Version)
                         {
-                            Debug.LogError($"XR Hand Capture data format version mismatch. " +
+                            Debug.LogWarning($"XR Hand Capture data format version mismatch. " +
                                 $"Saved recording uses v{version}, but this application now requires " +
-                                $"v{XRHandRecordingBinaryFileFormatConfigs.k_Version}. " +
-                                $"Please use a compatible recording file or update the application.");
-                            recordingMetadata = null;
-                            return false;
+                                $"v{XRHandRecordingBinaryFileFormatConfigs.k_Version}.");
+                            recordingMetadata = new XRHandRecordingMetadata(uniqueID, "Version Mismatch", 0f);
+                            return true;
                         }
+
+                        // Skip over the flags pertaining to the asset as a whole (not frame-specific)
+                        reader.ReadInt32();
+
+                        // Skip over the options that were recorded with
+                        reader.ReadRecordingOptions();
 
                         // Read the recording name
                         assetName = reader.ReadString();

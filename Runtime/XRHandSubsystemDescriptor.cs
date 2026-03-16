@@ -1,5 +1,7 @@
 using System;
 using UnityEngine.SubsystemsImplementation;
+using UnityEngine.XR.Hands.Capture;
+using UnityEngine.XR.Hands.Capture.Playback;
 using UnityEngine.XR.Hands.ProviderImplementation;
 
 namespace UnityEngine.XR.Hands
@@ -44,6 +46,41 @@ namespace UnityEngine.XR.Hands
         /// Whether the provider can supply poke pose.
         /// </summary>
         public bool supportsPokePose { get; }
+
+        /// <summary>
+        /// Creates an <see cref="XRHandSubsystem"/> that is incapable of
+        /// data from a platform API For surfacing live hand-tracking data,
+        /// but is useful for playing back <see cref="XRHandCaptureSequence"/>
+        /// data with controls provided on <see cref="XRHandPlayback"/>,
+        /// which you can retrieve from <c>XRHandSubsystem.</c><see cref="XRHandPlaybackExtensions.GetPlayback"/>.
+        /// </summary>
+        /// <param name="options">
+        /// Optional controls for how to create the playback-only <see cref="XRHandSubsystem"/>
+        /// <c>CreatePlaybackOnly</c> returns. This is not guaranteed to be respected, as a previous
+        /// call to <c>CreatePlaybackOnly</c> that has not has the <c>XRHandSubsystem</c> destroyed
+        /// yet will result in later calls returning the same <c>XRHandSubsystem</c> as
+        /// before, with whatever options were supplied at the original time of creation.
+        /// </param>
+        /// <returns>
+        /// A playback-only subsystem, that is only useful if you make use of its
+        /// attached <see cref="XRHandPlayback"/> to play back <see cref="XRHandCaptureSequence"/>
+        /// tracking data.
+        /// </returns>
+        internal static XRHandSubsystem CreatePlaybackOnly(
+            XRHandPlaybackOnlySubsystemCreationOptions options = XRHandPlaybackOnlySubsystemCreationOptions.AutomaticallyManageUpdater)
+        {
+            var playbackOnlySubsystem = PlaybackProvider.GetRegisteredDescriptor().Create();
+
+            if (s_PlaybackOnlySubsystem != playbackOnlySubsystem && (options & XRHandPlaybackOnlySubsystemCreationOptions.AutomaticallyManageUpdater) != 0)
+                s_SubsystemUpdater = new XRHandProviderUtility.SubsystemUpdater(playbackOnlySubsystem);
+
+            s_PlaybackOnlySubsystem = playbackOnlySubsystem;
+            return playbackOnlySubsystem;
+        }
+
+        // it's only possible to have one subsystem per descriptor, so we can safely store this statically
+        static XRHandProviderUtility.SubsystemUpdater s_SubsystemUpdater;
+        static XRHandSubsystem s_PlaybackOnlySubsystem;
 
         /// <summary>
         /// Construction information for the <see cref="XRHandSubsystemDescriptor"/>.
@@ -133,7 +170,7 @@ namespace UnityEngine.XR.Hands
             /// <param name="other">The other <see cref="Cinfo"/> to compare against.</param>
             /// <returns>
             /// Returns <see langword="true"/> if every field in <paramref name="other"/>
-            /// is equal to this <see cref="Cinfo"/>, otherwise returns <see langword="true"/>.
+            /// is equal to this <see cref="Cinfo"/>, otherwise returns <see langword="false"/>.
             /// </returns>
             public bool Equals(Cinfo other)
             {
@@ -190,6 +227,35 @@ namespace UnityEngine.XR.Hands
         public static void Register(Cinfo cinfo)
         {
             SubsystemDescriptorStore.RegisterDescriptor(new XRHandSubsystemDescriptor(cinfo));
+        }
+
+        internal static XRHandSubsystemDescriptor RegisterInternal(Cinfo cinfo)
+        {
+            var descriptor = new XRHandSubsystemDescriptor(cinfo);
+            SubsystemDescriptorStore.RegisterDescriptor(descriptor);
+            return descriptor;
+        }
+
+        internal static void OnSubsystemStarted(XRHandSubsystem subsystem)
+        {
+            if (subsystem.subsystemDescriptor == PlaybackProvider.GetRegisteredDescriptor())
+                s_SubsystemUpdater?.Start();
+        }
+
+        internal static void OnSubsystemStopped(XRHandSubsystem subsystem)
+        {
+            if (subsystem.subsystemDescriptor == PlaybackProvider.GetRegisteredDescriptor())
+                s_SubsystemUpdater?.Stop();
+        }
+
+        internal static void OnSubsystemDestroyed(XRHandSubsystem subsystem)
+        {
+            if (subsystem.subsystemDescriptor != PlaybackProvider.GetRegisteredDescriptor())
+                return;
+
+            s_PlaybackOnlySubsystem = null;
+            s_SubsystemUpdater?.Destroy();
+            s_SubsystemUpdater = null;
         }
 
         XRHandSubsystemDescriptor(Cinfo cinfo)

@@ -158,6 +158,7 @@ namespace UnityEngine.XR.Hands
 
         XRHandSubsystem m_Subsystem;
         readonly XRHandJointsUpdatedEventArgs m_HandJointsUpdatedEventArgs = new XRHandJointsUpdatedEventArgs();
+        XRHandSubsystem.UpdateSuccessFlags m_CombinedSuccessFlags;
 
         /// <summary>
         /// See <see cref="MonoBehaviour"/>.
@@ -246,14 +247,37 @@ namespace UnityEngine.XR.Hands
 
         void OnUpdatedHands(XRHandSubsystem handSubsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateEventType)
         {
-            if (updateEventType == XRHandSubsystem.UpdateType.Dynamic && !m_UpdateType.IsSet(UpdateTypes.Dynamic)
-                || updateEventType == XRHandSubsystem.UpdateType.BeforeRender && !m_UpdateType.IsSet(UpdateTypes.BeforeRender))
+            var dynamicEnabled = m_UpdateType.IsSet(UpdateTypes.Dynamic);
+            var beforeRenderEnabled = m_UpdateType.IsSet(UpdateTypes.BeforeRender);
+
+            if (updateEventType == XRHandSubsystem.UpdateType.Dynamic && !dynamicEnabled
+                || updateEventType == XRHandSubsystem.UpdateType.BeforeRender && !beforeRenderEnabled)
+            {
+                if (updateEventType == XRHandSubsystem.UpdateType.BeforeRender)
+                    m_CombinedSuccessFlags = XRHandSubsystem.UpdateSuccessFlags.None;
                 return;
+            }
+
+            // If listening to both, accumulate on Dynamic and dispatch once on BeforeRender.
+            if (dynamicEnabled && beforeRenderEnabled)
+            {
+                if (updateEventType == XRHandSubsystem.UpdateType.Dynamic)
+                {
+                    m_CombinedSuccessFlags = updateSuccessFlags;
+                    return;
+                }
+
+                m_CombinedSuccessFlags |= updateSuccessFlags;
+            }
+            else
+            {
+                m_CombinedSuccessFlags = updateSuccessFlags;
+            }
 
             if (m_Handedness == Handedness.Left)
             {
-                var leftJointsUpdated = (updateSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints) != XRHandSubsystem.UpdateSuccessFlags.None;
-                var leftRootPoseUpdated = (updateSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose) != XRHandSubsystem.UpdateSuccessFlags.None;
+                var leftJointsUpdated = (m_CombinedSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints) != XRHandSubsystem.UpdateSuccessFlags.None;
+                var leftRootPoseUpdated = (m_CombinedSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose) != XRHandSubsystem.UpdateSuccessFlags.None;
 
                 if (leftJointsUpdated || leftRootPoseUpdated)
                 {
@@ -269,8 +293,8 @@ namespace UnityEngine.XR.Hands
             }
             else if (m_Handedness == Handedness.Right)
             {
-                var rightJointsUpdated = (updateSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.RightHandJoints) != XRHandSubsystem.UpdateSuccessFlags.None;
-                var rightRootPoseUpdated = (updateSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose) != XRHandSubsystem.UpdateSuccessFlags.None;
+                var rightJointsUpdated = (m_CombinedSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.RightHandJoints) != XRHandSubsystem.UpdateSuccessFlags.None;
+                var rightRootPoseUpdated = (m_CombinedSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose) != XRHandSubsystem.UpdateSuccessFlags.None;
 
                 if (rightJointsUpdated || rightRootPoseUpdated)
                 {
@@ -284,6 +308,11 @@ namespace UnityEngine.XR.Hands
                 if (rightRootPoseUpdated)
                     m_PoseUpdated?.Invoke(m_HandJointsUpdatedEventArgs.hand.rootPose);
             }
+
+            // Reset the combined success flags if the update type is BeforeRender
+            // to prepare for next frame combined success flags for next frame
+            if (updateEventType == XRHandSubsystem.UpdateType.BeforeRender)
+                m_CombinedSuccessFlags = XRHandSubsystem.UpdateSuccessFlags.None;
         }
     }
 }

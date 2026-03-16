@@ -237,6 +237,11 @@ namespace UnityEngine.XR.Hands
         public AxisControl pinchStrengthLittle { get; private set; }
 
         /// <summary>
+        /// Denotes which hand this represents aim data for.
+        /// </summary>
+        public Handedness handedness => m_Handedness;
+
+        /// <summary>
         /// Perform final initialization tasks after the control hierarchy has been put into place.
         /// </summary>
         protected override void FinishSetup()
@@ -349,7 +354,13 @@ namespace UnityEngine.XR.Hands
                     }
                 }.ToJson()
             };
-            return InputSystem.InputSystem.AddDevice(desc) as MetaAimHand;
+
+            var hand = InputSystem.InputSystem.AddDevice(desc) as MetaAimHand;
+            if (hand == null)
+                return null;
+
+            hand.m_Handedness = ((extraCharacteristics & InputDeviceCharacteristics.Left) != 0) ? Handedness.Left : Handedness.Right;
+            return hand;
         }
 
         /// <summary>
@@ -380,17 +391,26 @@ namespace UnityEngine.XR.Hands
         /// </param>
         public void UpdateHand(
             bool isHandRootTracked,
-            MetaAimFlags aimFlags,
+            MetaAimFlags metaAimFlags,
             Pose aimPose,
             float pinchIndex,
             float pinchMiddle,
             float pinchRing,
             float pinchLittle)
         {
-            if (aimFlags != m_PreviousFlags)
+            m_AgnosticRepresentationMayNotBeFlushedYet.UpdateToAimRepresentation(
+                m_Handedness,
+                metaAimFlags,
+                aimPose,
+                pinchIndex,
+                pinchMiddle,
+                pinchRing,
+                pinchLittle);
+
+            if (metaAimFlags != m_PreviousFlags)
             {
-                InputSystem.InputSystem.QueueDeltaStateEvent(this.aimFlags, (int)aimFlags);
-                m_PreviousFlags = aimFlags;
+                InputSystem.InputSystem.QueueDeltaStateEvent(aimFlags, (int)metaAimFlags);
+                m_PreviousFlags = metaAimFlags;
             }
 
             bool isIndexPressed = pinchIndex > pressThreshold;
@@ -426,12 +446,12 @@ namespace UnityEngine.XR.Hands
             InputSystem.InputSystem.QueueDeltaStateEvent(pinchStrengthRing, pinchRing);
             InputSystem.InputSystem.QueueDeltaStateEvent(pinchStrengthLittle, pinchLittle);
 
-            if ((aimFlags & MetaAimFlags.Computed) == MetaAimFlags.None)
+            if ((metaAimFlags & MetaAimFlags.Computed) == MetaAimFlags.None)
             {
                 if (m_WasTracked)
                 {
                     InputSystem.InputSystem.QueueDeltaStateEvent(isTracked, false);
-                    InputSystem.InputSystem.QueueDeltaStateEvent(trackingState, InputTrackingState.None);
+                    InputSystem.InputSystem.QueueDeltaStateEvent(trackingState, m_AgnosticRepresentationMayNotBeFlushedYet.trackingState);
                     m_WasTracked = false;
                 }
 
@@ -443,9 +463,11 @@ namespace UnityEngine.XR.Hands
                 InputSystem.InputSystem.QueueDeltaStateEvent(devicePosition, aimPose.position);
                 InputSystem.InputSystem.QueueDeltaStateEvent(deviceRotation, aimPose.rotation);
 
+                m_AgnosticRepresentationMayNotBeFlushedYet.SetTrackingStateToValidPose();
+
                 if (!m_WasTracked)
                 {
-                    InputSystem.InputSystem.QueueDeltaStateEvent(trackingState, InputTrackingState.Position | InputTrackingState.Rotation);
+                    InputSystem.InputSystem.QueueDeltaStateEvent(trackingState, m_AgnosticRepresentationMayNotBeFlushedYet.trackingState);
                     InputSystem.InputSystem.QueueDeltaStateEvent(isTracked, true);
                 }
 
@@ -453,17 +475,21 @@ namespace UnityEngine.XR.Hands
             }
             else if (m_WasTracked)
             {
-                InputSystem.InputSystem.QueueDeltaStateEvent(trackingState, InputTrackingState.None);
+                InputSystem.InputSystem.QueueDeltaStateEvent(trackingState, m_AgnosticRepresentationMayNotBeFlushedYet.trackingState);
                 InputSystem.InputSystem.QueueDeltaStateEvent(isTracked, false);
                 m_WasTracked = false;
             }
         }
 
+        internal void FlushChanges() => m_AgnosticRepresentation = m_AgnosticRepresentationMayNotBeFlushedYet;
+
+        internal XRHandAimState ConvertToHandAimState() => m_AgnosticRepresentation;
+
         internal void UpdateHand(bool isLeft, bool isHandRootTracked)
         {
             UnityOpenXRHands_RetrieveMetaAim(
                 isLeft,
-                out MetaAimFlags aimFlags,
+                out MetaAimFlags metaAimFlags,
                 out Vector3 aimPosePosition,
                 out Quaternion aimPoseRotation,
                 out float pinchIndex,
@@ -473,7 +499,7 @@ namespace UnityEngine.XR.Hands
 
             UpdateHand(
                 isHandRootTracked,
-                aimFlags,
+                metaAimFlags,
                 new Pose(aimPosePosition, aimPoseRotation),
                 pinchIndex,
                 pinchMiddle,
@@ -507,12 +533,16 @@ namespace UnityEngine.XR.Hands
         const string k_MetaAimHandDeviceProductName = "Meta Aim Hand Tracking";
         const string k_MetaAimHandDeviceManufacturerName = "OpenXR Meta";
 
+        Handedness m_Handedness;
         MetaAimFlags m_PreviousFlags;
         bool m_WasTracked;
         bool m_WasIndexPressed;
         bool m_WasMiddlePressed;
         bool m_WasRingPressed;
         bool m_WasLittlePressed;
+
+        XRHandAimState m_AgnosticRepresentation;
+        XRHandAimState m_AgnosticRepresentationMayNotBeFlushedYet;
     }
 }
 

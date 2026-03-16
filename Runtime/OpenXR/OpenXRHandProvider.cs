@@ -96,12 +96,49 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (!m_IsValid)
                 return XRHandSubsystem.UpdateSuccessFlags.None;
 
-            return NativeApi.TryUpdateHands(
+            var successFlags = NativeApi.TryUpdateHands(
                 updateType,
                 ref leftHandRootPose,
                 leftHandJoints.GetUnsafePtr(),
                 ref rightHandRootPose,
                 rightHandJoints.GetUnsafePtr());
+
+            if (s_MetaAim != null && updateType == XRHandSubsystem.UpdateType.Dynamic)
+            {
+                s_MetaAim.OnUpdatedHandsInProvider(successFlags);
+                s_MetaAim.FlushMetaAimChanges();
+
+                var leftUpdated =
+                    (successFlags & (XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints)) != 0;
+                var rightUpdated =
+                    (successFlags & (XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints)) != 0;
+
+                if (leftUpdated)
+                {
+                    s_MetaAim.GetAimState(Handedness.Left, out var leftAimState);
+                    int idx = Handedness.Left.ToIndex();
+                    m_AgnosticAimStates[idx] = leftAimState;
+                    m_AgnosticAimStatesValidity[idx] = true;
+                }
+                else
+                {
+                    m_AgnosticAimStatesValidity[Handedness.Left.ToIndex()] = false;
+                }
+
+                if (rightUpdated)
+                {
+                    s_MetaAim.GetAimState(Handedness.Right, out var rightAimState);
+                    int idx = Handedness.Right.ToIndex();
+                    m_AgnosticAimStates[idx] = rightAimState;
+                    m_AgnosticAimStatesValidity[idx] = true;
+                }
+                else
+                {
+                    m_AgnosticAimStatesValidity[Handedness.Right.ToIndex()] = false;
+                }
+            }
+
+            return successFlags;
         }
 
         /// <inheritdoc/>
@@ -159,6 +196,21 @@ namespace UnityEngine.XR.Hands.OpenXR
         }
 
         /// <inheritdoc/>
+        public override bool TryGetAimActivatedState(Handedness handedness, out bool isAimActivated)
+        {
+            isAimActivated = false;
+#if UNITY_OPENXR_PACKAGE_1_8
+            if (!TryGetHandDevice(handedness, out var handDevice))
+                return false;
+
+            handDevice.TryGetFeatureValue(Usages.isAimActivated, out isAimActivated);
+            return handDevice.TryGetFeatureValue(Usages.isAimActivateValueReady, out var isReady) && isReady;
+#else
+            return false;
+#endif
+        }
+
+        /// <inheritdoc/>
         public override bool TryGetGraspValue(Handedness handedness, out float graspValue)
         {
             graspValue = 0f;
@@ -167,6 +219,21 @@ namespace UnityEngine.XR.Hands.OpenXR
                 return false;
 
             handDevice.TryGetFeatureValue(Usages.graspValue, out graspValue);
+            return handDevice.TryGetFeatureValue(Usages.isGraspValueReady, out var isReady) && isReady;
+#else
+            return false;
+#endif
+        }
+
+        /// <inheritdoc/>
+        public override bool TryGetGraspFirmState(Handedness handedness, out bool isGraspFirm)
+        {
+            isGraspFirm = false;
+#if UNITY_OPENXR_PACKAGE_1_8
+            if (!TryGetHandDevice(handedness, out var handDevice))
+                return false;
+
+            handDevice.TryGetFeatureValue(Usages.isGraspFirm, out isGraspFirm);
             return handDevice.TryGetFeatureValue(Usages.isGraspValueReady, out var isReady) && isReady;
 #else
             return false;
@@ -229,6 +296,21 @@ namespace UnityEngine.XR.Hands.OpenXR
         }
 
         /// <inheritdoc/>
+        public override bool TryGetPinchTouchedState(Handedness handedness, out bool isPinched)
+        {
+            isPinched = false;
+#if UNITY_OPENXR_PACKAGE_1_8
+            if (!TryGetHandDevice(handedness, out var handDevice))
+                return false;
+
+            handDevice.TryGetFeatureValue(Usages.isPinchTouched, out isPinched);
+            return handDevice.TryGetFeatureValue(Usages.isPinchValueReady, out var isReady) && isReady;
+#else
+            return false;
+#endif
+        }
+
+        /// <inheritdoc/>
         public override bool TryGetPokePose(Handedness handedness, out Pose pokePose)
         {
             pokePose = Pose.identity;
@@ -279,6 +361,15 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// <inheritdoc/>
         public override XRDetectedHandMeshLayout detectedHandMeshLayout => NativeApi.GetDetectedHandMeshLayout();
 
+        /// <inheritdoc/>
+        public override bool TryGetAimState(Handedness handedness, out XRHandAimState aimState)
+        {
+            int handednessAsIndex = handedness.ToIndex();
+            bool ret = m_AgnosticAimStatesValidity[handednessAsIndex];
+            aimState = ret ? m_AgnosticAimStates[handednessAsIndex] : default;
+            return ret;
+        }
+
 #if UNITY_OPENXR_PACKAGE_1_8
         static class Usages
         {
@@ -288,9 +379,11 @@ namespace UnityEngine.XR.Hands.OpenXR
 
             internal static readonly InputFeatureUsage<bool> isAimActivateValueReady = new InputFeatureUsage<bool>("PointerActivateReady");
             internal static readonly InputFeatureUsage<float> aimActivateValue = new InputFeatureUsage<float>("PointerActivateValue");
+            internal static readonly InputFeatureUsage<bool> isAimActivated = new InputFeatureUsage<bool>("PointerActivated");
 
             internal static readonly InputFeatureUsage<bool> isGraspValueReady = new InputFeatureUsage<bool>("GraspReady");
             internal static readonly InputFeatureUsage<float> graspValue = new InputFeatureUsage<float>("GraspValue");
+            internal static readonly InputFeatureUsage<bool> isGraspFirm = new InputFeatureUsage<bool>("GraspFirm");
 
             internal static readonly InputFeatureUsage<bool> isGripPoseTracked = new InputFeatureUsage<bool>("DeviceIsTracked");
             internal static readonly InputFeatureUsage<Vector3> gripPosition = new InputFeatureUsage<Vector3>("DevicePosition");
@@ -302,11 +395,14 @@ namespace UnityEngine.XR.Hands.OpenXR
 
             internal static readonly InputFeatureUsage<bool> isPinchValueReady = new InputFeatureUsage<bool>("PinchReady");
             internal static readonly InputFeatureUsage<float> pinchValue = new InputFeatureUsage<float>("PinchValue");
+            internal static readonly InputFeatureUsage<bool> isPinchTouched = new InputFeatureUsage<bool>("PinchTouched");
 
             internal static readonly InputFeatureUsage<bool> isPokePoseTracked = new InputFeatureUsage<bool>("PokeIsTracked");
             internal static readonly InputFeatureUsage<Vector3> pokePosition = new InputFeatureUsage<Vector3>("PokePosition");
             internal static readonly InputFeatureUsage<Quaternion> pokeRotation = new InputFeatureUsage<Quaternion>("PokeRotation");
         }
+
+        internal void FlushMetaAimChanges() => s_MetaAim?.FlushMetaAimChanges();
 
         InputDevice m_LeftHandInteractionDevice;
         InputDevice m_RightHandInteractionDevice;
@@ -351,8 +447,13 @@ namespace UnityEngine.XR.Hands.OpenXR
 #endif
 
         bool m_IsValid;
+        bool[] m_AgnosticAimStatesValidity = new bool[2];
+        XRHandAimState[] m_AgnosticAimStates = new XRHandAimState[2];
 
         static internal string id { get; private set; }
+
+        static internal void SetMetaAim(MetaHandTrackingAim metaAim) => s_MetaAim = metaAim;
+        static MetaHandTrackingAim s_MetaAim;
 
         static OpenXRHandProvider() => id = "OpenXR Hands";
 

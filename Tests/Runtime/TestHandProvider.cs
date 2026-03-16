@@ -135,6 +135,18 @@ class TestHandProvider : XRHandSubsystemProvider
         return base.TryGetAimActivateValue(handedness, out aimActivateValue);
     }
 
+    public override bool TryGetAimActivatedState(Handedness handedness, out bool isAimActivated)
+    {
+        if (commonGestureBehavior.AreExtensionCommonGesturesEnabled())
+        {
+            var gestureData = TestCommonGestureData.GetCommonGestureData(handedness);
+            isAimActivated = gestureData.aimActivatedState;
+            return true;
+        }
+
+        return base.TryGetAimActivatedState(handedness, out isAimActivated);
+    }
+
     public override bool TryGetGripPose(Handedness handedness, out Pose gripPose)
     {
         if (commonGestureBehavior.AreCoreCommonGesturesEnabled())
@@ -159,6 +171,18 @@ class TestHandProvider : XRHandSubsystemProvider
         return base.TryGetGraspValue(handedness, out graspValue);
     }
 
+    public override bool TryGetGraspFirmState(Handedness handedness, out bool isGraspFirm)
+    {
+        if (commonGestureBehavior.AreExtensionCommonGesturesEnabled())
+        {
+            var gestureData = TestCommonGestureData.GetCommonGestureData(handedness);
+            isGraspFirm = gestureData.graspFirmState;
+            return true;
+        }
+
+        return base.TryGetGraspFirmState(handedness, out isGraspFirm);
+    }
+
     public override bool TryGetPinchPose(Handedness handedness, out Pose pinchPose)
     {
         if (commonGestureBehavior.AreCoreCommonGesturesEnabled())
@@ -181,6 +205,18 @@ class TestHandProvider : XRHandSubsystemProvider
         }
 
         return base.TryGetPinchValue(handedness, out pinchValue);
+    }
+
+    public override bool TryGetPinchTouchedState(Handedness handedness, out bool isPinched)
+    {
+        if (commonGestureBehavior.AreExtensionCommonGesturesEnabled())
+        {
+            var gestureData = TestCommonGestureData.GetCommonGestureData(handedness);
+            isPinched = gestureData.pinchTouchedState;
+            return true;
+        }
+
+        return base.TryGetPinchTouchedState(handedness, out isPinched);
     }
 
     public override bool TryGetPokePose(Handedness handedness, out Pose pokePose)
