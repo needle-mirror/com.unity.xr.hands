@@ -7,7 +7,7 @@ namespace UnityEngine.XR.Hands
     {
         const string k_ApiFolder = "api";
         const string k_ManualFolder = "manual";
-        const string k_CurrentDocsVersion = "1.7";
+        const string k_CurrentDocsVersion = "1.8";
         const string k_CurrentDocsBaseUrl = "https://docs.unity3d.com/Packages/com.unity.xr.hands@" + k_CurrentDocsVersion + "/";
         const string k_NamespaceRoot = "UnityEngine.XR.Hands.";
 

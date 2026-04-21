@@ -365,6 +365,7 @@ namespace UnityEditor.XR.Hands.Capture
 
             // Reset the frame ID to 0 when the recording data changes
             OnFrameChanged(0);
+            m_CapturePlayback.selectedFrameID = 0;
 
             // Reset the frame selection slider range
             ResetFrameSelectionSliderRange();

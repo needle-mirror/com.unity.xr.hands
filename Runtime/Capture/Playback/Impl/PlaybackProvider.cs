@@ -9,6 +9,11 @@ namespace UnityEngine.XR.Hands.Capture.Playback
     /// </summary>
     class PlaybackProvider : XRHandSubsystemProvider
     {
+        static XRHandSubsystemDescriptor s_RegisteredDescriptor;
+        static bool s_SubsystemRegistered;
+
+        XRHandPlayback[] m_Playbacks;
+
         internal override void SubscribeToSubsystemActions(ref XRHandSubsystemActions actions)
         {
             m_Playbacks = new[] {
@@ -115,26 +120,26 @@ namespace UnityEngine.XR.Hands.Capture.Playback
 
         internal static XRHandSubsystemDescriptor GetRegisteredDescriptor() => s_RegisteredDescriptor;
 
-        XRHandPlayback[] m_Playbacks;
-
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void RegisterDescriptor()
         {
-            var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
+            if (!s_SubsystemRegistered)
             {
-                id = Constants.k_PlaybackDescriptorID,
-                providerType = typeof(PlaybackProvider),
-                supportsAimPose = true,
-                supportsAimActivateValue = true,
-                supportsGraspValue = true,
-                supportsGripPose = true,
-                supportsPinchPose = true,
-                supportsPinchValue = true,
-                supportsPokePose = true,
-            };
-            s_RegisteredDescriptor = XRHandSubsystemDescriptor.RegisterInternal(handsSubsystemCinfo);
+                var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
+                {
+                    id = Constants.k_PlaybackDescriptorID,
+                    providerType = typeof(PlaybackProvider),
+                    supportsAimPose = true,
+                    supportsAimActivateValue = true,
+                    supportsGraspValue = true,
+                    supportsGripPose = true,
+                    supportsPinchPose = true,
+                    supportsPinchValue = true,
+                    supportsPokePose = true,
+                };
+                s_RegisteredDescriptor = XRHandSubsystemDescriptor.RegisterInternal(handsSubsystemCinfo);
+                s_SubsystemRegistered = true;
+            }
         }
-
-        static XRHandSubsystemDescriptor s_RegisteredDescriptor;
     }
 }

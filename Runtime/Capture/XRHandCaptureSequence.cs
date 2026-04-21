@@ -32,7 +32,7 @@ namespace UnityEngine.XR.Hands.Capture
         /// <see cref="XRHandSubsystem"/><c>.</c><see cref="XRHandSubsystem.jointsInLayout"/>.
         /// </summary>
         /// <param name="allocator">
-        /// This will be passed to the <see cref="NativeArray"/> created and returned from
+        /// This will be passed to the <see cref="NativeArray{bool}"/> created and returned from
         /// <c>GetHandJointsInLayout</c>.
         /// </param>
         /// <returns>

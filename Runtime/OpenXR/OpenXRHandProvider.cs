@@ -454,6 +454,7 @@ namespace UnityEngine.XR.Hands.OpenXR
 
         static internal void SetMetaAim(MetaHandTrackingAim metaAim) => s_MetaAim = metaAim;
         static MetaHandTrackingAim s_MetaAim;
+        static bool s_SubsystemRegistered;
 
         static OpenXRHandProvider() => id = "OpenXR Hands";
 
@@ -475,20 +476,23 @@ namespace UnityEngine.XR.Hands.OpenXR
 #else
                 bool commonPosesEnabled = false;
 #endif
-
-                var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
+                if (!s_SubsystemRegistered)
                 {
-                    id = id,
-                    providerType = typeof(OpenXRHandProvider),
-                    supportsAimPose = commonPosesEnabled,
-                    supportsAimActivateValue = commonPosesEnabled,
-                    supportsGraspValue = commonPosesEnabled,
-                    supportsGripPose = commonPosesEnabled,
-                    supportsPinchPose = commonPosesEnabled,
-                    supportsPinchValue = commonPosesEnabled,
-                    supportsPokePose = commonPosesEnabled,
-                };
-                XRHandSubsystemDescriptor.Register(handsSubsystemCinfo);
+                    var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
+                    {
+                        id = id,
+                        providerType = typeof(OpenXRHandProvider),
+                        supportsAimPose = commonPosesEnabled,
+                        supportsAimActivateValue = commonPosesEnabled,
+                        supportsGraspValue = commonPosesEnabled,
+                        supportsGripPose = commonPosesEnabled,
+                        supportsPinchPose = commonPosesEnabled,
+                        supportsPinchValue = commonPosesEnabled,
+                        supportsPokePose = commonPosesEnabled,
+                    };
+                    XRHandSubsystemDescriptor.Register(handsSubsystemCinfo);
+                    s_SubsystemRegistered = true;
+                }
             }
         }
 

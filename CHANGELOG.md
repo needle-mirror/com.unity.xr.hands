@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 <!-- Headers should be listed in this order: Added, Changed, Deprecated, Removed, Fixed, Security -->
 
+## [1.8.0] - 2026-04-21
+
+### Fixed
+
+- Fixed an issue caused when an `XRHandSubsystemProvider` attempts to register more than once with the `SubsystemDescriptorStore`. This caused a warning when using fast-enter play mode. [UUM-135026](https://issuetracker.unity3d.com/product/unity/issues/guid/UUM-135026)
+- Fixed XRHandCapture slider resets when switching recordings
+
 ## [1.8.0-pre.1] - 2026-03-16
 
 ### Added
