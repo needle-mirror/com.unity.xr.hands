@@ -21,10 +21,15 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         public void Dispose()
         {
+            DisposeInternal(LifetimeType.FreelyDispose);
+        }
+
+        internal void DisposeInternal(LifetimeType callerContext)
+        {
             if (m_LifetimeType == LifetimeType.Invalid)
                 return;
 
-            if (s_AllowDisposalFor != m_LifetimeType)
+            if (m_LifetimeType != callerContext)
                 throw new InvalidOperationException("Must get XRHand objects from APIs in the XR Hands package, do not construct your own!");
 
             if (m_Joints.IsCreated)
@@ -171,8 +176,6 @@ namespace UnityEngine.XR.Hands
             }
         }
 
-        internal bool isValid => m_Handedness.IsValid() && m_Joints.IsCreated;
-
         internal enum LifetimeType
         {
             Invalid,
@@ -181,19 +184,13 @@ namespace UnityEngine.XR.Hands
             ProviderUtility,
         }
 
+        internal bool isValid => m_Handedness.IsValid() && m_Joints.IsCreated;
+
         internal NativeArray<XRHandJoint> m_Joints;
         internal Pose m_RootPose;
-        Handedness m_Handedness;
+        readonly Handedness m_Handedness;
         bool m_IsTracked;
 
         LifetimeType m_LifetimeType;
-
-        static internal LifetimeType allowDisposalFor
-        {
-            get => s_AllowDisposalFor;
-            set => s_AllowDisposalFor = value;
-        }
-
-        static LifetimeType s_AllowDisposalFor = LifetimeType.FreelyDispose;
     }
 }

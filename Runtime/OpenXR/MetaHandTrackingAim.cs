@@ -1,17 +1,8 @@
 #if UNITY_OPENXR_PACKAGE || PACKAGE_DOCS_GENERATION
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
-using UnityEngine.InputSystem.Layouts;
-using UnityEngine.InputSystem.XR;
-using UnityEngine.Scripting;
-using UnityEngine.XR.Hands;
-using UnityEngine.XR.Management;
-using UnityEngine.XR.OpenXR;
-using UnityEngine.XR.OpenXR.Input;
 using UnityEngine.XR.OpenXR.Features;
 
 #if UNITY_EDITOR
@@ -75,12 +66,14 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </summary>
         const string deviceManufacturerName = "OpenXR Meta";
 
+        bool m_SubsystemCreatedSubscribed;
+
         /// <summary>See <see cref="OpenXRFeature.OnSubsystemStart"/>.</summary>
         protected override void OnSubsystemStart()
         {
             if (HandTracking.subsystem == null)
             {
-                HandTracking.subsystemCreated += OnHandSubsystemCreated;
+                SubscribeSubsystemCreated();
                 return;
             }
 
@@ -102,7 +95,29 @@ namespace UnityEngine.XR.Hands.OpenXR
         {
             NativeApi.ToggleMetaAim(false);
             DestroyHands();
+            UnsubscribeSubsystemCreated();
+        }
+
+        void SubscribeSubsystemCreated()
+        {
+            if (m_SubsystemCreatedSubscribed)
+                return;
+
+#pragma warning disable UDR0004 // Non-static method subscribed to static event in SubscribeSubsystemCreated is not deregistered. Deregister it in OnDisable.
+            // -- Unsubscribed in `UnsubscribeSubsystemCreated` triggered when subsystem is stopped.
+            // -- The subscription is also guarded with a bool to prevent duplicate registration.
+            HandTracking.subsystemCreated += OnHandSubsystemCreated;
+#pragma warning restore UDR0004 // Non-static method subscribed to static event in SubscribeSubsystemCreated is not deregistered. Deregister it in OnDisable.
+            m_SubsystemCreatedSubscribed = true;
+        }
+
+        void UnsubscribeSubsystemCreated()
+        {
+            if (!m_SubsystemCreatedSubscribed)
+                return;
+
             HandTracking.subsystemCreated -= OnHandSubsystemCreated;
+            m_SubsystemCreatedSubscribed = false;
         }
 
         void CreateHands()
@@ -153,7 +168,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         static class NativeApi
         {
             [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_ToggleMetaAim")]
-            static internal extern bool ToggleMetaAim(bool enable);
+            internal static extern bool ToggleMetaAim(bool enable);
         }
     }
 }

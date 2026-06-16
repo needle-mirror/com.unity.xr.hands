@@ -10,6 +10,27 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 <!-- Headers should be listed in this order: Added, Changed, Deprecated, Removed, Fixed, Security -->
 
+## [1.9.0-pre.1] - 2026-06-16
+
+### Added
+
+- Added advanced skeletal data properties to `XRHandMeshData` (`bonesPerVertex`, `boneWeights`, and `jointBindPoseMatricesRaw`) to support GPU-skinned hand rendering through supporting OpenXR features (such as Meta Quest: Hand Mesh Data).
+- Added `XRHandMeshData.TryGetJointBindPoseMatrix` and `XRHandMeshData.TryGetJointRadius` for safe, per-joint access to runtime-supplied mesh bind poses and radii.
+- Added [OpenXRHandTrackingFeature](xref:UnityEngine.XR.Hands.OpenXR.OpenXRHandTrackingFeature) to support OpenXR extensions that augment `XR_EXT_Hand_Tracking`.
+- Added support for the [Hand Tracking Data Source](xref:xrhands-openxr-data-source-feature) OpenXR feature.
+- Added support for the [Hand Joints Motion Range](xref:xrhands-openxr-motion-range-feature) OpenXR feature.
+
+### Changed
+- Changed minimum supported version of the Unity Editor from 2022.3 to 6000.0 (LTS).
+
+### Fixed
+
+- Fixed an issue where burst compilation of `XRHandProcessingUtility.cs` would yield an invalid boxing operation error.
+- Fixed compiler warning due to serializing the 64-bit enum for `MetaAimFlags` required by the playback feature.
+- Fixed scripts to properly reset static fields to support fast-enter play mode settings when domain reload is disabled in Project Settings.
+- Fixed [`XRHandRecordingMetadata.GetSavedRecordingMetadata`](xref:UnityEngine.XR.Hands.Capture.Recording.XRHandRecordingMetadata.GetSavedRecordingMetadata) to clear the output list before populating it.
+- Fixed some scripts in Gestures package sample to retry finding a running `XRHandSubsystem` and skip updating if one is not found.
+
 ## [1.8.0] - 2026-04-21
 
 ### Fixed

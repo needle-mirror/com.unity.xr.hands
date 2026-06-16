@@ -13,6 +13,9 @@ namespace UnityEditor.XR.Hands.Analytics
     {
         static AnalyticsPlayModeUsageHooks()
         {
+            if (!EditorAnalytics.enabled)
+                return;
+
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
         }
 
@@ -20,12 +23,13 @@ namespace UnityEditor.XR.Hands.Analytics
         {
             switch (playModeStateChange)
             {
-                case PlayModeStateChange.EnteredEditMode or PlayModeStateChange.ExitingEditMode:
-                    return;
+                case PlayModeStateChange.ExitingEditMode:
+                    if (EditorAnalytics.enabled)
+                        XRHandFeatureUsageData.ResetData();
+                    break;
                 case PlayModeStateChange.ExitingPlayMode:
-                    var payload = GetPlayModeUsagePayload();
-                    XRHandsAnalytics.playmodeUsageEvent.Send(payload);
-                    XRHandFeatureUsageData.ResetData();
+                    if (EditorAnalytics.enabled)
+                        XRHandsAnalytics.playmodeUsageEvent.Send(GetPlayModeUsagePayload());
                     break;
             }
         }
@@ -36,8 +40,9 @@ namespace UnityEditor.XR.Hands.Analytics
             {
                 customGestureUsed = XRHandFeatureUsageData.xrHandCustomGestureUsed,
                 subsystemRuntimeUsed = XRHandFeatureUsageData.xrHandSubsystemRuntimeUsed,
-                customGestureDebuggerUsed = XRHandFeatureUsageData.xrHandCustomGestureDebuggerUsed
+                customGestureDebuggerUsed = XRHandFeatureUsageData.xrHandCustomGestureDebuggerUsed,
             };
+
             return payload;
         }
     }

@@ -309,13 +309,18 @@ namespace UnityEngine.XR.Hands
             {
                 if (m_HasJointTransformMask[i])
                 {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    if (m_JointTransforms[i] == null)
+#if !UNITY_6000_6_OR_NEWER || UNITY_ENABLE_CHECKS
+#if !UNITY_6000_6_OR_NEWER
+                    if (Debug.isDebugBuild)
+#endif
                     {
-                        Debug.LogError("XR Hand Skeleton has detected that a joint transform has been destroyed after it was initialized." +
-                            " After removing or modifying transform joint references at runtime it is required to call InitializeFromSerializedReferences to update the joint transform references.", this);
+                        if (m_JointTransforms[i] == null)
+                        {
+                            Debug.LogError("XR Hand Skeleton has detected that a joint transform has been destroyed after it was initialized." +
+                                    " After removing or modifying transform joint references at runtime it is required to call InitializeFromSerializedReferences to update the joint transform references.", this);
 
-                        continue;
+                            continue;
+                        }
                     }
 #endif
                     m_JointTransforms[i].SetLocalPose(m_JointLocalPoses[i]);

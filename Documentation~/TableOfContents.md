@@ -9,6 +9,8 @@
   * [Hand visuals](xref:xrhands-visuals)
 * [OpenXR features](xref:xrhands-openxr-features)
   * [Hand tracking feature](xref:xrhands-openxr-hands-feature)
+  * [Hand Tracking Data Source feature](xref:xrhands-openxr-data-source-feature)
+  * [Hand Joints Motion Range feature](xref:xrhands-openxr-motion-range-feature)
   * [Hand Subsystem Manager](xref:xrhands-openxr-subsystem-manager)
   * [Meta Aim Hand feature](xref:xrhands-meta-aim-feature)
 * [Custom gestures](xref:xrhands-custom-gestures)

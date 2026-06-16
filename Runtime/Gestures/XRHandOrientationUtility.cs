@@ -18,20 +18,23 @@ namespace UnityEngine.XR.Hands.Gestures
 
         internal static bool TryGetOriginTransform(out Transform originTransform)
         {
-            bool found = TryEnsureOriginAndHead() && s_OriginTransform != null;
+            bool found = TryGetXROrigin() && s_OriginTransform != null;
             originTransform = s_OriginTransform;
             return found;
         }
 
         internal static bool TryGetHeadTransform(out Transform headTransform)
         {
-            bool found = TryEnsureOriginAndHead() && s_HeadTransform != null;
+            bool found = TryGetXROrigin() && s_HeadTransform != null;
             headTransform = s_HeadTransform;
             return found;
         }
 
-        static bool TryEnsureOriginAndHead()
+        static bool TryGetXROrigin()
         {
+            // This method makes the assumption that once the XROrigin is successfully obtained,
+            // the Origin and Camera do not change references.
+
             if (s_Origin != null)
                 return true;
 
@@ -41,11 +44,18 @@ namespace UnityEngine.XR.Hands.Gestures
             s_Origin = Object.FindObjectOfType<XROrigin>();
 #endif // !UNITY_2023_2_OR_NEWER
 
+            s_OriginTransform = null;
+            s_HeadTransform = null;
+
             if (s_Origin == null)
                 return false;
 
-            s_OriginTransform = s_Origin.Origin.transform;
-            s_HeadTransform = s_Origin.Camera.transform;
+            if (s_Origin.Origin != null)
+                s_OriginTransform = s_Origin.Origin.transform;
+
+            if (s_Origin.Camera != null)
+                s_HeadTransform = s_Origin.Camera.transform;
+
             return true;
         }
 
@@ -114,6 +124,14 @@ namespace UnityEngine.XR.Hands.Gestures
                 default:
                     return false;
             }
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticsOnLoad()
+        {
+            s_Origin = null;
+            s_OriginTransform = null;
+            s_HeadTransform = null;
         }
 
         static XROrigin s_Origin;

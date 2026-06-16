@@ -521,13 +521,20 @@ namespace UnityEngine.XR.Hands
 #if UNITY_EDITOR
         static MetaAimHand() => RegisterLayout();
 #endif
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void RegisterLayout()
         {
+            // "ResetStaticsOnLoad()" section of this RuntimeInitializeOnLoadMethod
+            left = null;
+            right = null;
+
+#if ENABLE_INPUT_SYSTEM
             InputSystem.InputSystem.RegisterLayout<MetaAimHand>(
-                    matches: new InputDeviceMatcher()
+                matches: new InputDeviceMatcher()
                     .WithProduct(k_MetaAimHandDeviceProductName)
                     .WithManufacturer(k_MetaAimHandDeviceManufacturerName));
+#endif
         }
 
         const string k_MetaAimHandDeviceProductName = "Meta Aim Hand Tracking";

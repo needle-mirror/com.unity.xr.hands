@@ -13,8 +13,8 @@ namespace UnityEngine.XR.Hands.Meshing
         /// </summary>
         public void Dispose()
         {
-            leftHand.Dispose();
-            rightHand.Dispose();
+            m_LeftHand.Dispose();
+            m_RightHand.Dispose();
         }
 
         /// <summary>
@@ -26,7 +26,11 @@ namespace UnityEngine.XR.Hands.Meshing
         /// Data can only be valid if the call to <see cref="XRHandSubsystem.TryGetMeshData"/>
         /// was successful.
         /// </value>
-        public XRHandMeshData leftHand { get; internal set; }
+        public XRHandMeshData leftHand
+        {
+            get => m_LeftHand;
+            internal set => m_LeftHand = value;
+        }
 
         /// <summary>
         /// Low-level mesh data for right hand. It is up to the caller whether
@@ -37,7 +41,14 @@ namespace UnityEngine.XR.Hands.Meshing
         /// Data can only be valid if the call to <see cref="XRHandSubsystem.TryGetMeshData"/>
         /// was successful.
         /// </value>
-        public XRHandMeshData rightHand { get; internal set; }
+        public XRHandMeshData rightHand
+        {
+            get => m_RightHand;
+            internal set => m_RightHand = value;
+        }
+
+        XRHandMeshData m_LeftHand;
+        XRHandMeshData m_RightHand;
     }
 
     namespace ProviderImplementation

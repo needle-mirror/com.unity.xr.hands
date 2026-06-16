@@ -18,7 +18,7 @@ Access hand tracking data from the [XRHandSubsystem](xref:UnityEngine.XR.Hands.X
 
 The [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem) updates hands twice per frame. The first update occurs as close as possible to the frame [Update](xref:ExecutionOrder) event. Use the data in this update to perform game logic, such as interactions, that depend on the hand data. The second update occurs just before rendering, as close as possible to the [Application.onBeforeRender](https://docs.unity3d.com/ScriptReference/Application-onBeforeRender.html) event. Use the data in this event to position game objects or other visual representations of the hands. This second update provides the lowest latency between hand motion and rendering.
 
-The best way to access the data is through the [updatedHands](xref:UnityEngine.XR.Hands.XRHandSubsystem.updatedHands) callback, which is dispatched twice a frame when the hand data is updated. Getting the data in response to the callback provides the lowest latency and guarantees that you are using the latest data. Refer to [Subscribe to hand update events](#subscribe) for more information.
+The best way to access the data is through the [updatedHands](xref:UnityEngine.XR.Hands.XRHandSubsystem.updatedHands) callback, which is dispatched twice a frame when the hand data is updated. Getting the data in response to the callback provides the lowest latency and guarantees that you're using the latest data. Refer to [Subscribe to hand update events](#subscribe) for more information.
 
 You can also access [XRHand](xref:UnityEngine.XR.Hands.XRHand) objects directly from the [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem) without waiting for the [updatedHands](xref:UnityEngine.XR.Hands.XRHandSubsystem.updatedHands) callback to be invoked. The [XRHand](xref:UnityEngine.XR.Hands.XRHand) objects reflect the data as of the latest successful update event. This might be from a previous frame.
 
@@ -119,17 +119,31 @@ for(var i = XRHandJointID.BeginMarker.ToIndex();
 }
 ```
 
-Note that some or all of the data for a joint might not be successfully tracked in a given update.  The TryGet functions of the [XRHandJoint](xref:UnityEngine.XR.Hands.XRHandJoint) object return false if the data they access is unavailable. You can also use the [XRHandJoint.trackingState](xref:UnityEngine.XR.Hands.XRHandJoint.trackingState) flags to determine whether the data is valid or not. Refer to [Check data validity](#check-data-validity) for more information.
+Note that some or all of the data for a joint might not be successfully tracked in a given update. The TryGet functions of the [XRHandJoint](xref:UnityEngine.XR.Hands.XRHandJoint) object return false if the data they access is unavailable. You can also use the [XRHandJoint.trackingState](xref:UnityEngine.XR.Hands.XRHandJoint.trackingState) flags to determine whether the data is valid or not. Refer to [Check data validity](#check-data-validity) for more information.
 
 In addition, the hand data plug-in providing the hand data might not support every joint in the [XRHandJointID](xref:UnityEngine.XR.Hands.XRHandJointID) list. The TryGet functions of an unsupported joint always return false and the [trackingState](xref:UnityEngine.XR.Hands.XRHandJoint.trackingState) has the [WillNeverBeValid](xref:UnityEngine.XR.Hands.XRHandJointTrackingState.WillNeverBeValid) flag set. Refer to [Get provider data support](#joint-layout) for more information.
 
 > [!NOTE]
 > The XRHandSubsystem stores the data associated with each joint in an internal native array and updates the elements in place when new hand data becomes available. If you make a copy of an [XRHand](xref:UnityEngine.XR.Hands.XRHand)  object, the copy still points to the original native array. To take a snapshot of the joint data, you must copy the individual XRHandJoint objects at the desired point in time.
 
+## Access hand mesh data
+
+If the underlying runtime and provider support it, you can retrieve hand mesh data using [XRHandSubsystem.TryGetMeshData](xref:UnityEngine.XR.Hands.XRHandSubsystem.TryGetMeshData*).
+
+### Advanced skeletal data
+
+In addition to standard mesh arrays ([XRHandMeshData.positions](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.positions), [XRHandMeshData.normals](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.normals), [XRHandMeshData.uvs](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.uvs), and [XRHandMeshData.indices](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.indices)), [XRHandMeshData](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData) supports foundational data for GPU skinning. When using a supported provider (requires XR Hands 1.9.0+), the mesh data includes:
+
+- **Bone Weights**: Accessible via [XRHandMeshData.boneWeights](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.boneWeights) and [XRHandMeshData.bonesPerVertex](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.bonesPerVertex). Use `meshData.boneWeights.IsCreated` to verify availability.
+- **Bind Poses**: Accessible safely per-joint using [XRHandMeshData.TryGetJointBindPoseMatrix](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.TryGetJointBindPoseMatrix*) (`out Matrix4x4 bindPose, XRHandJointID jointID`), or as a raw array via [XRHandMeshData.jointBindPoseMatricesRaw](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.jointBindPoseMatricesRaw).
+- **Joint Radii**: Accessible safely per-joint using [XRHandMeshData.TryGetJointRadius](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.TryGetJointRadius*) (`out float radius, XRHandJointID jointID`).
+
 <a id="check-data-validity"></a>
 ## Check data validity
 
-Hand data can be unreliable for a variety of reasons. A hand or part of a hand might be occluded or out of sensor range. The provider plug-in supplying the data might not support every tracked point or might not calculate certain aspects of the data, such as velocity. Before you use the hand data, you should make sure that it is valid.
+Hand data can be unreliable for a variety of reasons. A hand or part of a hand might be occluded or out of sensor range. The provider plug-in supplying the data might not support every tracked point or might not calculate certain aspects of the data, such as velocity. Before you use the hand data, make sure that it's valid.
+
+For hand mesh data, apply the same approach: validate array availability with <c>IsCreated</c> (for example, [XRHandMeshData.boneWeights](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.boneWeights)) and use mesh-specific <c>TryGet</c> methods where available (for example, [XRHandMeshData.TryGetJointBindPoseMatrix](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.TryGetJointBindPoseMatrix*) and [XRHandMeshData.TryGetJointRadius](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.TryGetJointRadius*)).
 
 The XR Hands API provides several APIs that you can use to check data validity.
 
@@ -140,14 +154,14 @@ The XR Hands API provides several APIs that you can use to check data validity.
 | [XRHandSubsystem.trackingLost](xref:UnityEngine.XR.Hands.XRHandSubsystem.trackingLost)| A callback function invoked when tracking of a hand is lost. |
 | [XRHandSubsystem.updateSuccessFlags](xref:UnityEngine.XR.Hands.XRHandSubsystem.updateSuccessFlags)| Flags describing which types of data are available in the most recent update. These flags apply to the [XRHandSubsystem.rightHand](xref:UnityEngine.XR.Hands.XRHandSubsystem.rightHand) and [XRHandSubsystem.leftHand](xref:UnityEngine.XR.Hands.XRHandSubsystem.leftHand) properties. |
 | [XRHand.isTracked](xref:UnityEngine.XR.Hands.XRHand.isTracked)| Indicates whether the user's corresponding hand is currently being tracked by the system. |
-| [XRHandJoint.trackingState](xref:UnityEngine.XR.Hands.XRHandJoint.trackingState)| Indicates which types of data in the joint are valid. A specific type of data might be invalid because the system could not determine the value in the current update or because the hand data provider does not support that type of data.|
+| [XRHandJoint.trackingState](xref:UnityEngine.XR.Hands.XRHandJoint.trackingState)| Indicates which types of data in the joint are valid. A specific type of data might be invalid because the system is unable to determine the value in the current update or because the hand data provider doesn't support that type of data.|
 | [XRHandJoint TryGet functions](xref:UnityEngine.XR.Hands.XRHandJoint#methods)| The [XRHandJoint](xref:UnityEngine.XR.Hands.XRHandJoint) object uses the "TryGet" pattern to provide access to a specific type of data for a joint, such as the pose or a velocity. These functions return false if the corresponding type of data is invalid for the joint. |
 
 
 <a id="joint-layout"></a>
 ## Get supported joints array
 
-The [XRHandSubsystem.jointsInLayout](xref:UnityEngine.XR.Hands.XRHandSubsystem.jointsInLayout) is an array of boolean values that indicate which joints the current hand data provider supports. The array contains a value for each joint defined by the [XRHandJointID](xref:UnityEngine.XR.Hands.XRHandJointID) enumeration.
+The [XRHandSubsystem.jointsInLayout](xref:UnityEngine.XR.Hands.XRHandSubsystem.jointsInLayout) is an array of Boolean values that indicate which joints the current hand data provider supports. The array contains a value for each joint defined by the [XRHandJointID](xref:UnityEngine.XR.Hands.XRHandJointID) enumeration.
 
 The following example uses the `jointsInLayout` array to instantiate a prefab for each supported joint, which are stored in a dictionary keyed by the joint ID so that they can be updated when new hand data is available:
 

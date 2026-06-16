@@ -601,16 +601,22 @@ namespace UnityEngine.XR.Hands
             InputSystem.InputSystem.QueueStateEvent(this, m_DeviceState);
         }
 
-        static XRHandDevice() => Initialize();
+#if UNITY_EDITOR
+        static XRHandDevice() => RegisterLayout();
+#endif
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Initialize()
+        static void RegisterLayout()
         {
+            // "ResetStaticsOnLoad()" section of this RuntimeInitializeOnLoadMethod
+            leftHand = null;
+            rightHand = null;
+
 #if ENABLE_INPUT_SYSTEM
             InputSystem.InputSystem.RegisterLayout<XRHandDevice>(
                 matches: new InputDeviceMatcher()
-                .WithProduct(k_DeviceProductName));
-#endif // ENABLE_INPUT_SYSTEM
+                    .WithProduct(k_DeviceProductName));
+#endif
         }
 
         const string k_DeviceProductName = "XRHandDevice";

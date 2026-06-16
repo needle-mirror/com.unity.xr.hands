@@ -356,7 +356,12 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// valid data. Otherwise, returns <see langword="false"/>.
         /// </returns>
         public override bool TryGetMeshData(ref XRHandMeshDataQueryResult result, ref XRHandMeshDataQueryParams queryParams)
-            => handMeshDataSupplier != null ? handMeshDataSupplier.TryGetMeshData(ref result, ref queryParams) : false;
+        {
+            if (handMeshDataSupplier == null)
+                return false;
+
+            return handMeshDataSupplier.TryGetMeshData(ref result, ref queryParams);
+        }
 
         /// <inheritdoc/>
         public override XRDetectedHandMeshLayout detectedHandMeshLayout => NativeApi.GetDetectedHandMeshLayout();
@@ -447,52 +452,81 @@ namespace UnityEngine.XR.Hands.OpenXR
 #endif
 
         bool m_IsValid;
-        bool[] m_AgnosticAimStatesValidity = new bool[2];
-        XRHandAimState[] m_AgnosticAimStates = new XRHandAimState[2];
+        readonly bool[] m_AgnosticAimStatesValidity = new bool[2];
+        readonly XRHandAimState[] m_AgnosticAimStates = new XRHandAimState[2];
 
-        static internal string id { get; private set; }
+        internal static string id { get; }
 
-        static internal void SetMetaAim(MetaHandTrackingAim metaAim) => s_MetaAim = metaAim;
+        internal static void SetMetaAim(MetaHandTrackingAim metaAim) => s_MetaAim = metaAim;
         static MetaHandTrackingAim s_MetaAim;
         static bool s_SubsystemRegistered;
+
+        // This static field should not be reset between Play mode sessions since registration list of subsystem descriptors are not cleared.
+        static XRHandSubsystemDescriptor.Cinfo? s_RegisteredDescriptorCinfo;
 
         static OpenXRHandProvider() => id = "OpenXR Hands";
 
         const string k_HandInteractionDeviceName = "Hand Interaction OpenXR";
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Register()
+        internal static void Register()
         {
+            // "ResetStaticsOnLoad()" section of this RuntimeInitializeOnLoadMethod
+            s_MetaAim = null;
+
             var settings = OpenXRSettings.Instance;
             if (settings == null)
                 return;
 
             var feature = settings.GetFeature<HandTracking>();
-            if (feature != null && feature.enabled)
-            {
+            if (feature == null || !feature.enabled)
+                return;
+
 #if UNITY_OPENXR_PACKAGE_1_8
-                var profile = OpenXRSettings.Instance.GetFeature<HandInteractionProfile>();
-                bool commonPosesEnabled = profile != null && profile.enabled;
+            var profile = settings.GetFeature<HandInteractionProfile>();
+            var commonPosesEnabled = profile != null && profile.enabled;
 #else
-                bool commonPosesEnabled = false;
+            var commonPosesEnabled = false;
 #endif
-                if (!s_SubsystemRegistered)
-                {
-                    var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
-                    {
-                        id = id,
-                        providerType = typeof(OpenXRHandProvider),
-                        supportsAimPose = commonPosesEnabled,
-                        supportsAimActivateValue = commonPosesEnabled,
-                        supportsGraspValue = commonPosesEnabled,
-                        supportsGripPose = commonPosesEnabled,
-                        supportsPinchPose = commonPosesEnabled,
-                        supportsPinchValue = commonPosesEnabled,
-                        supportsPokePose = commonPosesEnabled,
-                    };
-                    XRHandSubsystemDescriptor.Register(handsSubsystemCinfo);
-                    s_SubsystemRegistered = true;
-                }
+            var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
+            {
+                id = id,
+                providerType = typeof(OpenXRHandProvider),
+                supportsAimPose = commonPosesEnabled,
+                supportsAimActivateValue = commonPosesEnabled,
+                supportsGraspValue = commonPosesEnabled,
+                supportsGripPose = commonPosesEnabled,
+                supportsPinchPose = commonPosesEnabled,
+                supportsPinchValue = commonPosesEnabled,
+                supportsPokePose = commonPosesEnabled,
+            };
+
+            // Determine if we need to register or replace the subsystem descriptor.
+            var registerSubsystemDescriptor = false;
+            if (!s_RegisteredDescriptorCinfo.HasValue)
+            {
+                // Has never registered the subsystem descriptor.
+                registerSubsystemDescriptor = true;
+            }
+            else if (s_RegisteredDescriptorCinfo.Value != handsSubsystemCinfo)
+            {
+                // Has previously registered the subsystem descriptor from a previous Play mode but parameters have changed.
+                // We must replace the subsystem descriptor for the changed parameters.
+                // Warn the user that they will see the following warning logged:
+                // "Registering subsystem descriptor with duplicate ID 'OpenXR Hands' - overwriting previous entry."
+                // There is no API in the subsystem module for avoiding the warning that will be logged
+                // during the Register method when replacing the subsystem descriptor.
+                var enabledOrDisabled = commonPosesEnabled ? "enabled" : "disabled";
+                Debug.Log($"The registered subsystem descriptor with ID '{id}' will be overwritten" +
+                    $" since Hand Interaction Profile has changed to be {enabledOrDisabled} since last Play mode.");
+
+                registerSubsystemDescriptor = true;
+            }
+
+            if (registerSubsystemDescriptor)
+            {
+                XRHandSubsystemDescriptor.Register(handsSubsystemCinfo);
+                s_RegisteredDescriptorCinfo = handsSubsystemCinfo;
             }
         }
 
@@ -505,7 +539,7 @@ namespace UnityEngine.XR.Hands.OpenXR
             internal static extern void Destroy();
 
             [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_TryUpdateHands")]
-            internal static unsafe extern XRHandSubsystem.UpdateSuccessFlags TryUpdateHands(
+            internal static extern unsafe XRHandSubsystem.UpdateSuccessFlags TryUpdateHands(
                 XRHandSubsystem.UpdateType updateType,
                 ref Pose leftRootPose,
                 void* leftHandJoints,

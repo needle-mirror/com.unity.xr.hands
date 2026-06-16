@@ -6,6 +6,7 @@ namespace UnityEngine.XR.Hands.Analytics
     /// </summary>
     struct XRHandFeatureUsageData
     {
+#pragma warning disable UDR0001 // No method with RuntimeInitializeOnLoadMethod attribute -- Reset in `ResetData` triggered by analytics upon entering Play mode.
         static XRHandFeatureUsageData s_PlayModeInstance;
 
         bool m_XRHandSubsystemActive;
@@ -38,6 +39,7 @@ namespace UnityEngine.XR.Hands.Analytics
             get => s_PlayModeInstance.m_XRHandCustomGestureDebugActive;
             set => s_PlayModeInstance.m_XRHandCustomGestureDebugActive = value;
         }
+#pragma warning restore UDR0001 // No method with RuntimeInitializeOnLoadMethod attribute
 
         public static void ResetData()
         {

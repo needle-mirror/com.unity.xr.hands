@@ -20,6 +20,20 @@ class Tests
     };
 
     [Test]
+    public void TestHandProcessingUtilHasFlagSameAsBitwiseCheck()
+    {
+        XRHandJointTrackingState trackingState1 = XRHandJointTrackingState.WillNeverBeValid;
+        Assert.AreEqual((trackingState1 & XRHandJointTrackingState.WillNeverBeValid) != 0, true);
+        Assert.AreEqual((trackingState1 & XRHandJointTrackingState.WillNeverBeValid) != 0,
+            trackingState1.HasFlag(XRHandJointTrackingState.WillNeverBeValid));
+
+        XRHandJointTrackingState trackingState2 = XRHandJointTrackingState.HighFidelityPose;
+        Assert.AreEqual((trackingState2 & XRHandJointTrackingState.WillNeverBeValid) != 0, false);
+        Assert.AreEqual((trackingState2 & XRHandJointTrackingState.WillNeverBeValid) != 0,
+            trackingState2.HasFlag(XRHandJointTrackingState.WillNeverBeValid));
+    }
+
+    [Test]
     public void TestFingerIDsToJointIDs()
     {
         Assert.AreEqual((int)XRHandFingerID.Thumb.GetFrontJointID() + 3, (int)XRHandFingerID.Thumb.GetBackJointID());

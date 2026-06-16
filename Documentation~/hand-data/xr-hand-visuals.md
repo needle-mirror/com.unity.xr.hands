@@ -25,3 +25,11 @@ For example, you can ignore an entire finger by not including the `Metacarpal` j
 # XR Hand Mesh Controller
 
 The [XRHandMeshController](xref:UnityEngine.XR.Hands.XRHandMeshController) component subscribes to events from a [XRHandTrackingEvents](xref:UnityEngine.XR.Hands.XRHandTrackingEvents) component and can enable and disable a Mesh Renderer component for the hand when tracking is acquired and lost.
+
+# GPU-Skinned Hand Rendering
+
+When using a runtime that provides advanced skeletal data via [XRHandSubsystem.TryGetMeshData](xref:UnityEngine.XR.Hands.XRHandSubsystem.TryGetMeshData*) (such as Meta Quest: Hand Mesh Data in the OpenXR Plugin), you can implement performant GPU-skinned hand visuals.
+
+Instead of rebuilding mesh vertices every frame, initialize a [SkinnedMeshRenderer](https://docs.unity3d.com/ScriptReference/SkinnedMeshRenderer.html) once per mesh/layout change using [XRHandMeshData.boneWeights](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.boneWeights), [XRHandMeshData.bonesPerVertex](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.bonesPerVertex), and [XRHandMeshData.jointBindPoseMatricesRaw](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData.jointBindPoseMatricesRaw).
+
+After initialization, update only the underlying joint GameObject transforms each frame relative to the XR Origin.

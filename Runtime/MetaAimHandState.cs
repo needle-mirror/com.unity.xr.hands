@@ -211,8 +211,10 @@ namespace UnityEngine.XR.Hands
         [SerializeField]
         internal InputTrackingState m_TrackingState;
 
+#pragma warning disable UAC1011 // Flags should never exceed the 32-bit limit, but this is required for OpenXR compatibility.
         [SerializeField]
         internal MetaAimFlags m_MetaFlags;
+#pragma warning restore UAC1011
 
         [SerializeField]
         internal float m_PinchStrengthIndex;

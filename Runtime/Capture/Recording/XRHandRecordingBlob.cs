@@ -97,7 +97,7 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         /// <summary>
         /// Initializes a new recording and prepares for capturing hand data, if possible.
         /// </summary>
-        /// <param name="args">The initialization arguments <see cref="XRHandRecordingInitArgs"/>.</param>
+        /// <param name="args">The initialization arguments <see cref="XRHandRecordingInitializeArgs"/>.</param>
         /// <returns><c>true</c> if the recording was successfully initialized; otherwise, <c>false</c>.</returns>
         /// <remarks>
         /// If successful, the recording begins on the subsequent frame update.

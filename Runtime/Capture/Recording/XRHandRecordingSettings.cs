@@ -5,16 +5,19 @@ namespace UnityEngine.XR.Hands.Capture.Recording
     /// </summary>
     public static class XRHandRecordingSettings
     {
+        const float k_TimeLimitInSecondsDefault = 60f;
+
         /// <summary>
         /// The maximum recording duration in seconds.
         /// A recording is stopped automatically when this limit is reached.
         /// Default value is 60 seconds.
         /// </summary>
-        public static float timeLimitInSeconds { get; set; }
+        public static float timeLimitInSeconds { get; set; } = k_TimeLimitInSecondsDefault;
 
-        static XRHandRecordingSettings()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticsOnLoad()
         {
-            timeLimitInSeconds = 60.0f;
+            timeLimitInSeconds = k_TimeLimitInSecondsDefault;
         }
     }
 }

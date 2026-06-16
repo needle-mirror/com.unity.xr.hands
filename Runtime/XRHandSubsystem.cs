@@ -610,7 +610,7 @@ namespace UnityEngine.XR.Hands
         /// <summary>
         /// Describes which version of authored hand meshes is detected for use.
         /// </summary>
-        public XRDetectedHandMeshLayout detectedHandMeshLayout => provider.detectedHandMeshLayout; // deprecate? should add new one either way
+        public XRDetectedHandMeshLayout detectedHandMeshLayout => provider.detectedHandMeshLayout;
 
         /// <summary>
         /// Registers a processor for hand joint data.
@@ -685,16 +685,9 @@ namespace UnityEngine.XR.Hands
         {
             base.OnDestroy();
 
-            var previousAllowDisposalFor = XRHand.allowDisposalFor;
-            XRHand.allowDisposalFor = XRHand.LifetimeType.Subsystem;
-            try
+            foreach (var perHandState in m_StatePerHand)
             {
-                foreach (var perHandState in m_StatePerHand)
-                    perHandState.OnDestroy();
-            }
-            finally
-            {
-                XRHand.allowDisposalFor = previousAllowDisposalFor;
+                perHandState.OnDestroy();
             }
 
             if (m_JointsInLayout.IsCreated)
@@ -795,11 +788,13 @@ namespace UnityEngine.XR.Hands
         {
             internal StatePerHand(Handedness handedness)
             {
-                m_Hand = new XRHand(Allocator.Persistent, handedness, XRHand.LifetimeType.Subsystem);
+                m_Hand = new XRHand(Allocator.Persistent, handedness, k_HandLifetimeType);
                 m_CommonGestures = new XRCommonHandGestures(handedness);
             }
 
-            internal void OnDestroy() => m_Hand.Dispose();
+            internal void OnDestroy() => m_Hand.DisposeInternal(k_HandLifetimeType);
+
+            const XRHand.LifetimeType k_HandLifetimeType = XRHand.LifetimeType.Subsystem;
 
             internal XRHand m_Hand;
             internal XRCommonHandGestures m_CommonGestures;
@@ -825,5 +820,119 @@ namespace UnityEngine.XR.Hands
 
         static int CompareProcessors(IXRHandProcessor a, IXRHandProcessor b)
             => a.callbackOrder.CompareTo(b.callbackOrder);
+
+        readonly Dictionary<Type, IXRHandExtendedDataReadHandler> m_ExtendedDataHandlers = new();
+        readonly Dictionary<Type, IXRHandConfigurationHandler> m_ConfigurationHandlers = new();
+
+        /// <summary>
+        /// Registers a handler that provides per-hand extended data of type
+        /// <typeparamref name="TData"/>. Only one handler per data type is
+        /// supported; registering a second handler for the same type replaces
+        /// the previous one.
+        /// </summary>
+        /// <typeparam name="TData">The extended data type.</typeparam>
+        /// <param name="handler">The handler to register.</param>
+        public void RegisterHandExtendedDataHandler<TData>(
+            IXRHandExtendedDataReadHandler<TData> handler) where TData : unmanaged
+        {
+            m_ExtendedDataHandlers[typeof(TData)] = handler;
+        }
+
+        /// <summary>
+        /// Unregisters the handler for extended data of type
+        /// <typeparamref name="TData"/>.
+        /// </summary>
+        /// <typeparam name="TData">The extended data type.</typeparam>
+        public void UnregisterHandExtendedDataHandler<TData>() where TData : unmanaged
+        {
+            m_ExtendedDataHandlers.Remove(typeof(TData));
+        }
+
+        /// <summary>
+        /// Registers a handler that manages configuration of type
+        /// <typeparamref name="TConfig"/>. Only one handler per config type is
+        /// supported; registering a second handler for the same type replaces
+        /// the previous one.
+        /// </summary>
+        /// <typeparam name="TConfig">The configuration type.</typeparam>
+        /// <param name="handler">The handler to register.</param>
+        public void RegisterConfigurationHandler<TConfig>(
+            IXRHandConfigurationHandler<TConfig> handler)
+        {
+            m_ConfigurationHandlers[typeof(TConfig)] = handler;
+        }
+
+        /// <summary>
+        /// Unregisters the handler for configuration of type
+        /// <typeparamref name="TConfig"/>.
+        /// </summary>
+        /// <typeparam name="TConfig">The configuration type.</typeparam>
+        public void UnregisterConfigurationHandler<TConfig>()
+        {
+            m_ConfigurationHandlers.Remove(typeof(TConfig));
+        }
+
+        /// <summary>
+        /// Attempts to retrieve per-hand extended data of type
+        /// <typeparamref name="TData"/> from the registered handler.
+        /// </summary>
+        /// <typeparam name="TData">The extended data type.</typeparam>
+        /// <param name="handedness">Which hand to retrieve data for.</param>
+        /// <param name="data">
+        /// When this method returns `true`, contains the
+        /// extended data for the specified hand.
+        /// </param>
+        /// <returns>
+        /// `true` if a handler is registered and returned data
+        /// successfully; otherwise `false`.
+        /// </returns>
+        public bool TryGetExtendedData<TData>(Handedness handedness, out TData data) where TData : unmanaged
+        {
+            if (m_ExtendedDataHandlers.TryGetValue(typeof(TData), out var handler))
+                return ((IXRHandExtendedDataReadHandler<TData>)handler).TryGetData(handedness, out data);
+
+            data = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the current configuration of type
+        /// <typeparamref name="TConfig"/> from the registered handler.
+        /// </summary>
+        /// <typeparam name="TConfig">The configuration type.</typeparam>
+        /// <param name="config">
+        /// When this method returns `true`, contains the
+        /// current configuration.
+        /// </param>
+        /// <returns>
+        /// `true` if a handler is registered and returned the
+        /// configuration successfully; otherwise `false`.
+        /// </returns>
+        public bool TryGetConfiguration<TConfig>(out TConfig config)
+        {
+            if (m_ConfigurationHandlers.TryGetValue(typeof(TConfig), out var handler))
+                return ((IXRHandConfigurationHandler<TConfig>)handler).TryGetConfiguration(out config);
+
+            config = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Attempts to update the configuration of type
+        /// <typeparamref name="TConfig"/> via the registered handler.
+        /// </summary>
+        /// <typeparam name="TConfig">The configuration type.</typeparam>
+        /// <param name="config">The new configuration to stage.</param>
+        /// <returns>
+        /// `true` if a handler is registered and accepted the
+        /// configuration; otherwise `false`.
+        /// </returns>
+        public bool TryUpdateConfiguration<TConfig>(TConfig config)
+        {
+            if (m_ConfigurationHandlers.TryGetValue(typeof(TConfig), out var handler))
+                return ((IXRHandConfigurationHandler<TConfig>)handler).TryUpdateConfiguration(config);
+
+            return false;
+        }
     }
 }

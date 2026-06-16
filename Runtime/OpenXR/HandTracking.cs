@@ -82,6 +82,10 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </summary>
         public static XRHandSubsystem subsystem => s_Subsystem;
 
+#if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
+        internal static HandExtensibilityManager extensibilityManager => s_This?.m_ExtensibilityManager;
+#endif
+
         /// <summary>
         /// Event-args struct passed to <see cref="subsystemCreated"/> when
         /// the subsystem is created.
@@ -130,11 +134,13 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// When you wish to initialize the subsystem later, call
         /// <see cref="EnsureSubsystemInitialized"/>.
         /// </remarks>
+#pragma warning disable UDR0002 // Static field/property is not assigned in a method with the RuntimeInitializeOnLoadMethod attribute -- Both fields cleared.
         public static bool automaticallyInitializeSubsystem
         {
-            get => s_AutoInitOverride ?? (s_This != null ? s_This.m_AutoStartSubsystem : true);
+            get => s_AutoInitOverride ?? (s_This == null || s_This.m_AutoStartSubsystem);
             set => s_AutoInitOverride = value;
         }
+#pragma warning restore UDR0002 // Static field/property is not assigned in a method with the RuntimeInitializeOnLoadMethod attribute
 
         /// <summary>
         /// Ensures an <see cref="XRHandSubsystem"/> is created.
@@ -173,8 +179,7 @@ namespace UnityEngine.XR.Hands.OpenXR
                 StartSubsystemAndUpdater();
             }
 
-            if (subsystemCreated != null)
-                subsystemCreated.Invoke(new SubsystemCreatedEventArgs {subsystem = s_Subsystem});
+            subsystemCreated?.Invoke(new SubsystemCreatedEventArgs { subsystem = s_Subsystem });
         }
 
         internal static void StartSubsystemAndUpdater()
@@ -210,8 +215,28 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (!base.OnInstanceCreate(xrInstance))
                 return false;
 
-            return NativeApi.OnInstanceCreate(xrInstance, xrGetInstanceProcAddr);
+            if (!NativeApi.OnInstanceCreate(xrInstance, xrGetInstanceProcAddr))
+                return false;
+
+            return true;
         }
+
+#if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
+        /// <summary>
+        /// Returns the shared extension provider, creating it lazily on first
+        /// access. Extension features call this from their
+        /// <c>OnInstanceCreate</c> to obtain the provider and register themselves.
+        /// </summary>
+        internal IHandTrackingExtensionProvider GetOrCreateExtensionProvider()
+        {
+            if (m_ExtensibilityManager == null)
+            {
+                m_ExtensibilityManager = new HandExtensibilityManager();
+                HandExtensibilityManager.RegisterNativeCallbacks();
+            }
+            return m_ExtensibilityManager;
+        }
+#endif
 
         /// <summary>See <see cref="OpenXRFeature.OnAppSpaceChange(ulong)"/>.</summary>
         protected override void OnAppSpaceChange(ulong xrSpace)
@@ -235,16 +260,28 @@ namespace UnityEngine.XR.Hands.OpenXR
                 EnsureSubsystemInitialized();
         }
 
-        /// <summary>See <see cref="OpenXRFeature.OnAppSpaceChange(ulong)"/>.</summary>
-        protected override void OnSessionDestroy(ulong xrSpace)
+        /// <summary>See <see cref="OpenXRFeature.OnSessionDestroy(ulong)"/>.</summary>
+        protected override void OnSessionDestroy(ulong xrSession)
         {
-            base.OnSessionDestroy(xrSpace);
-            NativeApi.OnSessionDestroy(xrSpace);
+#if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
+            m_ExtensibilityManager?.OnSessionEnd();
+#endif
+            base.OnSessionDestroy(xrSession);
+            NativeApi.OnSessionDestroy(xrSession);
         }
 
         /// <summary>See <see cref="OpenXRFeature.OnInstanceDestroy(ulong)"/>.</summary>
         protected override void OnInstanceDestroy(ulong xrInstance)
         {
+#if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
+            if (m_ExtensibilityManager != null)
+            {
+                HandExtensibilityManager.UnregisterNativeCallbacks();
+                m_ExtensibilityManager.Dispose();
+                m_ExtensibilityManager = null;
+            }
+#endif
+
             base.OnInstanceDestroy(xrInstance);
             NativeApi.OnInstanceDestroy(xrInstance);
         }
@@ -331,31 +368,46 @@ namespace UnityEngine.XR.Hands.OpenXR
 
         internal const string k_LibraryName = "UnityOpenXRHands";
 
-        static class NativeApi
+        internal static class NativeApi
         {
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnSystemChange")]
-            static internal extern void OnSystemChange(ulong xrSystem);
+            internal static extern void OnSystemChange(ulong xrSystem);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnInstanceCreate")]
-            static internal extern bool OnInstanceCreate(ulong xrInstance, IntPtr xrGetInstanceProcAddr);
+            internal static extern bool OnInstanceCreate(ulong xrInstance, IntPtr xrGetInstanceProcAddr);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnAppSpaceChange")]
-            static internal extern void OnAppSpaceChange(ulong xrSpace);
+            internal static extern void OnAppSpaceChange(ulong xrSpace);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnSessionCreate")]
-            static internal extern void OnSessionCreate(ulong xrSession);
+            internal static extern void OnSessionCreate(ulong xrSession);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnSessionDestroy")]
-            static internal extern void OnSessionDestroy(ulong xrSession);
+            internal static extern void OnSessionDestroy(ulong xrSession);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnInstanceDestroy")]
-            static internal extern void OnInstanceDestroy(ulong xrInstance);
+            internal static extern void OnInstanceDestroy(ulong xrInstance);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnInstanceLossPending")]
-            static internal extern void OnInstanceLossPending(ulong xrInstance);
+            internal static extern void OnInstanceLossPending(ulong xrInstance);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_intercept_xrGetInstanceProcAddr")]
-            static internal extern IntPtr Intercept_xrGetInstanceProcAddr(IntPtr func);
+            internal static extern IntPtr Intercept_xrGetInstanceProcAddr(IntPtr func);
+
+#if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
+            [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_RequestRestart")]
+            static internal extern void RequestRestart();
+
+            [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_RegisterCreateHandTrackerCallback")]
+            internal static extern void RegisterCreateHandTrackerCallback(IntPtr callback);
+
+            [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_RegisterHandTrackerLifecycleCallbacks")]
+            internal static extern void RegisterHandTrackerLifecycleCallbacks(IntPtr createdCallback, IntPtr destroyedCallback);
+
+            [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_RegisterLocateHandJointsCallbacks")]
+            internal static extern void RegisterLocateHandJointsCallbacks(
+                IntPtr beforeCallback, IntPtr afterCallback);
+#endif
         }
 
 #if UNITY_EDITOR
@@ -377,22 +429,30 @@ namespace UnityEngine.XR.Hands.OpenXR
 
         XRHandProviderUtility.SubsystemUpdater m_Updater;
         bool m_ShouldBeRunning;
+#if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
+        HandExtensibilityManager m_ExtensibilityManager;
+#endif
 
         static XRHandSubsystem s_Subsystem;
         static HandTracking s_This;
         static bool? s_AutoInitOverride;
 
-#if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetStaticsOnLoad()
         {
             s_Subsystem = null;
+#if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
+            s_This?.m_ExtensibilityManager?.Dispose();
+#endif
             s_This = null;
             s_AutoInitOverride = null;
+
+            // When we are able to make a breaking change, change the signature of these events
+            // to be `public static event` by adding the `event` keyword to avoid needing to reset
+            // these fields this way.
             subsystemCreated = null;
             destroyingSubsystem = null;
         }
-#endif
     }
 }
 

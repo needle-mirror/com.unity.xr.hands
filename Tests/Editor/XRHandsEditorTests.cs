@@ -2,6 +2,8 @@
 using NUnit.Framework;
 using System.Reflection;
 using UnityEngine.XR.Hands;
+using UnityEditor.PackageManager;
+
 
 #if UNITY_OPENXR_PACKAGE
 using System;
@@ -13,23 +15,28 @@ namespace UnityEditor.XR.Hands.Tests
 {
     class XRHandsEditorTests
     {
-        [Test]
-        public void DocumentationVersion()
+        /// <summary>
+        /// <see cref="PackageManager.PackageInfo"/>
+        /// </summary>
+        PackageManager.PackageInfo m_PackageInfo;
+
+        [OneTimeSetUp]
+        public void SetUp()
         {
-            var myPackage = UnityEditor.PackageManager.PackageInfo.FindForAssembly(Assembly.GetExecutingAssembly());
-            if (myPackage == null)
-                Assert.Fail();
+            var assembly = Assembly.Load("Unity.XR.Hands");
+            Assert.That(assembly, Is.Not.Null);
 
-            // allow for experimental/pre-release versions to go out without breaking docs links
-            if (myPackage.version.Contains("-"))
-                Assert.Pass();
+            m_PackageInfo = PackageManager.PackageInfo.FindForAssembly(assembly);
+            Assert.That(m_PackageInfo, Is.Not.Null);
+            Assert.That(m_PackageInfo.version, Is.Not.Null);
+            Assert.That(m_PackageInfo.version, Is.Not.Empty);
+        }
 
-            // We only need the major and minor version from the package, since that's what matters when referencing
-            // the docs pages. i.e: 1.3.1 would be referred to as -> 1.3
-            var splitVersion = myPackage.version.Split('.');
-            var majorMinorVersion = $"{splitVersion[0]}.{splitVersion[1]}"; // Only use major and minor version
-
-            Assert.AreEqual(majorMinorVersion, XRHelpURLConstants.currentDocsVersion);
+        [Test]
+        public void HelpURLVersionMatchesPackageVersion()
+        {
+            var majorMinorVersionString = GetMajorMinor(m_PackageInfo.version);
+            Assert.AreEqual(majorMinorVersionString, XRHelpURLConstants.currentDocsVersion);
         }
 
 #if UNITY_OPENXR_PACKAGE
@@ -92,6 +99,19 @@ namespace UnityEditor.XR.Hands.Tests
             Assert.IsTrue(typeof(MetaHandTrackingAim).GetCustomAttribute<OpenXRFeatureAttribute>().DocumentationLink.Contains(majorMinorVersion));
         }
 #endif
+
+        static string GetMajorMinor(DependencyInfo dependency) => GetMajorMinor(dependency.version);
+
+        static string GetMajorMinor(string version)
+        {
+            // Return major.minor from the string.
+            // For example, "1.2.3" would return "1.2"
+            Assert.That(version, Is.Not.Null);
+            Assert.That(version, Is.Not.Empty);
+            var secondDotIndex = version.IndexOf('.', version.IndexOf('.') + 1);
+            Assert.That(secondDotIndex, Is.GreaterThan(0));
+            return version.Substring(0, secondDotIndex);
+        }
     }
 }
 #endif
