@@ -1,7 +1,6 @@
 using System.IO;
 using Unity.Collections;
 using UnityEngine.XR.Hands.Gestures;
-using UnityEngine.XR.Hands.ProviderImplementation;
 
 namespace UnityEngine.XR.Hands.Capture.Recording
 {
@@ -12,11 +11,11 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         public static void Write(this BinaryWriter writer, XRDetectedHandMeshLayout meshLayout) => writer.Write((int)meshLayout);
         public static void Write(this BinaryWriter writer, XRHandRecordingOptions recordingOptions) => writer.Write((int)recordingOptions);
         public static void Write(this BinaryWriter writer, FrameFlags frameFlags) => writer.Write((int)frameFlags);
-        public static void Write(this BinaryWriter writer, HandFlags HandFlags) => writer.Write((int)HandFlags);
+        public static void Write(this BinaryWriter writer, HandFlags handFlags) => writer.Write((int)handFlags);
         public static void Write(this BinaryWriter writer, XRHandSubsystem.UpdateType updateType) => writer.Write((int)updateType);
         public static void Write(this BinaryWriter writer, XRHandSubsystem.UpdateSuccessFlags successFlags) => writer.Write((int)successFlags);
         public static void Write(this BinaryWriter writer, XRCommonHandGesturesFlags gesturesFlags) => writer.Write((int)gesturesFlags);
-        public static void Write(this BinaryWriter writer, AimFlags aimFlags) => writer.Write((int)aimFlags);
+        public static void Write(this BinaryWriter writer, AimStateFlags aimStateFlags) => writer.Write((int)aimStateFlags);
         public static void Write(this BinaryWriter writer, InputTrackingState trackingState) => writer.Write((int)trackingState);
         public static void Write(this BinaryWriter writer, SnapshotFlags snapshotFlags) => writer.Write((int)snapshotFlags);
         public static void Write(this BinaryWriter writer, SequenceFlags sequenceFlags) => writer.Write((int)sequenceFlags);
@@ -30,7 +29,7 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         public static XRHandSubsystem.UpdateType ReadUpdateType(this BinaryReader reader) => (XRHandSubsystem.UpdateType)reader.ReadInt32();
         public static XRHandSubsystem.UpdateSuccessFlags ReadUpdateSuccessFlags(this BinaryReader reader) => (XRHandSubsystem.UpdateSuccessFlags)reader.ReadInt32();
         public static XRCommonHandGesturesFlags ReadCommonGesturesFlags(this BinaryReader reader) => (XRCommonHandGesturesFlags)reader.ReadInt32();
-        public static AimFlags ReadAimFlags(this BinaryReader reader) => (AimFlags)reader.ReadInt32();
+        public static AimStateFlags ReadAimStateFlags(this BinaryReader reader) => (AimStateFlags)reader.ReadInt32();
         public static InputTrackingState ReadInputTrackingState(this BinaryReader reader) => (InputTrackingState)reader.ReadInt32();
         public static SnapshotFlags ReadSnapshotFlags(this BinaryReader reader) => (SnapshotFlags)reader.ReadInt32();
         public static SequenceFlags ReadSequenceFlags(this BinaryReader reader) => (SequenceFlags)reader.ReadInt32();
@@ -304,7 +303,7 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         public static void Write(this BinaryWriter writer, in XRHandAimState aimState)
         {
             writer.Write(aimState.handedness);
-            writer.Write(aimState.flags);
+            writer.Write(aimState.aimStateFlags);
             writer.Write(aimState.trackingState);
 
             writer.Write(aimState.reserved0);
@@ -320,7 +319,29 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         }
 
         public static void ReadAimState(this BinaryReader reader, out XRHandAimState aimState)
-            => aimState = new XRHandAimState(reader);
+        {
+            aimState = new XRHandAimState
+            {
+                handedness = reader.ReadHandedness(),
+                aimStateFlags = reader.ReadAimStateFlags(),
+                trackingState = reader.ReadInputTrackingState(),
+                reserved0 = reader.ReadInt32(),
+                reserved1 = reader.ReadInt32(),
+                pinchStrengthIndex = reader.ReadSingle(),
+                pinchStrengthMiddle = reader.ReadSingle(),
+                pinchStrengthRing = reader.ReadSingle(),
+                pinchStrengthLittle = reader.ReadSingle(),
+            };
+
+            // If the flags read above indicates that there is a Pose present, read it now.
+            if ((aimState.aimStateFlags & AimStateFlags.HasAimPose) != 0)
+            {
+                reader.ReadPose(out var aimPose);
+                aimState.aimPoseInternal = aimPose;
+            }
+            else
+                aimState.aimPoseInternal = Pose.identity;
+        }
 
         public static void Write(this BinaryWriter writer, XRFingerShapeConfiguration config)
         {

@@ -78,7 +78,7 @@ namespace UnityEngine.XR.Hands
             return playbackOnlySubsystem;
         }
 
-        // it's only possible to have one subsystem per descriptor, so we can safely store this statically
+        // It's only possible to have one subsystem per descriptor, so we can safely store this statically
         static XRHandProviderUtility.SubsystemUpdater s_SubsystemUpdater;
         static XRHandSubsystem s_PlaybackOnlySubsystem;
 
@@ -253,6 +253,14 @@ namespace UnityEngine.XR.Hands
             if (subsystem.subsystemDescriptor != PlaybackProvider.GetRegisteredDescriptor())
                 return;
 
+            s_PlaybackOnlySubsystem = null;
+            s_SubsystemUpdater?.Destroy();
+            s_SubsystemUpdater = null;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticsOnLoad()
+        {
             s_PlaybackOnlySubsystem = null;
             s_SubsystemUpdater?.Destroy();
             s_SubsystemUpdater = null;

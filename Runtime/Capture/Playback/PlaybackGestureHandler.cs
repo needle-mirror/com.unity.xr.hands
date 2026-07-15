@@ -200,10 +200,7 @@ namespace UnityEngine.XR.Hands.Capture.Playback
             {
                 // Apply coordinate transform to aim pose of current frame before returning early
                 if (aimState.TryGetAimPose(out var aimPose))
-                {
-                    aimPose = m_CoordinateTransform.TransformPose(aimPose);
-                    aimState.SetAimPose(aimPose);
-                }
+                    aimState.aimPoseInternal = m_CoordinateTransform.TransformPose(aimPose);
 
                 return true;
             }
@@ -226,10 +223,7 @@ namespace UnityEngine.XR.Hands.Capture.Playback
 
                 // Apply coordinate transform to aim pose if available
                 if (aimState.TryGetAimPose(out var aimPose))
-                {
-                    aimPose = m_CoordinateTransform.TransformPose(aimPose);
-                    aimState.SetAimPose(aimPose);
-                }
+                    aimState.aimPoseInternal = m_CoordinateTransform.TransformPose(aimPose);
             }
 
             return true;

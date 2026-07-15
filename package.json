@@ -1,7 +1,7 @@
 {
   "name": "com.unity.xr.hands",
   "displayName": "XR Hands",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "unity": "2022.3",
   "description": "Surfaces the cross-platform subsystem API for hand-tracking. Implementations of providers will be found in the package for that platform.",
   "keywords": [
@@ -39,15 +39,15 @@
     "com.unity.mathematics": "1.2.6"
   },
   "_upm": {
-    "changelog": "### Fixed\n\n- Fixed an issue caused when an `XRHandSubsystemProvider` attempts to register more than once with the `SubsystemDescriptorStore`. This caused a warning when using fast-enter play mode. [UUM-135026](https://issuetracker.unity3d.com/product/unity/issues/guid/UUM-135026)\n- Fixed XRHandCapture slider resets when switching recordings"
+    "changelog": "### Fixed\n\n- Fixed an issue where burst compilation of `XRHandProcessingUtility.cs` would yield an invalid boxing operation error. (Backport from 1.9.0-pre.1)\n- Fixed compiler warning due to serializing the 64-bit enum for `MetaAimFlags` required by the playback feature. (Backport from 1.9.0-pre.1)\n- Fixed scripts to properly reset static fields to support fast-enter play mode settings when domain reload is disabled in Project Settings. (Backport from 1.9.0-pre.1)\n- Fixed [`XRHandRecordingMetadata.GetSavedRecordingMetadata`](xref:UnityEngine.XR.Hands.Capture.Recording.XRHandRecordingMetadata.GetSavedRecordingMetadata) to clear the output list before populating it. (Backport from 1.9.0-pre.1)\n- Fixed some scripts in Gestures package sample to retry finding a running `XRHandSubsystem` and skip updating if one is not found. (Backport from 1.9.0-pre.1)\n- Fixed the Meta Hand Tracking Aim feature not updating the pose correctly when using the OpenXR Plugin (com.unity.xr.openxr) package version 1.16.0 or newer. (Backport from 1.9.0-pre.2)\n- Fixed the `MetaAimHand` input device not updating to clear tracking data when hand tracking was not actively tracking. (Backport from 1.9.0-pre.2)\n- Fixed [`MetaAimHandState`](xref:UnityEngine.XR.Hands.MetaAimHandState) and [`XRHandAimState`](xref:UnityEngine.XR.Hands.XRHandAimState) `isTracked` properties not getting set when using OpenXR. (Backport from 1.9.0-pre.2)\n- Fixed `<XRHandDevice>/trackingState` not updating correctly when changing the configuration with [`UpdateHandsConfiguration`](xref:UnityEngine.XR.Hands.XRHandSubsystem.UpdateHandsConfiguration) during runtime. (Backport from 1.9.0-pre.2)\n- Fixed some fields of the [`XRHandDevice`](xref:UnityEngine.XR.Hands.XRHandDevice) input device not getting reset when changing back to the legacy configuration. (Backport from 1.9.0-pre.2)"
   },
   "upmCi": {
-    "footprint": "014c5642da7925a59a79b54ec4b1b8b06939a31e"
+    "footprint": "c4195bab4b7f13d53de89157dd6888af79528094"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.8/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.xr.hands.git",
     "type": "git",
-    "revision": "d2d0fc8da8fc25df374e9778fe8ea7b944d913bb"
+    "revision": "d5d57b0c51f5adb717b2f28751434b860316b6a1"
   }
 }

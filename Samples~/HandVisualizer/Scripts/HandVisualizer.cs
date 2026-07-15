@@ -375,13 +375,13 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
             GameObject m_HandRoot;
             GameObject m_DrawJointsParent;
 
-            GameObject[] m_DrawJoints = new GameObject[XRHandJointID.EndMarker.ToIndex()];
-            GameObject[] m_VelocityParents = new GameObject[XRHandJointID.EndMarker.ToIndex()];
-            LineRenderer[] m_Lines = new LineRenderer[XRHandJointID.EndMarker.ToIndex()];
-            JointVisualizer[] m_JointVisualizers = new JointVisualizer[XRHandJointID.EndMarker.ToIndex()];
+            readonly GameObject[] m_DrawJoints = new GameObject[XRHandJointID.EndMarker.ToIndex()];
+            readonly GameObject[] m_VelocityParents = new GameObject[XRHandJointID.EndMarker.ToIndex()];
+            readonly LineRenderer[] m_Lines = new LineRenderer[XRHandJointID.EndMarker.ToIndex()];
+            readonly JointVisualizer[] m_JointVisualizers = new JointVisualizer[XRHandJointID.EndMarker.ToIndex()];
 
-            static Vector3[] s_LinePointsReuse = new Vector3[2];
-            XRHandMeshController m_MeshController;
+            static readonly Vector3[] s_LinePointsReuse = new Vector3[2];
+            readonly XRHandMeshController m_MeshController;
             const float k_LineWidth = 0.005f;
 
             public HandGameObjects(

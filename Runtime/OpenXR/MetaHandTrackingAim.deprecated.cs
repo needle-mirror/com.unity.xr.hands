@@ -114,7 +114,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         }
 
         /// <summary>
-        /// (Deprecated) A <see cref="TrackedDevice"/> based off the data exposed in the <see href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_FB_hand_tracking_aim">Meta Hand Tracking Aim extension</see>.
+        /// (Deprecated) A <see cref="TrackedDevice"/> based off the data exposed in the <a href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_FB_hand_tracking_aim">Meta Hand Tracking Aim extension</a>.
         /// Use <see cref="Hands.MetaAimHand"/> instead of <see cref="MetaHandTrackingAim.MetaAimHand"/>.
         /// </summary>
         [Preserve, InputControlLayout(displayName = "Meta Aim Hand (OpenXR)", commonUsages = new[] { "LeftHand", "RightHand" })]

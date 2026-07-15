@@ -150,15 +150,19 @@ namespace UnityEngine.XR.Hands
         }
 
         /// <summary>
-        /// Invoked when UpdateHandsConfiguration is called and after subsystem processing has occurred.
+        /// Invoked when <see cref="UpdateHandsConfiguration"/> is called.
         /// </summary>
-        internal Action<XRHandSubsystemConfigurationUpdatedEventArgs> configurationUpdated { get; set; }
+        internal event Action<XRHandSubsystemConfigurationUpdatedEventArgs> configurationUpdated;
 
         XRHandSubsystemConfiguration m_XRHandSubsystemConfiguration;
+
+        /// <summary>
+        /// The current subsystem configuration settings.
+        /// </summary>
         internal XRHandSubsystemConfiguration handSubsystemConfiguration => m_XRHandSubsystemConfiguration;
 
         /// <summary>
-        /// Updates the current subsystem configuration to newConfiguration. Invokes <see cref="configurationUpdated"/>
+        /// Updates the current subsystem configuration to the given configuration settings. Invokes <see cref="configurationUpdated"/>
         /// once local processing has been completed to notify consumers that they may need to update their
         /// configuration.
         ///
@@ -168,13 +172,12 @@ namespace UnityEngine.XR.Hands
         /// <param name="newConfiguration">The new configuration to be used by the hands subsystem.</param>
         public void UpdateHandsConfiguration(XRHandSubsystemConfiguration newConfiguration)
         {
+            if (m_XRHandSubsystemConfiguration.Equals(newConfiguration))
+                return;
+
             m_XRHandSubsystemConfiguration = newConfiguration;
 
-            if (configurationUpdated != null)
-            {
-                configurationUpdated(
-                    new XRHandSubsystemConfigurationUpdatedEventArgs(this, m_XRHandSubsystemConfiguration));
-            }
+            configurationUpdated?.Invoke(new XRHandSubsystemConfigurationUpdatedEventArgs(this, m_XRHandSubsystemConfiguration));
         }
 
         /// <summary>
@@ -451,19 +454,22 @@ namespace UnityEngine.XR.Hands
 
                 using (s_TrackingEventsMarker.Auto())
                 {
+                    const UpdateSuccessFlags leftSuccessFlags = UpdateSuccessFlags.LeftHandRootPose | UpdateSuccessFlags.LeftHandJoints;
+                    const UpdateSuccessFlags rightSuccessFlags = UpdateSuccessFlags.RightHandRootPose | UpdateSuccessFlags.RightHandJoints;
+
                     var wasLeftHandTracked = leftHand.isTracked;
-                    var success = UpdateSuccessFlags.LeftHandRootPose | UpdateSuccessFlags.LeftHandJoints;
-                    leftHand.isTracked = (updateSuccessFlags & success) == success;
+                    leftHand.isTracked = (updateSuccessFlags & leftSuccessFlags) == leftSuccessFlags;
                     m_StatePerHand[Handedness.Left.ToIndex()].m_Hand = leftHand;
+
                     if (!wasLeftHandTracked && leftHand.isTracked)
                         trackingAcquired?.Invoke(leftHand);
                     else if (wasLeftHandTracked && !leftHand.isTracked)
                         trackingLost?.Invoke(leftHand);
 
                     var wasRightHandTracked = rightHand.isTracked;
-                    success = UpdateSuccessFlags.RightHandRootPose | UpdateSuccessFlags.RightHandJoints;
-                    rightHand.isTracked = (updateSuccessFlags & success) == success;
+                    rightHand.isTracked = (updateSuccessFlags & rightSuccessFlags) == rightSuccessFlags;
                     m_StatePerHand[Handedness.Right.ToIndex()].m_Hand = rightHand;
+
                     if (!wasRightHandTracked && rightHand.isTracked)
                         trackingAcquired?.Invoke(rightHand);
                     else if (wasRightHandTracked && !rightHand.isTracked)
@@ -489,7 +495,6 @@ namespace UnityEngine.XR.Hands
                             RetrieveCommonPoseData(Handedness.Left, m_StatePerHand[Handedness.Left.ToIndex()].m_CommonGestures);
                             RetrieveCommonPoseData(Handedness.Right, m_StatePerHand[Handedness.Right.ToIndex()].m_CommonGestures);
                         }
-
                     }
 
 #if UNITY_OPENXR_PACKAGE
@@ -685,16 +690,9 @@ namespace UnityEngine.XR.Hands
         {
             base.OnDestroy();
 
-            var previousAllowDisposalFor = XRHand.allowDisposalFor;
-            XRHand.allowDisposalFor = XRHand.LifetimeType.Subsystem;
-            try
+            foreach (var perHandState in m_StatePerHand)
             {
-                foreach (var perHandState in m_StatePerHand)
-                    perHandState.OnDestroy();
-            }
-            finally
-            {
-                XRHand.allowDisposalFor = previousAllowDisposalFor;
+                perHandState.OnDestroy();
             }
 
             if (m_JointsInLayout.IsCreated)
@@ -795,11 +793,13 @@ namespace UnityEngine.XR.Hands
         {
             internal StatePerHand(Handedness handedness)
             {
-                m_Hand = new XRHand(Allocator.Persistent, handedness, XRHand.LifetimeType.Subsystem);
+                m_Hand = new XRHand(Allocator.Persistent, handedness, k_HandLifetimeType);
                 m_CommonGestures = new XRCommonHandGestures(handedness);
             }
 
-            internal void OnDestroy() => m_Hand.Dispose();
+            internal void OnDestroy() => m_Hand.DisposeInternal(k_HandLifetimeType);
+
+            const XRHand.LifetimeType k_HandLifetimeType = XRHand.LifetimeType.Subsystem;
 
             internal XRHand m_Hand;
             internal XRCommonHandGestures m_CommonGestures;

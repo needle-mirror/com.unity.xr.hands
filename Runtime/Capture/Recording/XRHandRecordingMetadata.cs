@@ -47,12 +47,15 @@ namespace UnityEngine.XR.Hands.Capture.Recording
         /// <remarks>
         /// This method loads only essential metadata without loading the entire frame data,
         /// making it efficient for listing recordings or displaying recording summaries.
+        /// Clears <paramref name="existingRecordings"/> before adding to it.
         /// </remarks>
         [BurstDiscard]
         public static void GetSavedRecordingMetadata(List<XRHandRecordingMetadata> existingRecordings)
         {
             try
             {
+                existingRecordings.Clear();
+
                 // Get all recording files from the device storage path
                 var deviceStoragePath = GetDeviceStoragePath();
                 string[] files = Directory.Exists(deviceStoragePath) ?

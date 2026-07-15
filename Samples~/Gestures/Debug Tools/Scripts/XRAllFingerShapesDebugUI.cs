@@ -18,7 +18,9 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
         XRFingerShape[] m_XRFingerShapes;
 
-        static List<XRHandSubsystem> s_SubsystemsReuse = new List<XRHandSubsystem>();
+        XRHandSubsystem m_Subsystem;
+
+        static readonly List<XRHandSubsystem> s_SubsystemsReuse = new List<XRHandSubsystem>();
 
         /// <summary>
         /// The graphs for each finger, indexed by <see cref="XRHandFingerID"/>.
@@ -47,7 +49,7 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
         void Update()
         {
-            if (!TryGetSubsystem(out var subsystem))
+            if (!TryGetHandSubsystem(out var subsystem))
                 return;
 
             var hand = m_Handedness == Handedness.Left ? subsystem.leftHand : subsystem.rightHand;
@@ -94,18 +96,26 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             }
         }
 
-        static bool TryGetSubsystem(out XRHandSubsystem system)
+        bool TryGetHandSubsystem(out XRHandSubsystem system)
         {
-            system = null;
-
-            if (s_SubsystemsReuse.Count == 0)
-                SubsystemManager.GetSubsystems(s_SubsystemsReuse);
-
-            if (s_SubsystemsReuse.Count > 0)
+            if (m_Subsystem != null && m_Subsystem.running)
             {
-                system = s_SubsystemsReuse[0];
+                system = m_Subsystem;
                 return true;
             }
+
+            SubsystemManager.GetSubsystems(s_SubsystemsReuse);
+            foreach (var handSubsystem in s_SubsystemsReuse)
+            {
+                if (handSubsystem.running)
+                {
+                    m_Subsystem = handSubsystem;
+                    system = m_Subsystem;
+                    return true;
+                }
+            }
+
+            system = null;
             return false;
         }
     }

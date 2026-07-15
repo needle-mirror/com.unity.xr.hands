@@ -1,15 +1,13 @@
 using System;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Runtime.InteropServices;
-using UnityEngine.XR.Hands.Capture.Recording;
+using UnityEngine.XR.Hands.Capture;
+using UnityEngine.XR.Hands.OpenXR;
 
 namespace UnityEngine.XR.Hands
 {
     /// <summary>
     /// <c>MetaAimHandState</c> represents a snapshot of a hand's worth of
     /// data in a single frame that can be successfully retrieved if the
-    /// <see cref="UnityEngine.XR.Hands.OpenXR.MetaHandTrackingAim"/> feature
+    /// <see cref="MetaHandTrackingAim"/> feature
     /// is enabled, or was enabled during capture when producing an
     /// <see cref="XRHandCaptureSequence"/> asset and retrieving that data from
     /// there.
@@ -26,7 +24,7 @@ namespace UnityEngine.XR.Hands
         /// is equal to this <see cref="XRHandAimState"/>.
         /// Returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool Equals(MetaAimHandState other)
+        public readonly bool Equals(MetaAimHandState other)
         {
             return m_Handedness == other.m_Handedness
                 && m_AgnosticFlags == other.m_AgnosticFlags
@@ -49,13 +47,13 @@ namespace UnityEngine.XR.Hands
         /// <see cref="Equals(MetaAimHandState)"/> also
         /// returns <see langword="true"/>; otherwise returns <see langword="false"/>.
         /// </returns>
-        public override bool Equals(object obj) => obj is MetaAimHandState other && Equals(other);
+        public readonly override bool Equals(object obj) => obj is MetaAimHandState other && Equals(other);
 
         /// <summary>
         /// Computes a hash code from all fields of this <c>MetaAimHandState</c>.
         /// </summary>
         /// <returns>Returns a hash code of this object.</returns>
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             int hash = HashCodeUtil.Combine(
                 m_Handedness.GetHashCode(),
@@ -103,19 +101,16 @@ namespace UnityEngine.XR.Hands
         public MetaAimHandState(in XRHandAimState aimState)
         {
             m_Handedness = aimState.handedness;
-            m_AgnosticFlags = aimState.flags;
+            m_AgnosticFlags = aimState.aimStateFlags;
             m_TrackingState = aimState.trackingState;
-
-            ulong copyFlags = (ulong)aimState.reserved0 & 0xffffffffUL;
-            copyFlags |= (ulong)aimState.reserved1 << 32;
-            m_MetaFlags = (MetaAimFlags)copyFlags;
+            m_MetaFlags = aimState.metaAimFlags;
 
             m_PinchStrengthIndex = aimState.pinchStrengthIndex;
             m_PinchStrengthMiddle = aimState.pinchStrengthMiddle;
             m_PinchStrengthRing = aimState.pinchStrengthRing;
             m_PinchStrengthLittle = aimState.pinchStrengthLittle;
 
-            m_AimPose = aimState.possiblyInvalidAimPose;
+            m_AimPose = aimState.aimPoseInternal;
         }
 
         /// <summary>
@@ -131,7 +126,7 @@ namespace UnityEngine.XR.Hands
         /// <summary>
         /// Whether the hand is currently tracked.
         /// </summary>
-        public readonly bool isTracked => (m_AgnosticFlags & AimFlags.IsTracked) != 0;
+        public readonly bool isTracked => (m_AgnosticFlags & AimStateFlags.IsTracked) != 0;
 
         /// <summary>
         /// Determines which properties of the hand are being tracked as per <see cref="InputTrackingState"/>.
@@ -139,29 +134,29 @@ namespace UnityEngine.XR.Hands
         public readonly InputTrackingState trackingState => m_TrackingState;
 
         /// <summary>
-        /// Mirrors the <c>XrFlags</c> in the <c>XrHandTrackingAimStateFB</c> struct from OpenXR.
+        /// Mirrors the <c>XrFlags64</c> in the <c>XrHandTrackingAimStateFB</c> struct from OpenXR.
         /// </summary>
         public readonly MetaAimFlags aimFlags => m_MetaFlags;
 
         /// <summary>
         /// Whether the index finger and thumb are currently pressed together.
         /// </summary>
-        public readonly bool indexPressed => (m_AgnosticFlags & AimFlags.IsIndexPressed) != 0;
+        public readonly bool indexPressed => (m_AgnosticFlags & AimStateFlags.IsIndexPressed) != 0;
 
         /// <summary>
         /// Whether the middle finger and thumb are currently pressed together.
         /// </summary>
-        public readonly bool middlePressed => (m_AgnosticFlags & AimFlags.IsMiddlePressed) != 0;
+        public readonly bool middlePressed => (m_AgnosticFlags & AimStateFlags.IsMiddlePressed) != 0;
 
         /// <summary>
         /// Whether the ring finger and thumb are currently pressed together.
         /// </summary>
-        public readonly bool ringPressed => (m_AgnosticFlags & AimFlags.IsRingPressed) != 0;
+        public readonly bool ringPressed => (m_AgnosticFlags & AimStateFlags.IsRingPressed) != 0;
 
         /// <summary>
         /// Whether the little finger and thumb are currently pressed together.
         /// </summary>
-        public readonly bool littlePressed => (m_AgnosticFlags & AimFlags.IsLittlePressed) != 0;
+        public readonly bool littlePressed => (m_AgnosticFlags & AimStateFlags.IsLittlePressed) != 0;
 
         /// <summary>
         ///  The strength of the pinch between the index finger and thumb. Ranges from 0.0 to 1.0.
@@ -195,9 +190,9 @@ namespace UnityEngine.XR.Hands
         /// Otherwise, this returns <see langword="false"/>, and you should not use
         /// the resulting pose.
         /// </returns>
-        public bool TryGetAimPose(out Pose aimPose)
+        public readonly bool TryGetAimPose(out Pose aimPose)
         {
-            bool ret = (m_AgnosticFlags & AimFlags.IsAimPoseValid) != 0;
+            bool ret = (m_AgnosticFlags & AimStateFlags.HasAimPose) != 0;
             aimPose = ret ? m_AimPose : Pose.identity;
             return ret;
         }
@@ -206,13 +201,15 @@ namespace UnityEngine.XR.Hands
         internal Handedness m_Handedness;
 
         [SerializeField]
-        internal AimFlags m_AgnosticFlags;
+        internal AimStateFlags m_AgnosticFlags;
 
         [SerializeField]
         internal InputTrackingState m_TrackingState;
 
+#pragma warning disable UAC1011 // Flags should never exceed the 32-bit limit, but this is required for OpenXR compatibility.
         [SerializeField]
         internal MetaAimFlags m_MetaFlags;
+#pragma warning restore UAC1011
 
         [SerializeField]
         internal float m_PinchStrengthIndex;

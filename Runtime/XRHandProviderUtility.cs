@@ -8,6 +8,8 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
     /// </summary>
     public static partial class XRHandProviderUtility
     {
+        const XRHand.LifetimeType k_HandLifetimeType = XRHand.LifetimeType.ProviderUtility;
+
         /// <summary>
         /// Create a fully configurable joint with at least a pose in hand
         /// space, tracking state, and ID.
@@ -54,10 +56,6 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
             Vector3 linearVelocity = new Vector3(),
             Vector3 angularVelocity = new Vector3())
         {
-            int idAndHandedness = (int)id;
-            if (handedness == Handedness.Right)
-                idAndHandedness |= XRHandJoint.k_IsRightHandBit;
-
             return new XRHandJoint
             {
                 m_TrackingState = trackingState,
@@ -97,7 +95,8 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// of <c>XRHandSubsystem</c>. Most applications should access hands through the subsystem's
         /// leftHand and rightHand properties instead. Refer to [Access hand data](xref:xr-hand-access-data) for details.
         /// </remarks>
-        public static XRHand CreateHand(Handedness handedness, Allocator allocator) => new XRHand(allocator, handedness, XRHand.LifetimeType.ProviderUtility);
+        public static XRHand CreateHand(Handedness handedness, Allocator allocator) =>
+            new XRHand(allocator, handedness, k_HandLifetimeType);
 
         /// <summary>
         /// Release resources allocated by an <see cref="XRHand"/> instance.
@@ -114,16 +113,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// </remarks>
         public static void DisposeHand(XRHand hand)
         {
-            var previous = XRHand.allowDisposalFor;
-            XRHand.allowDisposalFor = XRHand.LifetimeType.ProviderUtility;
-            try
-            {
-                hand.Dispose();
-            }
-            finally
-            {
-                XRHand.allowDisposalFor = previous;
-            }
+            hand.DisposeInternal(k_HandLifetimeType);
         }
 
         /// <summary>
@@ -212,7 +202,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
                     updateDelegate = () => OnUpdate()
                 };
 
-                Application.onBeforeRender += OnBeforeRender;
+                SubscribeOnBeforeRender();
                 playerLoop.subSystemList[earlyUpdateStepIndex].subSystemList[xrUpdateIndex].subSystemList = updatedSystems;
                 UnityEngine.LowLevel.PlayerLoop.SetPlayerLoop(playerLoop);
             }
@@ -224,7 +214,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
             /// </summary>
             public void Stop()
             {
-                Application.onBeforeRender -= OnBeforeRender;
+                UnsubscribeOnBeforeRender();
 
                 var playerLoop = UnityEngine.LowLevel.PlayerLoop.GetCurrentPlayerLoop();
 
@@ -308,6 +298,28 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
 #endif // ENABLE_INPUT_SYSTEM && (ENABLE_VR || UNITY_GAMECORE)
             }
 
+            void SubscribeOnBeforeRender()
+            {
+                if (m_OnBeforeRenderSubscribed)
+                    return;
+
+#pragma warning disable UDR0004 // Non-static method subscribed to static event in SubscribeOnBeforeRender is not deregistered. Deregister it in OnDisable.
+                // -- Unsubscribed in `Stop` triggered when subsystem that uses this class is stopped.
+                // -- The subscription is also guarded with a bool to prevent duplicate registration.
+                Application.onBeforeRender += OnBeforeRender;
+#pragma warning restore UDR0004 // Non-static method subscribed to static event in SubscribeOnBeforeRender is not deregistered. Deregister it in OnDisable.
+                m_OnBeforeRenderSubscribed = true;
+            }
+
+            void UnsubscribeOnBeforeRender()
+            {
+                if (!m_OnBeforeRenderSubscribed)
+                    return;
+
+                Application.onBeforeRender -= OnBeforeRender;
+                m_OnBeforeRenderSubscribed = false;
+            }
+
             void OnUpdate()
             {
 #if UNITY_EDITOR
@@ -363,6 +375,8 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
             }
 
             XRHandSubsystem m_Subsystem;
+
+            bool m_OnBeforeRenderSubscribed;
 
 #if UNITY_EDITOR
             bool m_AllowUpdates;

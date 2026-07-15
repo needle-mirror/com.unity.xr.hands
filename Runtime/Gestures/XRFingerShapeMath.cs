@@ -589,7 +589,7 @@ namespace UnityEngine.XR.Hands.Gestures
 
         const int k_HandednessCacheSize = 3;
         static readonly XRFingerShape[,] s_CachedFingerShapes;
-        static XRFingerShapeConfiguration[] s_Configurations;
-        static XRFingerShapeConfigurationState[] s_RestoreStatesWhenPlaybackEnds;
+        static readonly XRFingerShapeConfiguration[] s_Configurations;
+        static readonly XRFingerShapeConfigurationState[] s_RestoreStatesWhenPlaybackEnds;
     }
 }

@@ -9,6 +9,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- Headers should be listed in this order: Added, Changed, Deprecated, Removed, Fixed, Security -->
+## [1.8.1] - 2026-07-15
+
+### Fixed
+
+- Fixed an issue where burst compilation of `XRHandProcessingUtility.cs` would yield an invalid boxing operation error. (Backport from 1.9.0-pre.1)
+- Fixed compiler warning due to serializing the 64-bit enum for `MetaAimFlags` required by the playback feature. (Backport from 1.9.0-pre.1)
+- Fixed scripts to properly reset static fields to support fast-enter play mode settings when domain reload is disabled in Project Settings. (Backport from 1.9.0-pre.1)
+- Fixed [`XRHandRecordingMetadata.GetSavedRecordingMetadata`](xref:UnityEngine.XR.Hands.Capture.Recording.XRHandRecordingMetadata.GetSavedRecordingMetadata) to clear the output list before populating it. (Backport from 1.9.0-pre.1)
+- Fixed some scripts in Gestures package sample to retry finding a running `XRHandSubsystem` and skip updating if one is not found. (Backport from 1.9.0-pre.1)
+- Fixed the Meta Hand Tracking Aim feature not updating the pose correctly when using the OpenXR Plugin (com.unity.xr.openxr) package version 1.16.0 or newer. (Backport from 1.9.0-pre.2)
+- Fixed the `MetaAimHand` input device not updating to clear tracking data when hand tracking was not actively tracking. (Backport from 1.9.0-pre.2)
+- Fixed [`MetaAimHandState`](xref:UnityEngine.XR.Hands.MetaAimHandState) and [`XRHandAimState`](xref:UnityEngine.XR.Hands.XRHandAimState) `isTracked` properties not getting set when using OpenXR. (Backport from 1.9.0-pre.2)
+- Fixed `<XRHandDevice>/trackingState` not updating correctly when changing the configuration with [`UpdateHandsConfiguration`](xref:UnityEngine.XR.Hands.XRHandSubsystem.UpdateHandsConfiguration) during runtime. (Backport from 1.9.0-pre.2)
+- Fixed some fields of the [`XRHandDevice`](xref:UnityEngine.XR.Hands.XRHandDevice) input device not getting reset when changing back to the legacy configuration. (Backport from 1.9.0-pre.2)
 
 ## [1.8.0] - 2026-04-21
 

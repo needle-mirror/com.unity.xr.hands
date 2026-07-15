@@ -181,12 +181,14 @@ class XRHandCaptureTests
         // Verify that MetaAimFlags survive the round-trip:
         //   XRHandAimState.UpdateToAimRepresentation -> MetaAimHandState(in XRHandAimState)
         // The reserved0/reserved1 fields must encode low/high 32 bits consistently.
-        var testFlags = MetaAimFlags.Valid | MetaAimFlags.Computed | MetaAimFlags.IndexPinching
-            | MetaAimFlags.DominantHand | MetaAimFlags.MenuPressed;
+        // The (1 << 40) is a dummy flag that will be set in the upper 32-bits.
+        const MetaAimFlags testFlags = MetaAimFlags.Computed | MetaAimFlags.Valid | MetaAimFlags.IndexPinching |
+            MetaAimFlags.DominantHand | MetaAimFlags.MenuPressed | (MetaAimFlags)(1UL << 40);
 
         var aimState = new XRHandAimState();
         aimState.UpdateToAimRepresentation(
             Handedness.Left,
+            true,
             testFlags,
             Pose.identity,
             pinchIndex: 0.5f,
@@ -194,10 +196,14 @@ class XRHandCaptureTests
             pinchRing: 0.1f,
             pinchLittle: 0.75f);
 
+        // Ensure low and high 32-bits were correctly separated
+        Assert.That(aimState.reserved0, Is.EqualTo(unchecked((int)testFlags)), "Low 32 bits incorrect.");
+        Assert.That(aimState.reserved1, Is.EqualTo(1 << (40 - 32)), "High 32 bits incorrect.");
+
         var metaState = new MetaAimHandState(in aimState);
-        Assert.AreEqual(testFlags, metaState.aimFlags,
+        Assert.That(metaState.aimFlags, Is.EqualTo(testFlags),
             "MetaAimFlags must survive the XRHandAimState -> MetaAimHandState round-trip without corruption.");
-        Assert.AreEqual(Handedness.Left, metaState.handedness);
-        Assert.AreEqual(0.5f, metaState.pinchStrengthIndex, 0.0001f);
+        Assert.That(metaState.handedness, Is.EqualTo(Handedness.Left));
+        Assert.That(metaState.pinchStrengthIndex, Is.EqualTo(0.5f).Within(0.0001f));
     }
 }

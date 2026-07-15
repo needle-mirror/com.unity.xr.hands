@@ -1,17 +1,8 @@
 #if UNITY_OPENXR_PACKAGE || PACKAGE_DOCS_GENERATION
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
-using UnityEngine.InputSystem.Layouts;
-using UnityEngine.InputSystem.XR;
-using UnityEngine.Scripting;
-using UnityEngine.XR.Hands;
-using UnityEngine.XR.Management;
-using UnityEngine.XR.OpenXR;
-using UnityEngine.XR.OpenXR.Input;
 using UnityEngine.XR.OpenXR.Features;
 
 #if UNITY_EDITOR
@@ -24,8 +15,8 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// This <see cref="OpenXRInteractionFeature"/> enables the use of Meta's
     /// hand-tracking aim data in OpenXR. It will not work without also enabling
     /// the <see cref="HandTracking"/> feature. It enables
-    /// <see href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_FB_hand_tracking_aim">
-    /// XR_FB_hand_tracking_aim</see> in the underlying runtime. This creates
+    /// <a href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_FB_hand_tracking_aim">
+    /// XR_FB_hand_tracking_aim</a> in the underlying runtime. This creates
     /// new <see cref="InputDevice"/>s with the <see cref="InputDeviceCharacteristics.HandTracking"/>
     /// characteristic where the <see cref="TrackedDevice.devicePosition"/>
     /// and <see cref="TrackedDevice.deviceRotation"/> represent the aim pose
@@ -33,8 +24,8 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// </summary>
     /// <remarks>
     /// For this extension to be available, you must install the
-    /// <see href="https://docs.unity3d.com/Packages/com.unity.xr.hands@latest/manual/index.html">
-    /// XR Hands package</see>.
+    /// <a href="https://docs.unity3d.com/Packages/com.unity.xr.openxr@latest">
+    /// OpenXR Plugin package</a>.
     /// </remarks>
 #if UNITY_EDITOR
     [UnityEditor.XR.OpenXR.Features.OpenXRFeature(UiName = "Meta Hand Tracking Aim",
@@ -58,7 +49,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// <summary>
         /// The OpenXR Extension string. OpenXR uses this to check if this
         /// extension is available or enabled. See
-        /// <see href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_FB_hand_tracking_aim">Meta hand-tracking aim</see>
+        /// <a href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_FB_hand_tracking_aim">Meta hand-tracking aim</a>
         /// documentation for more information on this OpenXR extension.
         /// </summary>
         public const string extensionString = "XR_FB_hand_tracking_aim";
@@ -75,12 +66,14 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </summary>
         const string deviceManufacturerName = "OpenXR Meta";
 
+        bool m_SubsystemCreatedSubscribed;
+
         /// <summary>See <see cref="OpenXRFeature.OnSubsystemStart"/>.</summary>
         protected override void OnSubsystemStart()
         {
             if (HandTracking.subsystem == null)
             {
-                HandTracking.subsystemCreated += OnHandSubsystemCreated;
+                SubscribeSubsystemCreated();
                 return;
             }
 
@@ -102,7 +95,29 @@ namespace UnityEngine.XR.Hands.OpenXR
         {
             NativeApi.ToggleMetaAim(false);
             DestroyHands();
+            UnsubscribeSubsystemCreated();
+        }
+
+        void SubscribeSubsystemCreated()
+        {
+            if (m_SubsystemCreatedSubscribed)
+                return;
+
+#pragma warning disable UDR0004 // Non-static method subscribed to static event in SubscribeSubsystemCreated is not deregistered. Deregister it in OnDisable.
+            // -- Unsubscribed in `UnsubscribeSubsystemCreated` triggered when subsystem is stopped.
+            // -- The subscription is also guarded with a bool to prevent duplicate registration.
+            HandTracking.subsystemCreated += OnHandSubsystemCreated;
+#pragma warning restore UDR0004 // Non-static method subscribed to static event in SubscribeSubsystemCreated is not deregistered. Deregister it in OnDisable.
+            m_SubsystemCreatedSubscribed = true;
+        }
+
+        void UnsubscribeSubsystemCreated()
+        {
+            if (!m_SubsystemCreatedSubscribed)
+                return;
+
             HandTracking.subsystemCreated -= OnHandSubsystemCreated;
+            m_SubsystemCreatedSubscribed = false;
         }
 
         void CreateHands()
@@ -135,10 +150,10 @@ namespace UnityEngine.XR.Hands.OpenXR
 
         internal void OnUpdatedHandsInProvider(XRHandSubsystem.UpdateSuccessFlags successFlags)
         {
-            if ((successFlags & (XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints)) != 0)
-                Hands.MetaAimHand.left.UpdateHand(true, (successFlags & XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose) != 0);
-            if ((successFlags & (XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints)) != 0)
-                Hands.MetaAimHand.right.UpdateHand(false, (successFlags & XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose) != 0);
+            const XRHandSubsystem.UpdateSuccessFlags leftSuccessFlags = XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints;
+            const XRHandSubsystem.UpdateSuccessFlags rightSuccessFlags = XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
+            Hands.MetaAimHand.left.UpdateHand(true, (successFlags & leftSuccessFlags) == leftSuccessFlags);
+            Hands.MetaAimHand.right.UpdateHand(false, (successFlags & rightSuccessFlags) == rightSuccessFlags);
         }
 
         internal void GetAimState(Handedness handedness, out XRHandAimState aimState)
@@ -153,7 +168,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         static class NativeApi
         {
             [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_ToggleMetaAim")]
-            static internal extern bool ToggleMetaAim(bool enable);
+            internal static extern bool ToggleMetaAim(bool enable);
         }
     }
 }

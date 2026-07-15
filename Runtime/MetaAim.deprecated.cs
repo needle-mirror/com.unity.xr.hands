@@ -1,7 +1,6 @@
 #if ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION
 
 using System;
-using UnityEngine.InputSystem;
 
 namespace UnityEngine.XR.Hands
 {
@@ -39,8 +38,10 @@ namespace UnityEngine.XR.Hands
             float pinchRing,
             float pinchLittle)
         {
+            // Fallback to using flags where either Computed or Valid flag is set
+            // for driving the tracking fields.
             UpdateHand(
-                (aimFlags & MetaAimFlags.Valid) != MetaAimFlags.None,
+                (aimFlags & (MetaAimFlags.Computed | MetaAimFlags.Valid)) != 0,
                 aimFlags,
                 aimPose,
                 pinchIndex,

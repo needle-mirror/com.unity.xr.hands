@@ -108,33 +108,25 @@ namespace UnityEngine.XR.Hands.OpenXR
                 s_MetaAim.OnUpdatedHandsInProvider(successFlags);
                 s_MetaAim.FlushMetaAimChanges();
 
-                var leftUpdated =
-                    (successFlags & (XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints)) != 0;
-                var rightUpdated =
-                    (successFlags & (XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints)) != 0;
+                const XRHandSubsystem.UpdateSuccessFlags leftSuccessFlags = XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints;
+                const XRHandSubsystem.UpdateSuccessFlags rightSuccessFlags = XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
 
-                if (leftUpdated)
+                var indexLeft = Handedness.Left.ToIndex();
+                var indexRight = Handedness.Right.ToIndex();
+
+                m_AgnosticAimStatesValidity[indexLeft] |= (successFlags & leftSuccessFlags) == leftSuccessFlags;
+                m_AgnosticAimStatesValidity[indexRight] |= (successFlags & rightSuccessFlags) == rightSuccessFlags;
+
+                if (m_AgnosticAimStatesValidity[indexLeft])
                 {
                     s_MetaAim.GetAimState(Handedness.Left, out var leftAimState);
-                    int idx = Handedness.Left.ToIndex();
-                    m_AgnosticAimStates[idx] = leftAimState;
-                    m_AgnosticAimStatesValidity[idx] = true;
-                }
-                else
-                {
-                    m_AgnosticAimStatesValidity[Handedness.Left.ToIndex()] = false;
+                    m_AgnosticAimStates[indexLeft] = leftAimState;
                 }
 
-                if (rightUpdated)
+                if (m_AgnosticAimStatesValidity[indexRight])
                 {
                     s_MetaAim.GetAimState(Handedness.Right, out var rightAimState);
-                    int idx = Handedness.Right.ToIndex();
-                    m_AgnosticAimStates[idx] = rightAimState;
-                    m_AgnosticAimStatesValidity[idx] = true;
-                }
-                else
-                {
-                    m_AgnosticAimStatesValidity[Handedness.Right.ToIndex()] = false;
+                    m_AgnosticAimStates[indexRight] = rightAimState;
                 }
             }
 
@@ -447,14 +439,16 @@ namespace UnityEngine.XR.Hands.OpenXR
 #endif
 
         bool m_IsValid;
-        bool[] m_AgnosticAimStatesValidity = new bool[2];
-        XRHandAimState[] m_AgnosticAimStates = new XRHandAimState[2];
+        readonly bool[] m_AgnosticAimStatesValidity = new bool[2];
+        readonly XRHandAimState[] m_AgnosticAimStates = new XRHandAimState[2];
 
-        static internal string id { get; private set; }
+        internal static string id { get; }
 
-        static internal void SetMetaAim(MetaHandTrackingAim metaAim) => s_MetaAim = metaAim;
+        internal static void SetMetaAim(MetaHandTrackingAim metaAim) => s_MetaAim = metaAim;
         static MetaHandTrackingAim s_MetaAim;
-        static bool s_SubsystemRegistered;
+
+        // This static field should not be reset between Play mode sessions since registration list of subsystem descriptors are not cleared.
+        static XRHandSubsystemDescriptor.Cinfo? s_RegisteredDescriptorCinfo;
 
         static OpenXRHandProvider() => id = "OpenXR Hands";
 
@@ -463,36 +457,62 @@ namespace UnityEngine.XR.Hands.OpenXR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Register()
         {
+            // "ResetStaticsOnLoad()" section of this RuntimeInitializeOnLoadMethod
+            s_MetaAim = null;
+
             var settings = OpenXRSettings.Instance;
             if (settings == null)
                 return;
 
             var feature = settings.GetFeature<HandTracking>();
-            if (feature != null && feature.enabled)
-            {
+            if (feature == null || !feature.enabled)
+                return;
+
 #if UNITY_OPENXR_PACKAGE_1_8
-                var profile = OpenXRSettings.Instance.GetFeature<HandInteractionProfile>();
-                bool commonPosesEnabled = profile != null && profile.enabled;
+            var profile = settings.GetFeature<HandInteractionProfile>();
+            var commonPosesEnabled = profile != null && profile.enabled;
 #else
-                bool commonPosesEnabled = false;
+            var commonPosesEnabled = false;
 #endif
-                if (!s_SubsystemRegistered)
-                {
-                    var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
-                    {
-                        id = id,
-                        providerType = typeof(OpenXRHandProvider),
-                        supportsAimPose = commonPosesEnabled,
-                        supportsAimActivateValue = commonPosesEnabled,
-                        supportsGraspValue = commonPosesEnabled,
-                        supportsGripPose = commonPosesEnabled,
-                        supportsPinchPose = commonPosesEnabled,
-                        supportsPinchValue = commonPosesEnabled,
-                        supportsPokePose = commonPosesEnabled,
-                    };
-                    XRHandSubsystemDescriptor.Register(handsSubsystemCinfo);
-                    s_SubsystemRegistered = true;
-                }
+            var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
+            {
+                id = id,
+                providerType = typeof(OpenXRHandProvider),
+                supportsAimPose = commonPosesEnabled,
+                supportsAimActivateValue = commonPosesEnabled,
+                supportsGraspValue = commonPosesEnabled,
+                supportsGripPose = commonPosesEnabled,
+                supportsPinchPose = commonPosesEnabled,
+                supportsPinchValue = commonPosesEnabled,
+                supportsPokePose = commonPosesEnabled,
+            };
+
+            // Determine if we need to register or replace the subsystem descriptor.
+            var registerSubsystemDescriptor = false;
+            if (!s_RegisteredDescriptorCinfo.HasValue)
+            {
+                // Has never registered the subsystem descriptor.
+                registerSubsystemDescriptor = true;
+            }
+            else if (s_RegisteredDescriptorCinfo.Value != handsSubsystemCinfo)
+            {
+                // Has previously registered the subsystem descriptor from a previous Play mode but parameters have changed.
+                // We must replace the subsystem descriptor for the changed parameters.
+                // Warn the user that they will see the following warning logged:
+                // "Registering subsystem descriptor with duplicate ID 'OpenXR Hands' - overwriting previous entry."
+                // There is no API in the subsystem module for avoiding the warning that will be logged
+                // during the Register method when replacing the subsystem descriptor.
+                var enabledOrDisabled = commonPosesEnabled ? "enabled" : "disabled";
+                Debug.Log($"The registered subsystem descriptor with ID '{id}' will be overwritten" +
+                    $" since Hand Interaction Profile has changed to be {enabledOrDisabled} since last Play mode.");
+
+                registerSubsystemDescriptor = true;
+            }
+
+            if (registerSubsystemDescriptor)
+            {
+                XRHandSubsystemDescriptor.Register(handsSubsystemCinfo);
+                s_RegisteredDescriptorCinfo = handsSubsystemCinfo;
             }
         }
 
@@ -505,7 +525,7 @@ namespace UnityEngine.XR.Hands.OpenXR
             internal static extern void Destroy();
 
             [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_TryUpdateHands")]
-            internal static unsafe extern XRHandSubsystem.UpdateSuccessFlags TryUpdateHands(
+            internal static extern unsafe XRHandSubsystem.UpdateSuccessFlags TryUpdateHands(
                 XRHandSubsystem.UpdateType updateType,
                 ref Pose leftRootPose,
                 void* leftHandJoints,

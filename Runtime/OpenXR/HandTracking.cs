@@ -22,15 +22,15 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// <summary>
     /// This <see cref="OpenXRInteractionFeature"/> enables the use of
     /// hand-tracking data in OpenXR through the <see cref="XRHandSubsystem"/>.
-    /// It enables <see href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_EXT_hand_tracking">
-    /// XR_EXT_hand_tracking</see> in the underlying runtime. To retrieve hand
+    /// It enables <a href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_EXT_hand_tracking">
+    /// XR_EXT_hand_tracking</a> in the underlying runtime. To retrieve hand
     /// data, use the <see cref="XRHandSubsystem"/> retrieved from
     /// <see cref="HandTracking.subsystem"/>.
     /// </summary>
     /// <remarks>
     /// For this extension to be available, you must install the
-    /// <see href="https://docs.unity3d.com/Packages/com.unity.xr.hands@latest/manual/index.html">
-    /// XR Hands package</see>.
+    /// <a href="https://docs.unity3d.com/Packages/com.unity.xr.openxr@latest">
+    /// OpenXR Plugin package</a>.
     /// </remarks>
 #if UNITY_EDITOR
     [UnityEditor.XR.OpenXR.Features.OpenXRFeature(UiName = "Hand Tracking Subsystem",
@@ -66,7 +66,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// <summary>
         /// The OpenXR Extension string. OpenXR uses this to check if this
         /// extension is available or enabled. See
-        /// <see href="https://www.khronos.org/registry/OpenXR/specs/1.0/html/xrspec.html#XR_EXT_hand_tracking">hand interaction extension</see>
+        /// <a href="https://www.khronos.org/registry/OpenXR/specs/1.0/html/xrspec.html#XR_EXT_hand_tracking">hand interaction extension</a>
         /// documentation for more information on this OpenXR extension.
         /// </summary>
         public const string extensionString = "XR_EXT_hand_tracking";
@@ -130,11 +130,13 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// When you wish to initialize the subsystem later, call
         /// <see cref="EnsureSubsystemInitialized"/>.
         /// </remarks>
+#pragma warning disable UDR0002 // Static field/property is not assigned in a method with the RuntimeInitializeOnLoadMethod attribute -- Both fields cleared.
         public static bool automaticallyInitializeSubsystem
         {
-            get => s_AutoInitOverride ?? (s_This != null ? s_This.m_AutoStartSubsystem : true);
+            get => s_AutoInitOverride ?? (s_This == null || s_This.m_AutoStartSubsystem);
             set => s_AutoInitOverride = value;
         }
+#pragma warning restore UDR0002 // Static field/property is not assigned in a method with the RuntimeInitializeOnLoadMethod attribute
 
         /// <summary>
         /// Ensures an <see cref="XRHandSubsystem"/> is created.
@@ -173,8 +175,7 @@ namespace UnityEngine.XR.Hands.OpenXR
                 StartSubsystemAndUpdater();
             }
 
-            if (subsystemCreated != null)
-                subsystemCreated.Invoke(new SubsystemCreatedEventArgs {subsystem = s_Subsystem});
+            subsystemCreated?.Invoke(new SubsystemCreatedEventArgs { subsystem = s_Subsystem });
         }
 
         internal static void StartSubsystemAndUpdater()
@@ -334,28 +335,28 @@ namespace UnityEngine.XR.Hands.OpenXR
         static class NativeApi
         {
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnSystemChange")]
-            static internal extern void OnSystemChange(ulong xrSystem);
+            internal static extern void OnSystemChange(ulong xrSystem);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnInstanceCreate")]
-            static internal extern bool OnInstanceCreate(ulong xrInstance, IntPtr xrGetInstanceProcAddr);
+            internal static extern bool OnInstanceCreate(ulong xrInstance, IntPtr xrGetInstanceProcAddr);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnAppSpaceChange")]
-            static internal extern void OnAppSpaceChange(ulong xrSpace);
+            internal static extern void OnAppSpaceChange(ulong xrSpace);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnSessionCreate")]
-            static internal extern void OnSessionCreate(ulong xrSession);
+            internal static extern void OnSessionCreate(ulong xrSession);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnSessionDestroy")]
-            static internal extern void OnSessionDestroy(ulong xrSession);
+            internal static extern void OnSessionDestroy(ulong xrSession);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnInstanceDestroy")]
-            static internal extern void OnInstanceDestroy(ulong xrInstance);
+            internal static extern void OnInstanceDestroy(ulong xrInstance);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnInstanceLossPending")]
-            static internal extern void OnInstanceLossPending(ulong xrInstance);
+            internal static extern void OnInstanceLossPending(ulong xrInstance);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_intercept_xrGetInstanceProcAddr")]
-            static internal extern IntPtr Intercept_xrGetInstanceProcAddr(IntPtr func);
+            internal static extern IntPtr Intercept_xrGetInstanceProcAddr(IntPtr func);
         }
 
 #if UNITY_EDITOR
@@ -382,17 +383,19 @@ namespace UnityEngine.XR.Hands.OpenXR
         static HandTracking s_This;
         static bool? s_AutoInitOverride;
 
-#if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetStaticsOnLoad()
         {
             s_Subsystem = null;
             s_This = null;
             s_AutoInitOverride = null;
+
+            // When we are able to make a breaking change, change the signature of these events
+            // to be `public static event` by adding the `event` keyword to avoid needing to reset
+            // these fields this way.
             subsystemCreated = null;
             destroyingSubsystem = null;
         }
-#endif
     }
 }
 

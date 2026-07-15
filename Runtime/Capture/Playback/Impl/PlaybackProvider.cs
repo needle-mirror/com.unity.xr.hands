@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine.XR.Hands.ProviderImplementation;
 
@@ -9,6 +8,7 @@ namespace UnityEngine.XR.Hands.Capture.Playback
     /// </summary>
     class PlaybackProvider : XRHandSubsystemProvider
     {
+        // These static fields should not be reset between Play mode sessions since registration list of subsystem descriptors are not cleared.
         static XRHandSubsystemDescriptor s_RegisteredDescriptor;
         static bool s_SubsystemRegistered;
 
@@ -123,6 +123,9 @@ namespace UnityEngine.XR.Hands.Capture.Playback
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void RegisterDescriptor()
         {
+            // "ResetStaticsOnLoad()" section of this RuntimeInitializeOnLoadMethod
+            // Do not reset s_RegisteredDescriptor or s_SubsystemRegistered since registration list of subsystem descriptors are not cleared.
+
             if (!s_SubsystemRegistered)
             {
                 var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo

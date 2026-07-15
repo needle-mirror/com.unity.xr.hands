@@ -44,11 +44,13 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
         bool m_HandShapeCompletenessEnabled;
 
-        readonly List<XRFingerShapeDebugBar> k_ReusableBarsToHide = new List<XRFingerShapeDebugBar>();
+        XRHandSubsystem m_Subsystem;
 
-        readonly List<XRFingerShapeDebugBar> k_Bars = new List<XRFingerShapeDebugBar>();
+        readonly List<XRFingerShapeDebugBar> m_ReusableBarsToHide = new List<XRFingerShapeDebugBar>();
 
-        static List<XRHandSubsystem> s_SubsystemsReuse = new List<XRHandSubsystem>();
+        readonly List<XRFingerShapeDebugBar> m_Bars = new List<XRFingerShapeDebugBar>();
+
+        static readonly List<XRHandSubsystem> s_SubsystemsReuse = new List<XRHandSubsystem>();
 
         /// <summary>
         /// The hand shape that will be displayed in the debug UI.
@@ -63,14 +65,18 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
                 m_HandShape = handPose != null ? handPose.handShape : value as XRHandShape;
 
                 m_HandShapeDetected = m_HandShape != null;
-                foreach (var bar in k_Bars)
+                foreach (var bar in m_Bars)
+                {
                     bar.fingerShapeDetected = m_HandShapeDetected;
+                }
 
                 if (m_HandShapeDetected)
                 {
                     // Hide previously enabled bars
-                    foreach (var bar in k_Bars)
+                    foreach (var bar in m_Bars)
+                    {
                         bar.HideTargetAndTolerance();
+                    }
                 }
             }
         }
@@ -101,12 +107,14 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 #endif
             }
 
-            if (k_Bars.Count == 0)
+            if (m_Bars.Count == 0)
             {
                 foreach (var graph in m_XRAllFingerShapesDebugUI.xrFingerShapeDebugGraphs)
                 {
                     foreach (var bar in graph.bars)
-                        k_Bars.Add(bar);
+                    {
+                        m_Bars.Add(bar);
+                    }
                 }
             }
 
@@ -116,13 +124,17 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 
         void Update()
         {
-            foreach (var bar in k_Bars)
+            foreach (var bar in m_Bars)
+            {
                 bar.HideTargetAndTolerance();
+            }
 
             // Track all the bars that have no target and tolerance so they can be hidden
-            k_ReusableBarsToHide.Clear();
+            m_ReusableBarsToHide.Clear();
             foreach (var graph in m_XRAllFingerShapesDebugUI.xrFingerShapeDebugGraphs)
-                k_ReusableBarsToHide.AddRange(graph.bars);
+            {
+                m_ReusableBarsToHide.AddRange(graph.bars);
+            }
 
             if (m_HandShapeDetected)
             {
@@ -135,14 +147,14 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
                         var xrFingerShapeDebugGraph = m_XRAllFingerShapesDebugUI.xrFingerShapeDebugGraphs[(int)condition.fingerID];
                         var bar = xrFingerShapeDebugGraph.bars[(int)shapeCondition.shapeType];
                         bar.SetTargetAndTolerances(shapeCondition.desired, shapeCondition.upperTolerance, shapeCondition.lowerTolerance);
-                        k_ReusableBarsToHide.Remove(bar);
+                        m_ReusableBarsToHide.Remove(bar);
                     }
                 }
             }
 
             if (m_HandShapeCompletenessEnabled && m_HandShapeDetected)
             {
-                if (!TryGetSubsystem(out var subsystem))
+                if (!TryGetHandSubsystem(out var subsystem))
                     return;
 
                 var hand = m_XRAllFingerShapesDebugUI.handedness ==
@@ -167,18 +179,26 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
             handShapeOrPose = null;
         }
 
-        static bool TryGetSubsystem(out XRHandSubsystem system)
+        bool TryGetHandSubsystem(out XRHandSubsystem system)
         {
-            system = null;
-
-            if (s_SubsystemsReuse.Count == 0)
-                SubsystemManager.GetSubsystems(s_SubsystemsReuse);
-
-            if (s_SubsystemsReuse.Count > 0)
+            if (m_Subsystem != null && m_Subsystem.running)
             {
-                system = s_SubsystemsReuse[0];
+                system = m_Subsystem;
                 return true;
             }
+
+            SubsystemManager.GetSubsystems(s_SubsystemsReuse);
+            foreach (var handSubsystem in s_SubsystemsReuse)
+            {
+                if (handSubsystem.running)
+                {
+                    m_Subsystem = handSubsystem;
+                    system = m_Subsystem;
+                    return true;
+                }
+            }
+
+            system = null;
             return false;
         }
     }

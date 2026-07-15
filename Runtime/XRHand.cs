@@ -1,5 +1,6 @@
 using System;
 using Unity.Collections;
+using UnityEngine.InputSystem;
 using UnityEngine.XR.Hands.ProviderImplementation;
 
 namespace UnityEngine.XR.Hands
@@ -21,10 +22,15 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         public void Dispose()
         {
+            DisposeInternal(LifetimeType.FreelyDispose);
+        }
+
+        internal void DisposeInternal(LifetimeType callerContext)
+        {
             if (m_LifetimeType == LifetimeType.Invalid)
                 return;
 
-            if (s_AllowDisposalFor != m_LifetimeType)
+            if (m_LifetimeType != callerContext)
                 throw new InvalidOperationException("Must get XRHand objects from APIs in the XR Hands package, do not construct your own!");
 
             if (m_Joints.IsCreated)
@@ -62,9 +68,15 @@ namespace UnityEngine.XR.Hands
         public Handedness handedness => m_Handedness;
 
         /// <summary>
-        /// Whether the subsystem is currently tracking this hand's root pose and joints.
+        /// Whether the subsystem is currently actively tracking this hand's root pose and joints.
         /// </summary>
-        /// <value>Indicates the tracking status as of the last hand data update.</value>
+        /// <value>Indicates the active tracking status as of the last hand data update.</value>
+        /// <remarks>
+        /// Despite the name shared with <see cref="TrackedDevice.isTracked"/>, this property more closely relates to
+        /// <see cref="TrackedDevice.trackingState"/> where it is about the validity. This property indicates
+        /// that it's meaningful for the application to use pose data, though it may not necessarily indicate
+        /// that the poses are tracked and thus may be inferred or last-known.
+        /// </remarks>
         public bool isTracked
         {
             get => m_IsTracked;
@@ -171,8 +183,6 @@ namespace UnityEngine.XR.Hands
             }
         }
 
-        internal bool isValid => m_Handedness.IsValid() && m_Joints.IsCreated;
-
         internal enum LifetimeType
         {
             Invalid,
@@ -181,19 +191,13 @@ namespace UnityEngine.XR.Hands
             ProviderUtility,
         }
 
+        internal bool isValid => m_Handedness.IsValid() && m_Joints.IsCreated;
+
         internal NativeArray<XRHandJoint> m_Joints;
         internal Pose m_RootPose;
-        Handedness m_Handedness;
+        readonly Handedness m_Handedness;
         bool m_IsTracked;
 
         LifetimeType m_LifetimeType;
-
-        static internal LifetimeType allowDisposalFor
-        {
-            get => s_AllowDisposalFor;
-            set => s_AllowDisposalFor = value;
-        }
-
-        static LifetimeType s_AllowDisposalFor = LifetimeType.FreelyDispose;
     }
 }

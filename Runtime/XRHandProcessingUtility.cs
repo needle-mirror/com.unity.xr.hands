@@ -102,7 +102,7 @@ namespace UnityEngine.XR.Hands.Processing
         /// </remarks>
         public static void SetPose(this ref XRHandJoint joint, Pose pose)
         {
-            if (joint.m_TrackingState.HasFlag(XRHandJointTrackingState.WillNeverBeValid))
+            if ((joint.m_TrackingState & XRHandJointTrackingState.WillNeverBeValid) != 0)
                 throw new ArgumentException("Cannot set pose on a joint that was not registered as being part of the hand layout for this subsystem's provider.", nameof(joint));
 
             joint.m_TrackingState |= XRHandJointTrackingState.Pose;
@@ -127,7 +127,7 @@ namespace UnityEngine.XR.Hands.Processing
         /// </remarks>
         public static void SetLinearVelocity(this ref XRHandJoint joint, Vector3 linearVelocity)
         {
-            if (joint.m_TrackingState.HasFlag(XRHandJointTrackingState.WillNeverBeValid))
+            if ((joint.m_TrackingState & XRHandJointTrackingState.WillNeverBeValid) != 0)
                 throw new ArgumentException("Cannot set linear velocity on a joint that was not registered as being part of the hand layout for this subsystem's provider.", nameof(joint));
 
             joint.m_TrackingState |= XRHandJointTrackingState.LinearVelocity;
@@ -152,7 +152,7 @@ namespace UnityEngine.XR.Hands.Processing
         /// </remarks>
         public static void SetAngularVelocity(this ref XRHandJoint joint, Vector3 angularVelocity)
         {
-            if (joint.m_TrackingState.HasFlag(XRHandJointTrackingState.WillNeverBeValid))
+            if ((joint.m_TrackingState & XRHandJointTrackingState.WillNeverBeValid) != 0)
                 throw new ArgumentException("Cannot set angular velocity on a joint that was not registered as being part of the hand layout for this subsystem's provider.", nameof(joint));
 
             joint.m_TrackingState |= XRHandJointTrackingState.AngularVelocity;

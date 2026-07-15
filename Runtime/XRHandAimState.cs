@@ -1,8 +1,5 @@
 using System;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Runtime.InteropServices;
-using UnityEngine.XR.Hands.Capture.Recording;
+using UnityEngine.XR.Hands.Capture;
 
 namespace UnityEngine.XR.Hands
 {
@@ -22,7 +19,7 @@ namespace UnityEngine.XR.Hands
         /// is equal to this <see cref="XRHandAimState"/>.
         /// Returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool Equals(in XRHandAimState other)
+        public readonly bool Equals(in XRHandAimState other)
         {
             return m_Handedness == other.m_Handedness &&
                 m_AimFlags == other.m_AimFlags &&
@@ -37,7 +34,7 @@ namespace UnityEngine.XR.Hands
         }
 
         /// <inheritdoc cref="Equals(in XRHandAimState)"/>
-        bool IEquatable<XRHandAimState>.Equals(XRHandAimState other) => Equals(in other);
+        readonly bool IEquatable<XRHandAimState>.Equals(XRHandAimState other) => Equals(in other);
 
         /// <summary>
         /// Tests for equality.
@@ -49,13 +46,13 @@ namespace UnityEngine.XR.Hands
         /// <see cref="Equals(in XRHandAimState)"/> also
         /// returns <see langword="true"/>; otherwise returns <see langword="false"/>.
         /// </returns>
-        public override bool Equals(object obj) => obj is XRHandAimState other && Equals(in other);
+        public readonly override bool Equals(object obj) => obj is XRHandAimState other && Equals(in other);
 
         /// <summary>
         /// Computes a hash code from all fields of this <c>XRHandAimState</c>.
         /// </summary>
         /// <returns>Returns a hash code of this object.</returns>
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             int hash = HashCodeUtil.Combine(
                 m_Handedness.GetHashCode(),
@@ -103,54 +100,70 @@ namespace UnityEngine.XR.Hands
         /// <see cref="XRHandCaptureFrame"/><c>.</c><see cref="XRHandCaptureFrame.TryGetAimState"/>,
         /// this can only ever be <see cref="Handedness.Left"/> or <see cref="Handedness.Right"/>.
         /// </value>
-        public readonly Handedness handedness => m_Handedness;
+        public Handedness handedness
+        {
+            readonly get => m_Handedness;
+            internal set => m_Handedness = value;
+        }
 
         /// <summary>
         /// Whether the hand is currently tracked.
         /// </summary>
-        public readonly bool isTracked => (m_AimFlags & AimFlags.IsTracked) != 0;
+        public readonly bool isTracked => (m_AimFlags & AimStateFlags.IsTracked) != 0;
 
         /// <summary>
         /// Determines which properties of the hand are being tracked as per <see cref="InputTrackingState"/>.
         /// </summary>
-        public readonly InputTrackingState trackingState => m_TrackingState;
+        public InputTrackingState trackingState
+        {
+            readonly get => m_TrackingState;
+            internal set => m_TrackingState = value;
+        }
 
         /// <summary>
         /// Reserved.
         /// </summary>
-        public readonly int reserved0 => m_Reserved0;
+        public int reserved0
+        {
+            readonly get => m_Reserved0;
+            internal set => m_Reserved0 = value;
+        }
 
         /// <summary>
         /// Reserved.
         /// </summary>
-        public readonly int reserved1 => m_Reserved1;
+        public int reserved1
+        {
+            readonly get => m_Reserved1;
+            internal set => m_Reserved1 = value;
+        }
 
         /// <summary>
         /// Whether the index finger and thumb are currently pressed together.
         /// </summary>
-        public readonly bool indexPressed => (m_AimFlags & AimFlags.IsIndexPressed) != 0;
+        public readonly bool indexPressed => (m_AimFlags & AimStateFlags.IsIndexPressed) != 0;
 
         /// <summary>
         /// Whether the middle finger and thumb are currently pressed together.
         /// </summary>
-        public readonly bool middlePressed => (m_AimFlags & AimFlags.IsMiddlePressed) != 0;
+        public readonly bool middlePressed => (m_AimFlags & AimStateFlags.IsMiddlePressed) != 0;
 
         /// <summary>
         /// Whether the ring finger and thumb are currently pressed together.
         /// </summary>
-        public readonly bool ringPressed => (m_AimFlags & AimFlags.IsRingPressed) != 0;
+        public readonly bool ringPressed => (m_AimFlags & AimStateFlags.IsRingPressed) != 0;
 
         /// <summary>
         /// Whether the little finger and thumb are currently pressed together.
         /// </summary>
-        public readonly bool littlePressed => (m_AimFlags & AimFlags.IsLittlePressed) != 0;
+        public readonly bool littlePressed => (m_AimFlags & AimStateFlags.IsLittlePressed) != 0;
 
         /// <summary>
         ///  The strength of the pinch between the index finger and thumb. Ranges from 0.0 to 1.0.
         /// </summary>
         public float pinchStrengthIndex
         {
-            get => m_PinchStrengthIndex;
+            readonly get => m_PinchStrengthIndex;
             internal set => m_PinchStrengthIndex = value;
         }
 
@@ -159,7 +172,7 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         public float pinchStrengthMiddle
         {
-            get => m_PinchStrengthMiddle;
+            readonly get => m_PinchStrengthMiddle;
             internal set => m_PinchStrengthMiddle = value;
         }
 
@@ -168,7 +181,7 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         public float pinchStrengthRing
         {
-            get => m_PinchStrengthRing;
+            readonly get => m_PinchStrengthRing;
             internal set => m_PinchStrengthRing = value;
         }
 
@@ -177,8 +190,43 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         public float pinchStrengthLittle
         {
-            get => m_PinchStrengthLittle;
+            readonly get => m_PinchStrengthLittle;
             internal set => m_PinchStrengthLittle = value;
+        }
+
+        /// <summary>
+        /// Internal flags that pack some of the dependent properties of this representation.
+        /// </summary>
+        internal AimStateFlags aimStateFlags
+        {
+            readonly get => m_AimFlags;
+            set => m_AimFlags = value;
+        }
+
+        /// <summary>
+        /// Flags that describe the availability and state of other signals, coming from the OpenXR status bitmask.
+        /// </summary>
+        /// <remarks>
+        /// See https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#XrHandTrackingAimFlagBitsFB.
+        /// </remarks>
+        /// <seealso cref="MetaAimHand.aimFlags"/>
+        // The 64-bit flags is captured with two 32-bit int fields,
+        // where reserved0 is the lower 32-bits and reserved1 is the upper 32-bits.
+        internal MetaAimFlags metaAimFlags => (MetaAimFlags)((((ulong)reserved1) << 32) | ((uint)reserved0));
+
+        /// <summary>
+        /// Internal raw access to the aim <see cref="Pose"/>.
+        /// </summary>
+        /// <remarks>
+        /// Note that this property does not check/set <see cref="AimStateFlags.HasAimPose"/>.
+        /// This property is intended to be available for transforming the Pose to a different reference space
+        /// or for copy constructors to access the Pose field.
+        /// </remarks>
+        /// <seealso cref="TryGetAimPose"/>
+        internal Pose aimPoseInternal
+        {
+            readonly get => m_AimPose;
+            set => m_AimPose = value;
         }
 
         /// <summary>
@@ -193,44 +241,16 @@ namespace UnityEngine.XR.Hands
         /// Otherwise, this returns <see langword="false"/>, and you should not use
         /// the resulting pose.
         /// </returns>
-        public bool TryGetAimPose(out Pose aimPose)
+        public readonly bool TryGetAimPose(out Pose aimPose)
         {
-            bool ret = (m_AimFlags & AimFlags.IsAimPoseValid) != 0;
+            bool ret = (m_AimFlags & AimStateFlags.HasAimPose) != 0;
             aimPose = ret ? m_AimPose : Pose.identity;
             return ret;
         }
 
-        internal void SetAimPose(Pose aimPose)
-        {
-            m_AimPose = aimPose;
-        }
-
-        internal XRHandAimState(BinaryReader reader)
-        {
-            m_Handedness = reader.ReadHandedness();
-            m_AimFlags = reader.ReadAimFlags();
-            m_TrackingState = reader.ReadInputTrackingState();
-
-            m_Reserved0 = reader.ReadInt32();
-            m_Reserved1 = reader.ReadInt32();
-
-            m_PinchStrengthIndex = reader.ReadSingle();
-            m_PinchStrengthMiddle = reader.ReadSingle();
-            m_PinchStrengthRing = reader.ReadSingle();
-            m_PinchStrengthLittle = reader.ReadSingle();
-
-            if ((m_AimFlags & AimFlags.IsAimPoseValid) != 0)
-                reader.ReadPose(out m_AimPose);
-            else
-                m_AimPose = Pose.identity;
-        }
-
-        internal readonly AimFlags flags => m_AimFlags;
-
-        internal readonly Pose possiblyInvalidAimPose => m_AimPose;
-
         internal void UpdateToAimRepresentation(
             Handedness handedness,
+            bool isHandRootTracked,
             MetaAimFlags metaAimFlags,
             Pose aimPose,
             float pinchIndex,
@@ -239,44 +259,44 @@ namespace UnityEngine.XR.Hands
             float pinchLittle)
         {
             m_Handedness = handedness;
+            m_AimFlags = AimStateFlags.HasAimPose;
             m_TrackingState = InputTrackingState.None;
 
-            m_Reserved0 = (int)(((ulong)metaAimFlags) & 0xffffffff);
-            m_Reserved1 = (int)(((ulong)metaAimFlags) >> 32);
+            if (isHandRootTracked)
+            {
+                m_AimFlags |= AimStateFlags.IsTracked;
+                m_TrackingState = InputTrackingState.Position | InputTrackingState.Rotation;
+            }
+
+            if ((metaAimFlags & MetaAimFlags.IndexPinching) != 0)
+                m_AimFlags |= AimStateFlags.IsIndexPressed;
+
+            if ((metaAimFlags & MetaAimFlags.MiddlePinching) != 0)
+                m_AimFlags |= AimStateFlags.IsMiddlePressed;
+
+            if ((metaAimFlags & MetaAimFlags.RingPinching) != 0)
+                m_AimFlags |= AimStateFlags.IsRingPressed;
+
+            if ((metaAimFlags & MetaAimFlags.LittlePinching) != 0)
+                m_AimFlags |= AimStateFlags.IsLittlePressed;
+
+            // Store 64-bit flags as two 32-bit int fields
+            // where reserved0 is the lower 32-bits and reserved1 is the upper 32-bits.
+            m_Reserved0 = unchecked((int)((ulong)metaAimFlags));
+            m_Reserved1 = unchecked((int)(((ulong)metaAimFlags) >> 32));
 
             m_PinchStrengthIndex = pinchIndex;
             m_PinchStrengthMiddle = pinchMiddle;
             m_PinchStrengthRing = pinchRing;
             m_PinchStrengthLittle = pinchLittle;
-
-            m_AimFlags = AimFlags.None;
-            if ((metaAimFlags & MetaAimFlags.IndexPinching) != 0)
-                m_AimFlags |= AimFlags.IsIndexPressed;
-
-            if ((metaAimFlags & MetaAimFlags.MiddlePinching) != 0)
-                m_AimFlags |= AimFlags.IsMiddlePressed;
-
-            if ((metaAimFlags & MetaAimFlags.RingPinching) != 0)
-                m_AimFlags |= AimFlags.IsRingPressed;
-
-            if ((metaAimFlags & MetaAimFlags.LittlePinching) != 0)
-                m_AimFlags |= AimFlags.IsLittlePressed;
-
-            if ((metaAimFlags & MetaAimFlags.Valid) != 0)
-            {
-                m_AimPose = aimPose;
-                m_AimFlags |= AimFlags.IsAimPoseValid;
-            }
+            m_AimPose = aimPose;
         }
-
-        internal void SetTrackingStateToValidPose()
-            => m_TrackingState = InputTrackingState.Position | InputTrackingState.Rotation;
 
         [SerializeField]
         Handedness m_Handedness;
 
         [SerializeField]
-        AimFlags m_AimFlags;
+        AimStateFlags m_AimFlags;
 
         [SerializeField]
         InputTrackingState m_TrackingState;

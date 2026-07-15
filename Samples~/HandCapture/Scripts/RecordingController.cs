@@ -82,8 +82,11 @@ namespace UnityEngine.XR.Hands.Samples.Capture
                 m_RecordingSlots[recordingSlotIndex] = new XRHandRecordingBlob();
                 m_SlotsOccupied[recordingSlotIndex] = false;
             }
+
+            s_ExistingRecordingsReuse.Clear();
         }
-        static List<XRHandRecordingMetadata> s_ExistingRecordingsReuse = new List<XRHandRecordingMetadata>();
+
+        static readonly List<XRHandRecordingMetadata> s_ExistingRecordingsReuse = new List<XRHandRecordingMetadata>();
 
         public XRHandRecordingBase GetRecordingAtSlot(int idx)
         {

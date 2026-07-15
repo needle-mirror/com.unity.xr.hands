@@ -41,6 +41,9 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
         Pose m_LeftHandPose = Pose.identity;
         Pose m_RightHandPose = Pose.identity;
 
+        XRHandSubsystem m_Subsystem;
+        static readonly List<XRHandSubsystem> s_SubsystemsReuse = new List<XRHandSubsystem>();
+
         [SerializeField]
         [Tooltip("The mode to use for the sample processor.")]
         ProcessorExampleMode m_ProcessorExampleMode = ProcessorExampleMode.Smoothing;
@@ -164,8 +167,5 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
                 m_Subsystem = null;
             }
         }
-
-        XRHandSubsystem m_Subsystem;
-        static List<XRHandSubsystem> s_SubsystemsReuse = new List<XRHandSubsystem>();
     }
 }

@@ -9,7 +9,6 @@ using UnityEngine.XR;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.Configuration;
 using UnityEngine.XR.Hands.ProviderImplementation;
-using Is = Unity.XR.Hands.Tests.NUnitExtensions.Is;
 
 class Tests
 {
@@ -18,6 +17,20 @@ class Tests
         Handedness.Left,
         Handedness.Right
     };
+
+    [Test]
+    public void TestHandProcessingUtilHasFlagSameAsBitwiseCheck()
+    {
+        XRHandJointTrackingState trackingState1 = XRHandJointTrackingState.WillNeverBeValid;
+        Assert.IsTrue((trackingState1 & XRHandJointTrackingState.WillNeverBeValid) != 0);
+        Assert.AreEqual(trackingState1.HasFlag(XRHandJointTrackingState.WillNeverBeValid),
+            (trackingState1 & XRHandJointTrackingState.WillNeverBeValid) != 0);
+
+        XRHandJointTrackingState trackingState2 = XRHandJointTrackingState.HighFidelityPose;
+        Assert.IsFalse((trackingState2 & XRHandJointTrackingState.WillNeverBeValid) != 0);
+        Assert.AreEqual(trackingState2.HasFlag(XRHandJointTrackingState.WillNeverBeValid),
+            (trackingState2 & XRHandJointTrackingState.WillNeverBeValid) != 0);
+    }
 
     [Test]
     public void TestFingerIDsToJointIDs()
@@ -408,138 +421,157 @@ class Tests
         var subsystem = TestHandUtils.CreateTestSubsystem();
         XRHandSubsystemConfiguration configuration = new()
         {
-            xrHandDevicePoseSource = XRHandDevicePoseSource.CommonGestures
+            xrHandDevicePoseSource = XRHandDevicePoseSource.CommonGestures,
         };
 
         XRHandDevicePoseSource expectedPoseSource = XRHandDevicePoseSource.CommonGestures;
         XRHandSubsystemConfiguration receivedConfiguration = default;
         XRHandSubsystem subsystemSender = null;
+        bool configurationUpdatedInvoked = false;
         subsystem.configurationUpdated += (args) =>
         {
             receivedConfiguration = args.newConfiguration;
             subsystemSender = args.subsystem;
+            configurationUpdatedInvoked = true;
         };
 
         subsystem.UpdateHandsConfiguration(configuration);
 
+        Assert.That(configurationUpdatedInvoked, Is.True);
+        Assert.That(receivedConfiguration, Is.EqualTo(configuration));
         Assert.That(receivedConfiguration.xrHandDevicePoseSource, Is.EqualTo(expectedPoseSource));
         Assert.That(subsystemSender, Is.EqualTo(subsystem));
+        Assert.That(subsystem.handSubsystemConfiguration, Is.EqualTo(configuration));
         Assert.That(subsystem.handSubsystemConfiguration.xrHandDevicePoseSource, Is.EqualTo(expectedPoseSource));
 
         expectedPoseSource = XRHandDevicePoseSource.LegacyJointRecognition;
         subsystemSender = null;
+        configurationUpdatedInvoked = false;
         configuration.xrHandDevicePoseSource = expectedPoseSource;
         subsystem.UpdateHandsConfiguration(configuration);
 
+        Assert.That(configurationUpdatedInvoked, Is.True);
+        Assert.That(receivedConfiguration, Is.EqualTo(configuration));
         Assert.That(receivedConfiguration.xrHandDevicePoseSource, Is.EqualTo(expectedPoseSource));
         Assert.That(subsystemSender, Is.EqualTo(subsystem));
+        Assert.That(subsystem.handSubsystemConfiguration, Is.EqualTo(configuration));
         Assert.That(subsystem.handSubsystemConfiguration.xrHandDevicePoseSource, Is.EqualTo(expectedPoseSource));
+
+        // Setting the configuration to the same value should not retrigger the updated event
+        subsystemSender = null;
+        configurationUpdatedInvoked = false;
+        subsystem.UpdateHandsConfiguration(configuration);
+
+        Assert.That(configurationUpdatedInvoked, Is.False);
+        Assert.That(subsystemSender, Is.Null);
     }
 
     [UnityTest]
     public IEnumerator CommonGesturePoseUpdatesXRHandDevice([ValueSource(nameof(s_HandednessOptions))] Handedness handedness)
     {
 #if ENABLE_INPUT_SYSTEM
+        Assume.That(handedness, Is.Not.EqualTo(Handedness.Invalid));
+        Assume.That(XRHandDevice.leftHand, Is.Null);
+        Assume.That(XRHandDevice.rightHand, Is.Null);
+
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
         var subsystem = TestHandUtils.CreateTestSubsystem();
-        XRHandSubsystemConfiguration configuration = new()
+        var configuration = new XRHandSubsystemConfiguration
         {
-            xrHandDevicePoseSource = XRHandDevicePoseSource.CommonGestures
+            xrHandDevicePoseSource = XRHandDevicePoseSource.CommonGestures,
         };
         subsystem.UpdateHandsConfiguration(configuration);
         subsystem.Start();
 
-        var updateSuccessFlags = subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic);
-
-        if (handedness == Handedness.Left && XRHandDevice.leftHand == null)
-            XRHandDevice.leftHand = XRHandDevice.Create(subsystem, Handedness.Left, updateSuccessFlags, XRHandSubsystem.UpdateType.Dynamic);
-        else if (handedness == Handedness.Right && XRHandDevice.rightHand == null)
-            XRHandDevice.rightHand = XRHandDevice.Create(subsystem, Handedness.Right, updateSuccessFlags, XRHandSubsystem.UpdateType.Dynamic);
+        if (handedness == Handedness.Left)
+            XRHandDevice.leftHand = XRHandDevice.Create(subsystem, Handedness.Left, XRHandSubsystem.UpdateSuccessFlags.None, XRHandSubsystem.UpdateType.Dynamic);
+        else if (handedness == Handedness.Right)
+            XRHandDevice.rightHand = XRHandDevice.Create(subsystem, Handedness.Right, XRHandSubsystem.UpdateSuccessFlags.None, XRHandSubsystem.UpdateType.Dynamic);
 
         XRHandDevice currentHandDevice = handedness == Handedness.Left ? XRHandDevice.leftHand : XRHandDevice.rightHand;
+        Assert.That(currentHandDevice, Is.Not.Null);
 
+        // It takes at least one Input System update for the rotations to change from default to identity
+        InputSystem.Update();
+        yield return null;
+
+        // Assert tracking states are default and poses are identity before subsystem update
         Assert.That((InputTrackingState)currentHandDevice.pinchTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
         Assert.That(currentHandDevice.pinchPosition.ReadValue(), Is.EqualTo(Vector3.zero));
-        Assert.That(currentHandDevice.pinchRotation.ReadValue(), Is.EqualTo(new Quaternion()));
-        Assert.That(currentHandDevice.pinchValue.ReadValue(), Is.EqualTo(0.0f));
+        Assert.That(currentHandDevice.pinchRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
+        Assert.That(currentHandDevice.pinchValue.ReadValue(), Is.EqualTo(0f));
         Assert.That(currentHandDevice.pinchTouched.IsPressed(), Is.False);
+        Assert.That(currentHandDevice.pinchReady.IsPressed(), Is.False);
 
         Assert.That((InputTrackingState)currentHandDevice.aimTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
         Assert.That(currentHandDevice.aimPosition.ReadValue(), Is.EqualTo(Vector3.zero));
-        Assert.That(currentHandDevice.aimRotation.ReadValue(), Is.EqualTo(new Quaternion()));
-        Assert.That(currentHandDevice.aimActivateValue.ReadValue(), Is.EqualTo(0.0f));
+        Assert.That(currentHandDevice.aimRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
+        Assert.That(currentHandDevice.aimActivateValue.ReadValue(), Is.EqualTo(0f));
         Assert.That(currentHandDevice.aimActivated.IsPressed(), Is.False);
+        Assert.That(currentHandDevice.aimActivateReady.IsPressed(), Is.False);
 
         Assert.That((InputTrackingState)currentHandDevice.gripTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
         Assert.That(currentHandDevice.gripPosition.ReadValue(), Is.EqualTo(Vector3.zero));
-        Assert.That(currentHandDevice.gripRotation.ReadValue(), Is.EqualTo(new Quaternion()));
-        Assert.That(currentHandDevice.graspValue.ReadValue(), Is.EqualTo(0.0f));
+        Assert.That(currentHandDevice.gripRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
+        Assert.That(currentHandDevice.graspValue.ReadValue(), Is.EqualTo(0f));
         Assert.That(currentHandDevice.graspFirm.IsPressed(), Is.False);
+        Assert.That(currentHandDevice.graspReady.IsPressed(), Is.False);
 
         Assert.That((InputTrackingState)currentHandDevice.pokeTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
         Assert.That(currentHandDevice.pokePosition.ReadValue(), Is.EqualTo(Vector3.zero));
-        Assert.That(currentHandDevice.pokeRotation.ReadValue(), Is.EqualTo(new Quaternion()));
+        Assert.That(currentHandDevice.pokeRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
+
+        Assert.That((InputTrackingState)currentHandDevice.trackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
+        Assert.That(currentHandDevice.devicePosition.ReadValue(), Is.EqualTo(Vector3.zero));
+        Assert.That(currentHandDevice.deviceRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
 
         XRCommonHandGestures currentCommonGestures = handedness == Handedness.Left ? subsystem.leftHandCommonGestures : subsystem.rightHandCommonGestures;
         currentCommonGestures.UpdatePinchPose(expectedData.pinchPose);
         currentCommonGestures.UpdateAimPose(expectedData.aimPose);
         currentCommonGestures.UpdateGripPose(expectedData.gripPose);
+        currentCommonGestures.UpdatePokePose(expectedData.pokePose);
         currentCommonGestures.UpdatePinchValue(expectedData.pinchValue);
         currentCommonGestures.UpdatePinchTouchedState(expectedData.pinchTouchedState);
         currentCommonGestures.UpdateAimActivateValue(expectedData.aimActivateValue);
         currentCommonGestures.UpdateAimActivatedState(expectedData.aimActivatedState);
         currentCommonGestures.UpdateGraspValue(expectedData.graspValue);
         currentCommonGestures.UpdateGraspFirmState(expectedData.graspFirmState);
-        currentCommonGestures.UpdatePokePose(expectedData.pokePose);
 
-        subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic);
+        Assert.That(subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic), Is.EqualTo(XRHandSubsystem.UpdateSuccessFlags.All));
         InputSystem.Update();
         yield return null;
 
-        Vector3 pinchPosition = currentHandDevice.pinchPosition.ReadValue();
-        Quaternion pinchRotation = currentHandDevice.pinchRotation.ReadValue();
-        float pinchValue = currentHandDevice.pinchValue.ReadValue();
-        bool pinchTouched = currentHandDevice.pinchTouched.IsPressed();
-        var pinchTrackingState = (InputTrackingState)currentHandDevice.pinchTrackingState.ReadValue();
+        Assert.That((InputTrackingState)currentHandDevice.pinchTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.pinchPosition.ReadValue(), Is.EqualTo(expectedData.pinchPose.position));
+        Assert.That(currentHandDevice.pinchRotation.ReadValue(), Is.EqualTo(expectedData.pinchPose.rotation));
+        Assert.That(currentHandDevice.pinchValue.ReadValue(), Is.EqualTo(expectedData.pinchValue));
+        Assert.That(currentHandDevice.pinchTouched.IsPressed(), Is.EqualTo(expectedData.pinchTouchedState));
+        Assert.That(currentHandDevice.pinchReady.IsPressed(), Is.True);
 
-        Vector3 aimPosition = currentHandDevice.aimPosition.ReadValue();
-        Quaternion aimRotation = currentHandDevice.aimRotation.ReadValue();
-        float aimValue = currentHandDevice.aimActivateValue.ReadValue();
-        bool aimActivated = currentHandDevice.aimActivated.IsPressed();
-        var aimTrackingState = (InputTrackingState)currentHandDevice.aimTrackingState.ReadValue();
+        Assert.That((InputTrackingState)currentHandDevice.aimTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.aimPosition.ReadValue(), Is.EqualTo(expectedData.aimPose.position));
+        Assert.That(currentHandDevice.aimRotation.ReadValue(), Is.EqualTo(expectedData.aimPose.rotation));
+        Assert.That(currentHandDevice.aimActivateValue.ReadValue(), Is.EqualTo(expectedData.aimActivateValue));
+        Assert.That(currentHandDevice.aimActivated.IsPressed(), Is.EqualTo(expectedData.aimActivatedState));
+        Assert.That(currentHandDevice.aimActivateReady.IsPressed(), Is.True);
 
-        Vector3 gripPosition = currentHandDevice.gripPosition.ReadValue();
-        Quaternion gripRotation = currentHandDevice.gripRotation.ReadValue();
-        float graspValue = currentHandDevice.graspValue.ReadValue();
-        bool graspFirm = currentHandDevice.graspFirm.IsPressed();
-        var gripTrackingState = (InputTrackingState)currentHandDevice.gripTrackingState.ReadValue();
+        Assert.That((InputTrackingState)currentHandDevice.gripTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.gripPosition.ReadValue(), Is.EqualTo(expectedData.gripPose.position));
+        Assert.That(currentHandDevice.gripRotation.ReadValue(), Is.EqualTo(expectedData.gripPose.rotation));
+        Assert.That(currentHandDevice.graspValue.ReadValue(), Is.EqualTo(expectedData.graspValue));
+        Assert.That(currentHandDevice.graspFirm.IsPressed(), Is.EqualTo(expectedData.graspFirmState));
+        Assert.That(currentHandDevice.graspReady.IsPressed(), Is.True);
 
-        Vector3 pokePosition = currentHandDevice.pokePosition.ReadValue();
-        Quaternion pokeRotation = currentHandDevice.pokeRotation.ReadValue();
-        var pokeTrackingState = (InputTrackingState)currentHandDevice.pokeTrackingState.ReadValue();
+        Assert.That((InputTrackingState)currentHandDevice.pokeTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.pokePosition.ReadValue(), Is.EqualTo(expectedData.pokePose.position));
+        Assert.That(currentHandDevice.pokeRotation.ReadValue(), Is.EqualTo(expectedData.pokePose.rotation));
 
-        Assert.That(pinchPosition, Is.EqualTo(expectedData.pinchPose.position));
-        Assert.That(pinchRotation, Is.EqualTo(expectedData.pinchPose.rotation));
-        Assert.That(pinchValue, Is.EqualTo(expectedData.pinchValue));
-        Assert.That(pinchTouched, Is.EqualTo(expectedData.pinchTouchedState));
-        Assert.That(pinchTrackingState, Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That((InputTrackingState)currentHandDevice.trackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.devicePosition.ReadValue(), Is.EqualTo(expectedData.gripPose.position));
+        Assert.That(currentHandDevice.deviceRotation.ReadValue(), Is.EqualTo(expectedData.gripPose.rotation));
 
-        Assert.That(aimPosition, Is.EqualTo(expectedData.aimPose.position));
-        Assert.That(aimRotation, Is.EqualTo(expectedData.aimPose.rotation));
-        Assert.That(aimValue, Is.EqualTo(expectedData.aimActivateValue));
-        Assert.That(aimActivated, Is.EqualTo(expectedData.aimActivatedState));
-        Assert.That(aimTrackingState, Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
-
-        Assert.That(gripPosition, Is.EqualTo(expectedData.gripPose.position));
-        Assert.That(gripRotation, Is.EqualTo(expectedData.gripPose.rotation));
-        Assert.That(graspValue, Is.EqualTo(expectedData.graspValue));
-        Assert.That(graspFirm, Is.EqualTo(expectedData.graspFirmState));
-        Assert.That(gripTrackingState, Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
-
-        Assert.That(pokePosition, Is.EqualTo(expectedData.pokePose.position));
-        Assert.That(pokeRotation, Is.EqualTo(expectedData.pokePose.rotation));
-        Assert.That(pokeTrackingState, Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
-
+        subsystem.Destroy();
+        InputSystem.RemoveDevice(currentHandDevice);
         XRHandDevice.leftHand = null;
         XRHandDevice.rightHand = null;
 #else
@@ -551,98 +583,274 @@ class Tests
     public IEnumerator LegacyJointRecognitionPoseUpdatesXRHandDevice([ValueSource(nameof(s_HandednessOptions))] Handedness handedness)
     {
 #if ENABLE_INPUT_SYSTEM
+        Assume.That(handedness, Is.Not.EqualTo(Handedness.Invalid));
+        Assume.That(XRHandDevice.leftHand, Is.Null);
+        Assume.That(XRHandDevice.rightHand, Is.Null);
+
         var subsystem = TestHandUtils.CreateTestSubsystem();
-        XRHandSubsystemConfiguration configuration = new()
+        var configuration = new XRHandSubsystemConfiguration
         {
-            xrHandDevicePoseSource = XRHandDevicePoseSource.LegacyJointRecognition
+            xrHandDevicePoseSource = XRHandDevicePoseSource.LegacyJointRecognition,
         };
 
         subsystem.UpdateHandsConfiguration(configuration);
         subsystem.Start();
 
-        var updateSuccessFlags = subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic);
-
-        yield return null;
-
-        if (handedness == Handedness.Left && XRHandDevice.leftHand == null)
-            XRHandDevice.leftHand = XRHandDevice.Create(subsystem, Handedness.Left, updateSuccessFlags, XRHandSubsystem.UpdateType.Dynamic);
-        else if (handedness == Handedness.Right && XRHandDevice.rightHand == null)
-            XRHandDevice.rightHand = XRHandDevice.Create(subsystem, Handedness.Right, updateSuccessFlags, XRHandSubsystem.UpdateType.Dynamic);
+        if (handedness == Handedness.Left)
+            XRHandDevice.leftHand = XRHandDevice.Create(subsystem, Handedness.Left, XRHandSubsystem.UpdateSuccessFlags.None, XRHandSubsystem.UpdateType.Dynamic);
+        else if (handedness == Handedness.Right)
+            XRHandDevice.rightHand = XRHandDevice.Create(subsystem, Handedness.Right, XRHandSubsystem.UpdateSuccessFlags.None, XRHandSubsystem.UpdateType.Dynamic);
 
         XRHandDevice currentHandDevice = handedness == Handedness.Left ? XRHandDevice.leftHand : XRHandDevice.rightHand;
-        XRHand currentHand = handedness == Handedness.Left ? subsystem.leftHand : subsystem.rightHand;
+        Assert.That(currentHandDevice, Is.Not.Null);
 
-        Assert.That((InputTrackingState)currentHandDevice.trackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
-        Assert.That(currentHandDevice.devicePosition.ReadValue(), Is.EqualTo(Vector3.zero));
-        Assert.That(currentHandDevice.deviceRotation.ReadValue(), Is.EqualTo(new Quaternion()));
-
-        Assert.That((InputTrackingState)currentHandDevice.gripTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
-        Assert.That(currentHandDevice.gripPosition.ReadValue(), Is.EqualTo(Vector3.zero));
-        Assert.That(currentHandDevice.gripRotation.ReadValue(), Is.EqualTo(new Quaternion()));
-
-        Assert.That((InputTrackingState)currentHandDevice.pokeTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
-        Assert.That(currentHandDevice.pokePosition.ReadValue(), Is.EqualTo(Vector3.zero));
-        Assert.That(currentHandDevice.pokeRotation.ReadValue(), Is.EqualTo(new Quaternion()));
-
-        Assert.That((InputTrackingState)currentHandDevice.pinchTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
-        Assert.That(currentHandDevice.pinchPosition.ReadValue(), Is.EqualTo(Vector3.zero));
-        Assert.That(currentHandDevice.pinchRotation.ReadValue(), Is.EqualTo(new Quaternion()));
-
-        // Assert tracking states are None before update
-        Assert.That((InputTrackingState)currentHandDevice.aimTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
-        Assert.That(currentHandDevice.aimPosition.ReadValue(), Is.EqualTo(Vector3.zero));
-        Assert.That(currentHandDevice.aimRotation.ReadValue(), Is.EqualTo(new Quaternion()));
-
+        // It takes at least one Input System update for the rotations to change from default to identity
         InputSystem.Update();
         yield return null;
 
-        var deviceTrackingState = (InputTrackingState)currentHandDevice.trackingState.ReadValue();
-        Vector3 devicePosition = currentHandDevice.devicePosition.ReadValue();
-        Quaternion deviceRotation = currentHandDevice.deviceRotation.ReadValue();
-        currentHand.GetJoint(XRHandJointID.Wrist).TryGetPose(out var wristPose);
+        // Assert tracking states are default and poses are identity before subsystem update
+        Assert.That((InputTrackingState)currentHandDevice.trackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
+        Assert.That(currentHandDevice.devicePosition.ReadValue(), Is.EqualTo(Vector3.zero));
+        Assert.That(currentHandDevice.deviceRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
 
-        var aimTrackingState = (InputTrackingState)currentHandDevice.aimTrackingState.ReadValue();
-        Vector3 aimPosition = currentHandDevice.aimPosition.ReadValue();
-        Quaternion aimRotation = currentHandDevice.aimRotation.ReadValue();
+        Assert.That((InputTrackingState)currentHandDevice.gripTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
+        Assert.That(currentHandDevice.gripPosition.ReadValue(), Is.EqualTo(Vector3.zero));
+        Assert.That(currentHandDevice.gripRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
 
-        var gripTrackingState = (InputTrackingState)currentHandDevice.gripTrackingState.ReadValue();
-        Vector3 gripPosition = currentHandDevice.gripPosition.ReadValue();
-        Quaternion gripRotation = currentHandDevice.gripRotation.ReadValue();
-        currentHand.GetJoint(XRHandJointID.Palm).TryGetPose(out var palmPose);
+        Assert.That((InputTrackingState)currentHandDevice.pokeTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
+        Assert.That(currentHandDevice.pokePosition.ReadValue(), Is.EqualTo(Vector3.zero));
+        Assert.That(currentHandDevice.pokeRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
 
-        var pokeTrackingState = (InputTrackingState)currentHandDevice.pokeTrackingState.ReadValue();
-        Vector3 pokePosition = currentHandDevice.pokePosition.ReadValue();
-        Quaternion pokeRotation = currentHandDevice.pokeRotation.ReadValue();
-        currentHand.GetJoint(XRHandJointID.IndexTip).TryGetPose(out var indexTipPose);
+        Assert.That((InputTrackingState)currentHandDevice.pinchTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
+        Assert.That(currentHandDevice.pinchPosition.ReadValue(), Is.EqualTo(Vector3.zero));
+        Assert.That(currentHandDevice.pinchRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
 
-        var pinchTrackingState = (InputTrackingState)currentHandDevice.pinchTrackingState.ReadValue();
-        Vector3 pinchPosition = currentHandDevice.pinchPosition.ReadValue();
-        Quaternion pinchRotation = currentHandDevice.pinchRotation.ReadValue();
-        currentHand.GetJoint(XRHandJointID.ThumbTip).TryGetPose(out var thumbTipPose);
+        Assert.That((InputTrackingState)currentHandDevice.aimTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
+        Assert.That(currentHandDevice.aimPosition.ReadValue(), Is.EqualTo(Vector3.zero));
+        Assert.That(currentHandDevice.aimRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
 
-        Assert.That(deviceTrackingState, Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
-        Assert.That(devicePosition, Is.EqualTo(wristPose.position));
-        Assert.That(deviceRotation, Is.EqualTo(wristPose.rotation));
+        Assert.That(subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic), Is.EqualTo(XRHandSubsystem.UpdateSuccessFlags.All));
+        InputSystem.Update();
+        yield return null;
 
-        Assert.That(gripTrackingState, Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
-        Assert.That(gripPosition, Is.EqualTo(palmPose.position));
-        Assert.That(gripRotation, Is.EqualTo(palmPose.rotation));
+        XRHand currentHand = handedness == Handedness.Left ? subsystem.leftHand : subsystem.rightHand;
 
-        Assert.That(pokeTrackingState, Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
-        Assert.That(pokePosition, Is.EqualTo(indexTipPose.position));
-        Assert.That(pokeRotation, Is.EqualTo(indexTipPose.rotation));
+        Assert.That(currentHand.GetJoint(XRHandJointID.Wrist).TryGetPose(out var wristPose), Is.True);
+        Assert.That(currentHand.GetJoint(XRHandJointID.Palm).TryGetPose(out var palmPose), Is.True);
+        Assert.That(currentHand.GetJoint(XRHandJointID.IndexTip).TryGetPose(out var indexTipPose), Is.True);
+        Assert.That(currentHand.GetJoint(XRHandJointID.ThumbTip).TryGetPose(out var thumbTipPose), Is.True);
 
-        Assert.That(pinchTrackingState, Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
-        Assert.That(pinchPosition, Is.EqualTo(thumbTipPose.position));
-        Assert.That(pinchRotation, Is.EqualTo(thumbTipPose.rotation));
+        Assert.That((InputTrackingState)currentHandDevice.trackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.devicePosition.ReadValue(), Is.EqualTo(wristPose.position));
+        Assert.That(currentHandDevice.deviceRotation.ReadValue(), Is.EqualTo(wristPose.rotation));
 
-        // Make sure aim is still reporting nothing
-        Assert.That(aimTrackingState, Is.EqualTo(InputTrackingState.None));
-        Assert.That(aimPosition, Is.EqualTo(Vector3.zero));
-        Assert.That(aimRotation, Is.EqualTo(new Quaternion()));
+        Assert.That((InputTrackingState)currentHandDevice.gripTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.gripPosition.ReadValue(), Is.EqualTo(palmPose.position));
+        Assert.That(currentHandDevice.gripRotation.ReadValue(), Is.EqualTo(palmPose.rotation));
 
-       XRHandDevice.leftHand = null;
-       XRHandDevice.rightHand = null;
+        Assert.That((InputTrackingState)currentHandDevice.pokeTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.pokePosition.ReadValue(), Is.EqualTo(indexTipPose.position));
+        Assert.That(currentHandDevice.pokeRotation.ReadValue(), Is.EqualTo(indexTipPose.rotation));
+
+        Assert.That((InputTrackingState)currentHandDevice.pinchTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.pinchPosition.ReadValue(), Is.EqualTo(thumbTipPose.position));
+        Assert.That(currentHandDevice.pinchRotation.ReadValue(), Is.EqualTo(thumbTipPose.rotation));
+
+        // Make sure aim is still reporting nothing since Legacy does not drive that pose
+        Assert.That((InputTrackingState)currentHandDevice.aimTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
+        Assert.That(currentHandDevice.aimPosition.ReadValue(), Is.EqualTo(Vector3.zero));
+        Assert.That(currentHandDevice.aimRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
+
+        subsystem.Destroy();
+        InputSystem.RemoveDevice(currentHandDevice);
+        XRHandDevice.leftHand = null;
+        XRHandDevice.rightHand = null;
+#else
+        yield return null;
+#endif
+    }
+
+    [UnityTest]
+    public IEnumerator ConfigurationUpdateResetsXRHandDevice([ValueSource(nameof(s_HandednessOptions))] Handedness handedness)
+    {
+#if ENABLE_INPUT_SYSTEM
+        Assume.That(handedness, Is.Not.EqualTo(Handedness.Invalid));
+        Assume.That(XRHandDevice.leftHand, Is.Null);
+        Assume.That(XRHandDevice.rightHand, Is.Null);
+
+        var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
+        var subsystem = TestHandUtils.CreateTestSubsystem();
+        var configuration = new XRHandSubsystemConfiguration
+        {
+            xrHandDevicePoseSource = XRHandDevicePoseSource.CommonGestures,
+        };
+        subsystem.UpdateHandsConfiguration(configuration);
+        subsystem.Start();
+
+        if (handedness == Handedness.Left)
+            XRHandDevice.leftHand = XRHandDevice.Create(subsystem, Handedness.Left, XRHandSubsystem.UpdateSuccessFlags.None, XRHandSubsystem.UpdateType.Dynamic);
+        else if (handedness == Handedness.Right)
+            XRHandDevice.rightHand = XRHandDevice.Create(subsystem, Handedness.Right, XRHandSubsystem.UpdateSuccessFlags.None, XRHandSubsystem.UpdateType.Dynamic);
+
+        XRHandDevice currentHandDevice = handedness == Handedness.Left ? XRHandDevice.leftHand : XRHandDevice.rightHand;
+        Assert.That(currentHandDevice, Is.Not.Null);
+
+        XRCommonHandGestures currentCommonGestures = handedness == Handedness.Left ? subsystem.leftHandCommonGestures : subsystem.rightHandCommonGestures;
+        currentCommonGestures.UpdatePinchPose(expectedData.pinchPose);
+        currentCommonGestures.UpdateAimPose(expectedData.aimPose);
+        currentCommonGestures.UpdateGripPose(expectedData.gripPose);
+        currentCommonGestures.UpdatePokePose(expectedData.pokePose);
+        currentCommonGestures.UpdatePinchValue(expectedData.pinchValue);
+        currentCommonGestures.UpdatePinchTouchedState(expectedData.pinchTouchedState);
+        currentCommonGestures.UpdateAimActivateValue(expectedData.aimActivateValue);
+        currentCommonGestures.UpdateAimActivatedState(expectedData.aimActivatedState);
+        currentCommonGestures.UpdateGraspValue(expectedData.graspValue);
+        currentCommonGestures.UpdateGraspFirmState(expectedData.graspFirmState);
+
+        Assert.That(subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic), Is.EqualTo(XRHandSubsystem.UpdateSuccessFlags.All));
+        InputSystem.Update();
+        yield return null;
+
+        Assert.That((InputTrackingState)currentHandDevice.pinchTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.pinchPosition.ReadValue(), Is.EqualTo(expectedData.pinchPose.position));
+        Assert.That(currentHandDevice.pinchRotation.ReadValue(), Is.EqualTo(expectedData.pinchPose.rotation));
+        Assert.That(currentHandDevice.pinchValue.ReadValue(), Is.EqualTo(expectedData.pinchValue));
+        Assert.That(currentHandDevice.pinchTouched.IsPressed(), Is.EqualTo(expectedData.pinchTouchedState));
+        Assert.That(currentHandDevice.pinchReady.IsPressed(), Is.True);
+
+        Assert.That((InputTrackingState)currentHandDevice.aimTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.aimPosition.ReadValue(), Is.EqualTo(expectedData.aimPose.position));
+        Assert.That(currentHandDevice.aimRotation.ReadValue(), Is.EqualTo(expectedData.aimPose.rotation));
+        Assert.That(currentHandDevice.aimActivateValue.ReadValue(), Is.EqualTo(expectedData.aimActivateValue));
+        Assert.That(currentHandDevice.aimActivated.IsPressed(), Is.EqualTo(expectedData.aimActivatedState));
+        Assert.That(currentHandDevice.aimActivateReady.IsPressed(), Is.True);
+
+        Assert.That((InputTrackingState)currentHandDevice.gripTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.gripPosition.ReadValue(), Is.EqualTo(expectedData.gripPose.position));
+        Assert.That(currentHandDevice.gripRotation.ReadValue(), Is.EqualTo(expectedData.gripPose.rotation));
+        Assert.That(currentHandDevice.graspValue.ReadValue(), Is.EqualTo(expectedData.graspValue));
+        Assert.That(currentHandDevice.graspFirm.IsPressed(), Is.EqualTo(expectedData.graspFirmState));
+        Assert.That(currentHandDevice.graspReady.IsPressed(), Is.True);
+
+        Assert.That((InputTrackingState)currentHandDevice.pokeTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.pokePosition.ReadValue(), Is.EqualTo(expectedData.pokePose.position));
+        Assert.That(currentHandDevice.pokeRotation.ReadValue(), Is.EqualTo(expectedData.pokePose.rotation));
+
+        Assert.That((InputTrackingState)currentHandDevice.trackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.devicePosition.ReadValue(), Is.EqualTo(expectedData.gripPose.position));
+        Assert.That(currentHandDevice.deviceRotation.ReadValue(), Is.EqualTo(expectedData.gripPose.rotation));
+
+        // Change configuration to legacy
+        configuration.xrHandDevicePoseSource = XRHandDevicePoseSource.LegacyJointRecognition;
+        subsystem.UpdateHandsConfiguration(configuration);
+
+        Assert.That(subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic), Is.EqualTo(XRHandSubsystem.UpdateSuccessFlags.All));
+        InputSystem.Update();
+        yield return null;
+
+        // Legacy does not drive aim pose so it should be reset
+        Assert.That((InputTrackingState)currentHandDevice.aimTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
+        Assert.That(currentHandDevice.aimPosition.ReadValue(), Is.EqualTo(Vector3.zero));
+        Assert.That(currentHandDevice.aimRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
+
+        // All other non-driven fields should also be reset
+        Assert.That(currentHandDevice.pinchValue.ReadValue(), Is.EqualTo(0f));
+        Assert.That(currentHandDevice.pinchTouched.IsPressed(), Is.False);
+        Assert.That(currentHandDevice.pinchReady.IsPressed(), Is.False);
+
+        Assert.That(currentHandDevice.aimActivateValue.ReadValue(), Is.EqualTo(0f));
+        Assert.That(currentHandDevice.aimActivated.IsPressed(), Is.False);
+        Assert.That(currentHandDevice.aimActivateReady.IsPressed(), Is.False);
+
+        Assert.That(currentHandDevice.graspValue.ReadValue(), Is.EqualTo(0f));
+        Assert.That(currentHandDevice.graspFirm.IsPressed(), Is.False);
+        Assert.That(currentHandDevice.graspReady.IsPressed(), Is.False);
+
+        subsystem.Destroy();
+        InputSystem.RemoveDevice(currentHandDevice);
+        XRHandDevice.leftHand = null;
+        XRHandDevice.rightHand = null;
+#else
+        yield return null;
+#endif
+    }
+
+    [UnityTest]
+    public IEnumerator ConfigurationUpdateWorksWithTrackingStateAction([ValueSource(nameof(s_HandednessOptions))] Handedness handedness)
+    {
+#if ENABLE_INPUT_SYSTEM
+        Assume.That(handedness, Is.Not.EqualTo(Handedness.Invalid));
+        Assume.That(XRHandDevice.leftHand, Is.Null);
+        Assume.That(XRHandDevice.rightHand, Is.Null);
+
+        var deviceUsageString = handedness == Handedness.Left ? "{LeftHand}" : "{RightHand}";
+        var inputAction = new InputAction("Tracking State", InputActionType.Value, $"<XRHandDevice>{deviceUsageString}/trackingState");
+        inputAction.Enable();
+
+        var subsystem = TestHandUtils.CreateTestSubsystem();
+        var configuration = new XRHandSubsystemConfiguration
+        {
+            xrHandDevicePoseSource = XRHandDevicePoseSource.LegacyJointRecognition,
+        };
+
+        subsystem.UpdateHandsConfiguration(configuration);
+        subsystem.Start();
+
+        if (handedness == Handedness.Left)
+            XRHandDevice.leftHand = XRHandDevice.Create(subsystem, Handedness.Left, XRHandSubsystem.UpdateSuccessFlags.None, XRHandSubsystem.UpdateType.Dynamic);
+        else if (handedness == Handedness.Right)
+            XRHandDevice.rightHand = XRHandDevice.Create(subsystem, Handedness.Right, XRHandSubsystem.UpdateSuccessFlags.None, XRHandSubsystem.UpdateType.Dynamic);
+
+        XRHandDevice currentHandDevice = handedness == Handedness.Left ? XRHandDevice.leftHand : XRHandDevice.rightHand;
+        Assert.That(currentHandDevice, Is.Not.Null);
+
+        // It takes at least one Input System update for the rotations to change from default to identity
+        InputSystem.Update();
+        yield return null;
+
+        // Assert tracking states are default and poses are identity before subsystem update
+        Assert.That((InputTrackingState)currentHandDevice.trackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
+        Assert.That(currentHandDevice.devicePosition.ReadValue(), Is.EqualTo(Vector3.zero));
+        Assert.That(currentHandDevice.deviceRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
+        Assert.That((InputTrackingState)inputAction.ReadValue<int>(), Is.EqualTo(InputTrackingState.None));
+
+        Assert.That(subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic), Is.EqualTo(XRHandSubsystem.UpdateSuccessFlags.All));
+        InputSystem.Update();
+        yield return null;
+
+        XRHand currentHand = handedness == Handedness.Left ? subsystem.leftHand : subsystem.rightHand;
+
+        Assert.That(currentHand.GetJoint(XRHandJointID.Wrist).TryGetPose(out var wristPose), Is.True);
+
+        Assert.That((InputTrackingState)currentHandDevice.trackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.devicePosition.ReadValue(), Is.EqualTo(wristPose.position));
+        Assert.That(currentHandDevice.deviceRotation.ReadValue(), Is.EqualTo(wristPose.rotation));
+        Assert.That((InputTrackingState)inputAction.ReadValue<int>(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+
+        // Change configuration from legacy to common gestures
+        configuration.xrHandDevicePoseSource = XRHandDevicePoseSource.CommonGestures;
+        subsystem.UpdateHandsConfiguration(configuration);
+
+        XRCommonHandGestures currentCommonGestures = handedness == Handedness.Left ? subsystem.leftHandCommonGestures : subsystem.rightHandCommonGestures;
+        var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
+        currentCommonGestures.UpdateGripPose(expectedData.gripPose);
+
+        Assert.That(subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic), Is.EqualTo(XRHandSubsystem.UpdateSuccessFlags.All));
+        InputSystem.Update();
+        yield return null;
+
+        Assert.That((InputTrackingState)currentHandDevice.trackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.devicePosition.ReadValue(), Is.EqualTo(expectedData.gripPose.position));
+        Assert.That(currentHandDevice.deviceRotation.ReadValue(), Is.EqualTo(expectedData.gripPose.rotation));
+        Assert.That((InputTrackingState)inputAction.ReadValue<int>(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+
+        inputAction.Disable();
+        inputAction.Dispose();
+
+        subsystem.Destroy();
+        InputSystem.RemoveDevice(currentHandDevice);
+        XRHandDevice.leftHand = null;
+        XRHandDevice.rightHand = null;
 #else
         yield return null;
 #endif
