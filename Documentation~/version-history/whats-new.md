@@ -2,6 +2,31 @@
 uid: xrhands-whats-new
 ---
 
+# What's new in version 1.9
+
+The main updates in this release include:
+
+## Added
+
+### Hand tracking extensibility
+
+The new [hand tracking extensibility](xref:xrhands-openxr-hand-extensibility) APIs let you augment Unity's OpenXR hand tracking with additional OpenXR extensions. By deriving from the new [OpenXRHandTrackingFeature](xref:UnityEngine.XR.Hands.OpenXR.OpenXRHandTrackingFeature), device vendors and SDK authors can attach custom extension structures to the `xrCreateHandTrackerEXT` and `xrLocateHandJointsEXT` calls and read runtime-supplied data each frame. A new [XrStructureChain](xref:UnityEngine.XR.Hands.OpenXR.NativeInterop.XrStructureChain) type manages these extension structures in unmanaged memory.
+
+This release also adds support for two OpenXR features built on this mechanism:
+
+* [Hand Tracking Data Source](xref:xrhands-openxr-data-source-feature): Choose a preferred hand tracking data source per hand and query the active source at runtime.
+* [Hand Joints Motion Range](xref:xrhands-openxr-motion-range-feature): Constrain hand joint poses to natural movement or controller-conforming movement.
+
+### GPU-skinned hand rendering
+
+[XRHandMeshData](xref:UnityEngine.XR.Hands.Meshing.XRHandMeshData) now includes bone weights, bind poses, and joint radii, so you can render hands with a [SkinnedMeshRenderer](https://docs.unity3d.com/ScriptReference/SkinnedMeshRenderer.html) instead of rebuilding mesh vertices every frame.
+
+Supporting OpenXR features, such as [Meta Quest: Hand Mesh Data](xref:openxr-hand-mesh-data), supply this data through [XRHandSubsystem.TryGetMeshData](xref:UnityEngine.XR.Hands.XRHandSubsystem.TryGetMeshData*). Refer to [GPU-Skinned Hand Rendering](xref:xrhands-visuals#gpu-skinned-hand-rendering).
+
+## Changed
+
+The minimum supported editor version increased to 6000.0 from 2022.3.
+
 # What's new in version 1.8
 
 The main updates in this release include:

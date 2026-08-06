@@ -202,8 +202,7 @@ namespace UnityEngine.XR.Hands.Capture.Playback
             if (current.TryGetAimPose(out var currentAimPose) &&
                 next.TryGetAimPose(out var nextAimPose))
             {
-                var interpolatedAimPose = InterpolatePose(currentAimPose, nextAimPose, blendScalar);
-                interpolated.SetAimPose(interpolatedAimPose);
+                interpolated.aimPoseInternal = InterpolatePose(currentAimPose, nextAimPose, blendScalar);
             }
 
             return true;

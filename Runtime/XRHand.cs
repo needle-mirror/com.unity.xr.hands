@@ -1,5 +1,6 @@
 using System;
 using Unity.Collections;
+using UnityEngine.InputSystem;
 using UnityEngine.XR.Hands.ProviderImplementation;
 
 namespace UnityEngine.XR.Hands
@@ -67,9 +68,15 @@ namespace UnityEngine.XR.Hands
         public Handedness handedness => m_Handedness;
 
         /// <summary>
-        /// Whether the subsystem is currently tracking this hand's root pose and joints.
+        /// Whether the subsystem is currently actively tracking this hand's root pose and joints.
         /// </summary>
-        /// <value>Indicates the tracking status as of the last hand data update.</value>
+        /// <value>Indicates the active tracking status as of the last hand data update.</value>
+        /// <remarks>
+        /// Despite the name shared with <see cref="TrackedDevice.isTracked"/>, this property more closely relates to
+        /// <see cref="TrackedDevice.trackingState"/> where it is about the validity. This property indicates
+        /// that it's meaningful for the application to use pose data, though it may not necessarily indicate
+        /// that the poses are tracked and thus may be inferred or last-known.
+        /// </remarks>
         public bool isTracked
         {
             get => m_IsTracked;

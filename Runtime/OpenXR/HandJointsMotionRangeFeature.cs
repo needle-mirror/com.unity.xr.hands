@@ -13,8 +13,8 @@ namespace UnityEngine.XR.Hands.OpenXR
 {
     /// <summary>
     /// This <see cref="OpenXRFeature"/> enables
-    /// <see href="https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#XR_EXT_hand_joints_motion_range">
-    /// XR_EXT_hand_joints_motion_range</see>, allowing the application to
+    /// <a href="https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#XR_EXT_hand_joints_motion_range">
+    /// XR_EXT_hand_joints_motion_range</a>, allowing the application to
     /// constrain hand joint poses to either natural (unobstructed) motion or
     /// motion conforming to a held controller.
     /// </summary>

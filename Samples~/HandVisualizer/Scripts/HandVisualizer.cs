@@ -61,7 +61,8 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
         GameObject m_AndroidXRRightHandMesh;
 
         [SerializeField]
-        [Tooltip("(Optional) If this is set, the hand meshes will be assigned this material.")]
+        [Tooltip("(Optional) If this is set, the hand meshes will be assigned this material." +
+                 "<br><br>Note: If there is more than one material on the mesh, all materials will be replaced by this single material.")]
         Material m_HandMeshMaterial;
 
         [SerializeField]
@@ -445,7 +446,10 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
 
                 if (meshMaterial != null)
                 {
-                    m_MeshController.handMeshRenderer.sharedMaterial = meshMaterial;
+                    if (m_MeshController.handMeshRenderer.sharedMaterials.Length > 1)
+                        m_MeshController.handMeshRenderer.sharedMaterials = new Material[] { meshMaterial };
+                    else
+                        m_MeshController.handMeshRenderer.sharedMaterial = meshMaterial;
                 }
 
                 var skeletonDriver = m_HandRoot.GetComponent<XRHandSkeletonDriver>();

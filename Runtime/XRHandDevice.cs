@@ -1,10 +1,9 @@
-#if ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION
-
 using System;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.Layouts;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.Scripting;
 using UnityEngine.XR.Hands.Configuration;
@@ -180,6 +179,7 @@ namespace UnityEngine.XR.Hands
         Action<XRHandSubsystem, XRHandSubsystem.UpdateSuccessFlags, XRHandSubsystem.UpdateType> m_UpdateBehavior;
 
         XRHandDeviceState m_DeviceState;
+        bool m_DeviceStateDirty = true;
 
         /// <summary>
         /// Perform final initialization tasks after the control hierarchy has been put into place.
@@ -210,11 +210,18 @@ namespace UnityEngine.XR.Hands
             aimActivated = GetChildControl<ButtonControl>("aimActivated");
             aimActivateReady = GetChildControl<ButtonControl>("aimActivateReady");
 
+            // Explicitly initialize all rotations in the device state to identity (Quaternion(0f, 0f, 0f, 1f))
+            // instead of the struct default (Quaternion(0f, 0f, 0f, 0f)).
             m_DeviceState.gripRotation = Quaternion.identity;
             m_DeviceState.pokeRotation = Quaternion.identity;
             m_DeviceState.pinchRotation = Quaternion.identity;
             m_DeviceState.aimRotation = Quaternion.identity;
+            m_DeviceState.deviceRotation = Quaternion.identity;
 
+            // Ensure these initial rotation state changes are pushed even when the hand is not valid
+            m_DeviceStateDirty = true;
+
+#if ENABLE_VR || UNITY_GAMECORE // UnityEngine.InputSystem.XR.XRDeviceDescriptor.characteristics is guarded with these defines starting with com.unity.inputsystem@1.14.2
             var deviceDescriptor = XRDeviceDescriptor.FromJson(description.capabilities);
             if (deviceDescriptor != null)
             {
@@ -223,6 +230,15 @@ namespace UnityEngine.XR.Hands
                 else if ((deviceDescriptor.characteristics & InputDeviceCharacteristics.Right) != 0)
                     InputSystem.InputSystem.SetDeviceUsage(this, InputSystem.CommonUsages.RightHand);
             }
+#endif // ENABLE_VR || UNITY_GAMECORE
+        }
+
+        /// <inheritdoc />
+        protected override unsafe long ExecuteCommand(InputDeviceCommand* commandPtr)
+        {
+            return XRHandDeviceUtility.TryExecuteCommand(commandPtr, out var result)
+                ? result
+                : base.ExecuteCommand(commandPtr);
         }
 
         internal static XRHandDevice Create(
@@ -231,14 +247,15 @@ namespace UnityEngine.XR.Hands
             XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags,
             XRHandSubsystem.UpdateType updateType)
         {
-            var extraCharacteristics = handedness == Handedness.Left ? InputDeviceCharacteristics.Left : InputDeviceCharacteristics.Right;
-
             var desc = new InputDeviceDescription
             {
                 product = k_DeviceProductName,
                 capabilities = new XRDeviceDescriptor
                 {
-                    characteristics = InputDeviceCharacteristics.HandTracking | InputDeviceCharacteristics.TrackedDevice | extraCharacteristics,
+#if ENABLE_VR || UNITY_GAMECORE // UnityEngine.InputSystem.XR.XRDeviceDescriptor.characteristics is guarded with these defines starting with com.unity.inputsystem@1.14.2
+                    characteristics = InputDeviceCharacteristics.HandTracking | InputDeviceCharacteristics.TrackedDevice |
+                        (handedness == Handedness.Left ? InputDeviceCharacteristics.Left : InputDeviceCharacteristics.Right),
+#endif // ENABLE_VR || UNITY_GAMECORE
                     inputFeatures = new List<XRFeatureDescriptor>
                     {
                         new XRFeatureDescriptor
@@ -352,34 +369,63 @@ namespace UnityEngine.XR.Hands
             var handDevice = InputSystem.InputSystem.AddDevice(desc) as XRHandDevice;
             if (handDevice != null)
             {
+                handDevice.m_Handedness = handedness;
+
+#if !(ENABLE_VR || UNITY_GAMECORE) // Ensure the device usage is set when the characteristics property is unavailable
+                if (handedness == Handedness.Left)
+                    InputSystem.InputSystem.SetDeviceUsage(handDevice, InputSystem.CommonUsages.LeftHand);
+                else if (handedness == Handedness.Right)
+                    InputSystem.InputSystem.SetDeviceUsage(handDevice, InputSystem.CommonUsages.RightHand);
+#endif // !(ENABLE_VR || UNITY_GAMECORE)
+
                 subsystem.updatedHands += handDevice.OnUpdatedHands;
                 subsystem.configurationUpdated += handDevice.OnXRHandSubsystemConfigUpdated;
 
-                handDevice.m_Handedness = handedness;
-                handDevice.m_UpdateBehavior = handDevice.OnUpdatedHandsLegacy;
-
-                handDevice.OnDevicePoseSourceUpdated(subsystem.handSubsystemConfiguration.xrHandDevicePoseSource);
+                // Initialize the update method we will use for each frame and trigger initial update
+                handDevice.SetDevicePoseSource(subsystem.handSubsystemConfiguration.xrHandDevicePoseSource);
                 handDevice.OnUpdatedHands(subsystem, updateSuccessFlags, updateType);
             }
 
             return handDevice;
         }
 
-        void OnXRHandSubsystemConfigUpdated(XRHandSubsystemConfigurationUpdatedEventArgs args)
+        void SetDevicePoseSource(XRHandDevicePoseSource poseSource)
         {
-            OnDevicePoseSourceUpdated(args.newConfiguration.xrHandDevicePoseSource);
-        }
-
-        void OnDevicePoseSourceUpdated(XRHandDevicePoseSource newPoseSource)
-        {
-            if (newPoseSource == XRHandDevicePoseSource.CommonGestures)
+            if (poseSource == XRHandDevicePoseSource.LegacyJointRecognition)
+                m_UpdateBehavior = OnUpdatedHandsLegacy;
+            else if (poseSource == XRHandDevicePoseSource.CommonGestures)
                 m_UpdateBehavior = OnUpdatedHandsCommonGesture;
             else
-                m_UpdateBehavior = OnUpdatedHandsLegacy;
+                throw new ArgumentException($"Unhandled {typeof(XRHandDevicePoseSource)}={poseSource}", nameof(poseSource));
         }
 
-        void OnUpdatedHands(XRHandSubsystem subsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags,
-            XRHandSubsystem.UpdateType updateType)
+        void OnXRHandSubsystemConfigUpdated(XRHandSubsystemConfigurationUpdatedEventArgs args)
+        {
+            var poseSource = args.newConfiguration.xrHandDevicePoseSource;
+            SetDevicePoseSource(poseSource);
+
+            if (poseSource == XRHandDevicePoseSource.LegacyJointRecognition)
+            {
+                // Reset all fields that are potentially set during the CommonGestures path and never in the Legacy path
+                // to ensure all fields are not frozen in place at some last driven CommonGestures value.
+                m_DeviceState.graspValue = default;
+                m_DeviceState.graspReady = default;
+                m_DeviceState.graspFirm = default;
+                m_DeviceState.pinchValue = default;
+                m_DeviceState.pinchReady = default;
+                m_DeviceState.pinchTouched = default;
+                m_DeviceState.aimActivateValue = default;
+                m_DeviceState.aimActivateReady = default;
+                m_DeviceState.aimActivated = default;
+                m_DeviceState.aimPosition = default;
+                m_DeviceState.aimRotation = Quaternion.identity;
+                m_DeviceState.aimTrackingState = (int)InputTrackingState.None;
+
+                m_DeviceStateDirty = true;
+            }
+        }
+
+        void OnUpdatedHands(XRHandSubsystem subsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateType)
         {
             m_UpdateBehavior(subsystem, updateSuccessFlags, updateType);
         }
@@ -391,63 +437,71 @@ namespace UnityEngine.XR.Hands
             if (m_Handedness == Handedness.Left)
             {
                 hand = subsystem.leftHand;
-                var success = XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints;
+                const XRHandSubsystem.UpdateSuccessFlags success = XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints;
                 isValid = (updateSuccessFlags & success) == success;
             }
             else
             {
                 hand = subsystem.rightHand;
-                var success = XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
+                const XRHandSubsystem.UpdateSuccessFlags success = XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
                 isValid = (updateSuccessFlags & success) == success;
             }
 
-            if (!m_WasValid && !isValid)
-                return;
-
-            if (m_WasValid && !isValid)
+            if (!isValid)
             {
-                InputSystem.InputSystem.QueueDeltaStateEvent(isTracked, false);
-                InputSystem.InputSystem.QueueDeltaStateEvent(trackingState, InputTrackingState.None);
-                InputSystem.InputSystem.QueueDeltaStateEvent(gripTrackingState, InputTrackingState.None);
-                InputSystem.InputSystem.QueueDeltaStateEvent(pokeTrackingState, InputTrackingState.None);
-                InputSystem.InputSystem.QueueDeltaStateEvent(pinchTrackingState, InputTrackingState.None);
-                m_WasValid = false;
+                if (m_WasValid)
+                {
+                    m_DeviceState.isTracked = false;
+                    m_DeviceState.trackingState = (int)InputTrackingState.None;
+                    m_DeviceState.gripTrackingState = (int)InputTrackingState.None;
+                    m_DeviceState.pokeTrackingState = (int)InputTrackingState.None;
+                    m_DeviceState.pinchTrackingState = (int)InputTrackingState.None;
+                    m_WasValid = false;
+
+                    m_DeviceStateDirty = true;
+                }
+
+                if (m_DeviceStateDirty)
+                    QueueStateEvent();
+
                 return;
             }
 
-            if (!m_WasValid && isValid)
-            {
-                InputSystem.InputSystem.QueueDeltaStateEvent(isTracked, true);
-                InputSystem.InputSystem.QueueDeltaStateEvent(trackingState, InputTrackingState.Position | InputTrackingState.Rotation);
-                InputSystem.InputSystem.QueueDeltaStateEvent(gripTrackingState, InputTrackingState.Position | InputTrackingState.Rotation);
-                InputSystem.InputSystem.QueueDeltaStateEvent(pokeTrackingState, InputTrackingState.Position | InputTrackingState.Rotation);
-                InputSystem.InputSystem.QueueDeltaStateEvent(pinchTrackingState, InputTrackingState.Position | InputTrackingState.Rotation);
-                m_WasValid = true;
-            }
+            m_WasValid = true;
+
+            const int poseFullyTracked = (int)(InputTrackingState.Position | InputTrackingState.Rotation);
+
+            m_DeviceState.isTracked = true;
+            m_DeviceState.trackingState = poseFullyTracked;
+            m_DeviceState.gripTrackingState = poseFullyTracked;
+            m_DeviceState.pokeTrackingState = poseFullyTracked;
+            m_DeviceState.pinchTrackingState = poseFullyTracked;
 
             if (hand.GetJoint(XRHandJointID.Wrist).TryGetPose(out var wristPose))
             {
-                InputSystem.InputSystem.QueueDeltaStateEvent(devicePosition, wristPose.position);
-                InputSystem.InputSystem.QueueDeltaStateEvent(deviceRotation, wristPose.rotation);
+                m_DeviceState.devicePosition = wristPose.position;
+                m_DeviceState.deviceRotation = wristPose.rotation;
             }
 
             if (hand.GetJoint(XRHandJointID.Palm).TryGetPose(out var palmPose))
             {
-                InputSystem.InputSystem.QueueDeltaStateEvent(gripPosition, palmPose.position);
-                InputSystem.InputSystem.QueueDeltaStateEvent(gripRotation, palmPose.rotation);
+                m_DeviceState.gripPosition = palmPose.position;
+                m_DeviceState.gripRotation = palmPose.rotation;
             }
 
             if (hand.GetJoint(XRHandJointID.IndexTip).TryGetPose(out var indexTipPose))
             {
-                InputSystem.InputSystem.QueueDeltaStateEvent(pokePosition, indexTipPose.position);
-                InputSystem.InputSystem.QueueDeltaStateEvent(pokeRotation, indexTipPose.rotation);
+                m_DeviceState.pokePosition = indexTipPose.position;
+                m_DeviceState.pokeRotation = indexTipPose.rotation;
             }
 
             if (hand.GetJoint(XRHandJointID.ThumbTip).TryGetPose(out var thumbTipPose))
             {
-                InputSystem.InputSystem.QueueDeltaStateEvent(pinchPosition, thumbTipPose.position);
-                InputSystem.InputSystem.QueueDeltaStateEvent(pinchRotation, thumbTipPose.rotation);
+                m_DeviceState.pinchPosition = thumbTipPose.position;
+                m_DeviceState.pinchRotation = thumbTipPose.rotation;
             }
+
+            QueueStateEvent();
         }
 
         void OnUpdatedHandsCommonGesture(XRHandSubsystem subsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateType)
@@ -457,40 +511,45 @@ namespace UnityEngine.XR.Hands
             if (m_Handedness == Handedness.Left)
             {
                 commonGestures = subsystem.leftHandCommonGestures;
-                var success = XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints;
+                const XRHandSubsystem.UpdateSuccessFlags success = XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints;
                 isValid = (updateSuccessFlags & success) == success;
             }
             else
             {
                 commonGestures = subsystem.rightHandCommonGestures;
-                var success = XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
+                const XRHandSubsystem.UpdateSuccessFlags success = XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
                 isValid = (updateSuccessFlags & success) == success;
             }
 
-            if (!m_WasValid && !isValid)
-                return;
-
-            if (m_WasValid && !isValid)
+            if (!isValid)
             {
-                m_DeviceState.isTracked = false;
-                m_DeviceState.trackingState = (int) InputTrackingState.None;
-                m_DeviceState.aimTrackingState = (int) InputTrackingState.None;
-                m_DeviceState.gripTrackingState = (int) InputTrackingState.None;
-                m_DeviceState.pokeTrackingState = (int) InputTrackingState.None;
-                m_DeviceState.pinchTrackingState = (int) InputTrackingState.None;
-                m_WasValid = false;
+                if (m_WasValid)
+                {
+                    m_DeviceState.isTracked = false;
+                    m_DeviceState.trackingState = (int)InputTrackingState.None;
+                    m_DeviceState.gripTrackingState = (int)InputTrackingState.None;
+                    m_DeviceState.pokeTrackingState = (int)InputTrackingState.None;
+                    m_DeviceState.pinchTrackingState = (int)InputTrackingState.None;
+                    m_DeviceState.aimTrackingState = (int)InputTrackingState.None;
+                    m_WasValid = false;
+
+                    m_DeviceStateDirty = true;
+                }
+
+                if (m_DeviceStateDirty)
+                    QueueStateEvent();
+
                 return;
             }
+
+            m_WasValid = true;
 
             const int poseFullyTracked = (int)(InputTrackingState.Position | InputTrackingState.Rotation);
 
-            if (!m_WasValid && isValid)
-            {
-                m_DeviceState.isTracked = true;
-                m_DeviceState.trackingState = poseFullyTracked;
-                m_WasValid = true;
-            }
+            m_DeviceState.isTracked = true;
+            m_DeviceState.trackingState = poseFullyTracked;
 
+            // Grip Pose
             if (commonGestures.TryGetGripPose(out var gripPose))
             {
                 m_DeviceState.devicePosition = gripPose.position;
@@ -505,6 +564,7 @@ namespace UnityEngine.XR.Hands
                 m_DeviceState.gripTrackingState = (int)InputTrackingState.None;
             }
 
+            // Grasp
             if (commonGestures.TryGetGraspValue(out var currentGraspValue))
             {
                 m_DeviceState.graspValue = currentGraspValue;
@@ -516,15 +576,9 @@ namespace UnityEngine.XR.Hands
                 m_DeviceState.graspReady = false;
             }
 
-            if (commonGestures.TryGetGraspFirmState(out var isGraspFirm))
-            {
-                m_DeviceState.graspFirm = isGraspFirm;
-            }
-            else
-            {
-                m_DeviceState.graspFirm = false;
-            }
+            m_DeviceState.graspFirm = commonGestures.TryGetGraspFirmState(out var isGraspFirm) && isGraspFirm;
 
+            // Poke Pose
             if (commonGestures.TryGetPokePose(out var pokePose))
             {
                 m_DeviceState.pokePosition = pokePose.position;
@@ -536,6 +590,7 @@ namespace UnityEngine.XR.Hands
                 m_DeviceState.pokeTrackingState = (int)InputTrackingState.None;
             }
 
+            // Pinch Pose
             if (commonGestures.TryGetPinchPose(out var pinchPose))
             {
                 m_DeviceState.pinchPosition = pinchPose.position;
@@ -547,6 +602,7 @@ namespace UnityEngine.XR.Hands
                 m_DeviceState.pinchTrackingState = (int)InputTrackingState.None;
             }
 
+            // Pinch
             if (commonGestures.TryGetPinchValue(out var currentPinchValue))
             {
                 m_DeviceState.pinchValue = currentPinchValue;
@@ -558,15 +614,9 @@ namespace UnityEngine.XR.Hands
                 m_DeviceState.pinchReady = false;
             }
 
-            if (commonGestures.TryGetPinchTouchedState(out var isPinchTouched))
-            {
-                m_DeviceState.pinchTouched = isPinchTouched;
-            }
-            else
-            {
-                m_DeviceState.pinchTouched = false;
-            }
+            m_DeviceState.pinchTouched = commonGestures.TryGetPinchTouchedState(out var isPinchTouched) && isPinchTouched;
 
+            // Aim Pose
             if (commonGestures.TryGetAimPose(out var aimPose))
             {
                 m_DeviceState.aimPosition = aimPose.position;
@@ -578,6 +628,7 @@ namespace UnityEngine.XR.Hands
                 m_DeviceState.aimTrackingState = (int)InputTrackingState.None;
             }
 
+            // Aim
             if (commonGestures.TryGetAimActivateValue(out var currentAimValue))
             {
                 m_DeviceState.aimActivateValue = currentAimValue;
@@ -589,15 +640,14 @@ namespace UnityEngine.XR.Hands
                 m_DeviceState.aimActivateReady = false;
             }
 
-            if (commonGestures.TryGetAimActivatedState(out var isAimActivated))
-            {
-                m_DeviceState.aimActivated = isAimActivated;
-            }
-            else
-            {
-                m_DeviceState.aimActivated = false;
-            }
+            m_DeviceState.aimActivated = commonGestures.TryGetAimActivatedState(out var isAimActivated) && isAimActivated;
 
+            QueueStateEvent();
+        }
+
+        void QueueStateEvent()
+        {
+            m_DeviceStateDirty = false;
             InputSystem.InputSystem.QueueStateEvent(this, m_DeviceState);
         }
 
@@ -625,5 +675,3 @@ namespace UnityEngine.XR.Hands
         bool m_WasValid;
     }
 }
-
-#endif // ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION

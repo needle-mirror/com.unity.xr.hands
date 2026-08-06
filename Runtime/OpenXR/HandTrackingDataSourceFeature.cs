@@ -17,8 +17,8 @@ namespace UnityEngine.XR.Hands.OpenXR
 {
     /// <summary>
     /// This <see cref="OpenXRFeature"/> enables
-    /// <see href="https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#XR_EXT_hand_tracking_data_source">
-    /// XR_EXT_hand_tracking_data_source</see>, allowing the application to
+    /// <a href="https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#XR_EXT_hand_tracking_data_source">
+    /// XR_EXT_hand_tracking_data_source</a>, allowing the application to
     /// specify preferred hand tracking data sources (e.g., optical tracking or
     /// controller-derived poses) at hand tracker creation time and to query the
     /// active data source per hand per frame.

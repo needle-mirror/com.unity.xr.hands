@@ -6,8 +6,8 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// Specifies the motion range constraint applied to hand joint poses.
     /// Values correspond to the
     /// <c>XrHandJointsMotionRangeEXT</c> enumeration defined by
-    /// <see href="https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#XR_EXT_hand_joints_motion_range">
-    /// XR_EXT_hand_joints_motion_range</see>.
+    /// <a href="https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#XR_EXT_hand_joints_motion_range">
+    /// XR_EXT_hand_joints_motion_range</a>.
     /// </summary>
     public enum HandJointsMotionRange
     {

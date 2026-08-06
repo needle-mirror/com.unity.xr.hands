@@ -6,8 +6,8 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// Identifies the source of hand tracking data reported by the runtime.
     /// Values correspond to the
     /// <c>XrHandTrackingDataSourceEXT</c> enumeration defined by
-    /// <see href="https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#XR_EXT_hand_tracking_data_source">
-    /// XR_EXT_hand_tracking_data_source</see>.
+    /// <a href="https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#XR_EXT_hand_tracking_data_source">
+    /// XR_EXT_hand_tracking_data_source</a>.
     /// </summary>
     public enum HandTrackingDataSource
     {

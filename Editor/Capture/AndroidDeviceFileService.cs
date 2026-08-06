@@ -62,7 +62,8 @@ namespace UnityEditor.XR.Hands.Capture
                 commandOutput = process.StandardOutput.ReadToEnd();
                 process.WaitForExit();
 
-                // Check the exit code to determine success. A non-zero exit code indicates an error.
+                // Treat the exit code as the sole success signal: adb 36+ writes success/progress summary to stderr even on success,
+                // so don't warn on stderr output.
                 if (process.ExitCode != 0)
                 {
                     UnityEngine.Debug.LogError(
@@ -70,13 +71,6 @@ namespace UnityEditor.XR.Hands.Capture
                         $"Error: \"{errorOut}\"\n" +
                         $"ADB command arguments: {startInfo.Arguments}");
                     return false;
-                }
-
-                if (!string.IsNullOrWhiteSpace(errorOut))
-                {
-                    // Do not return false here, as some adb commands output to stderr even when successful.
-                    UnityEngine.Debug.LogWarning(
-                        $"ADB command succeeded, but there was output in the error stream: \"{errorOut}\"");
                 }
 
                 return true;

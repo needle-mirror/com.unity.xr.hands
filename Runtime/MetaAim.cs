@@ -1,16 +1,18 @@
-#if ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION
-
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.Layouts;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.XR.Hands
 {
+    // SERIALIZATION DEPENDENCY: keep every flag within 32 bits (bit 0..31). Unity
+    // serializes the [SerializeField] MetaAimHandState.m_MetaFlags as 32-bit, so a bit >= 32
+    // is silently truncated on round-trip (the UAC1011 mute on that field relies on this).
     /// <summary>
     /// The flags in the extension for each hand that can be read from
     /// <see cref="MetaAimHand.aimFlags"/> and casting to this type.
@@ -25,13 +27,12 @@ namespace UnityEngine.XR.Hands
         None = 0,
 
         /// <summary>
-        /// Data for this hand has been computed.
+        /// Aiming data is computed from additional sources beyond the hand data in the base hand tracking feature.
         /// </summary>
         Computed = 1 << 0,
 
         /// <summary>
-        /// The aim pose is generally pointed away from the face and is valid
-        /// for use with UI.
+        /// Aiming data is valid.
         /// </summary>
         Valid = 1 << 1,
 
@@ -87,8 +88,8 @@ namespace UnityEngine.XR.Hands
 
     /// <summary>
     /// A <see cref="TrackedDevice"/> based off the data exposed in the
-    /// <see href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_FB_hand_tracking_aim">
-    /// Meta Hand Tracking Aim extension</see>. Enabled through [Meta Hand Tracking Aim](xref:UnityEngine.XR.Hands.OpenXR.MetaHandTrackingAim)
+    /// <a href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_FB_hand_tracking_aim">
+    /// Meta Hand Tracking Aim extension</a>. Enabled through [Meta Hand Tracking Aim](xref:UnityEngine.XR.Hands.OpenXR.MetaHandTrackingAim)
     /// or by enabling hand-tracking in the Oculus plug-in if the Input System
     /// back-end is enabled.
     /// </summary>
@@ -110,7 +111,7 @@ namespace UnityEngine.XR.Hands
 #if UNITY_EDITOR
     [UnityEditor.InitializeOnLoad]
 #endif
-    [Preserve, InputControlLayout(displayName = "Meta Aim Hand", commonUsages = new[] { "LeftHand", "RightHand" })]
+    [Preserve, InputControlLayout(stateType = typeof(MetaAimHandDeviceState), displayName = "Meta Aim Hand", commonUsages = new[] { "LeftHand", "RightHand" })]
     public partial class MetaAimHand : TrackedDevice
     {
         /// <summary>
@@ -152,7 +153,7 @@ namespace UnityEngine.XR.Hands
         /// the thumb is mostly pressed (greater than a threshold of <c>0.8</c>
         /// contained in <see cref="pressThreshold"/>).
         /// </summary>
-        [Preserve, InputControl(offset = 0)]
+        [Preserve]
         public ButtonControl indexPressed { get; private set; }
 
         /// <summary>
@@ -161,7 +162,7 @@ namespace UnityEngine.XR.Hands
         /// the thumb is mostly pressed (greater than a threshold of <c>0.8</c>
         /// contained in <see cref="pressThreshold"/>).
         /// </summary>
-        [Preserve, InputControl(offset = 1)]
+        [Preserve]
         public ButtonControl middlePressed { get; private set; }
 
         /// <summary>
@@ -170,7 +171,7 @@ namespace UnityEngine.XR.Hands
         /// the thumb is mostly pressed (greater than a threshold of <c>0.8</c>
         /// contained in <see cref="pressThreshold"/>).
         /// </summary>
-        [Preserve, InputControl(offset = 2)]
+        [Preserve]
         public ButtonControl ringPressed { get; private set; }
 
         /// <summary>
@@ -179,13 +180,13 @@ namespace UnityEngine.XR.Hands
         /// the thumb is mostly pressed (greater than a threshold of <c>0.8</c>
         /// contained in <see cref="pressThreshold"/>).
         /// </summary>
-        [Preserve, InputControl(offset = 3)]
+        [Preserve]
         public ButtonControl littlePressed { get; private set; }
 
         /// <summary>
         /// Cast the result of reading this to <see cref="MetaAimFlags"/> to examine the value.
         /// </summary>
-        [Preserve, InputControl]
+        [Preserve]
         public IntegerControl aimFlags { get; private set; }
 
         /// <summary>
@@ -197,7 +198,7 @@ namespace UnityEngine.XR.Hands
         /// A value of <c>0</c> denotes no pinch at all, while a value of
         /// <c>1</c> denotes a full pinch.
         /// </remarks>
-        [Preserve, InputControl]
+        [Preserve]
         public AxisControl pinchStrengthIndex { get; private set; }
 
         /// <summary>
@@ -209,7 +210,7 @@ namespace UnityEngine.XR.Hands
         /// A value of <c>0</c> denotes no pinch at all, while a value of
         /// <c>1</c> denotes a full pinch.
         /// </remarks>
-        [Preserve, InputControl]
+        [Preserve]
         public AxisControl pinchStrengthMiddle { get; private set; }
 
         /// <summary>
@@ -221,7 +222,7 @@ namespace UnityEngine.XR.Hands
         /// A value of <c>0</c> denotes no pinch at all, while a value of
         /// <c>1</c> denotes a full pinch.
         /// </remarks>
-        [Preserve, InputControl]
+        [Preserve]
         public AxisControl pinchStrengthRing { get; private set; }
 
         /// <summary>
@@ -233,7 +234,7 @@ namespace UnityEngine.XR.Hands
         /// A value of <c>0</c> denotes no pinch at all, while a value of
         /// <c>1</c> denotes a full pinch.
         /// </remarks>
-        [Preserve, InputControl]
+        [Preserve]
         public AxisControl pinchStrengthLittle { get; private set; }
 
         /// <summary>
@@ -258,6 +259,11 @@ namespace UnityEngine.XR.Hands
             pinchStrengthRing = GetChildControl<AxisControl>(nameof(pinchStrengthRing));
             pinchStrengthLittle = GetChildControl<AxisControl>(nameof(pinchStrengthLittle));
 
+            // Explicitly initialize the device rotation in the device state to identity (Quaternion(0f, 0f, 0f, 1f))
+            // instead of the struct default (Quaternion(0f, 0f, 0f, 0f)).
+            m_DeviceState.deviceRotation = Quaternion.identity;
+
+#if ENABLE_VR || UNITY_GAMECORE // UnityEngine.InputSystem.XR.XRDeviceDescriptor.characteristics is guarded with these defines starting with com.unity.inputsystem@1.14.2
             var deviceDescriptor = XRDeviceDescriptor.FromJson(description.capabilities);
             if (deviceDescriptor != null)
             {
@@ -266,8 +272,18 @@ namespace UnityEngine.XR.Hands
                 else if ((deviceDescriptor.characteristics & InputDeviceCharacteristics.Right) != 0)
                     InputSystem.InputSystem.SetDeviceUsage(this, InputSystem.CommonUsages.RightHand);
             }
+#endif // ENABLE_VR || UNITY_GAMECORE
         }
 
+        /// <inheritdoc />
+        protected override unsafe long ExecuteCommand(InputDeviceCommand* commandPtr)
+        {
+            return XRHandDeviceUtility.TryExecuteCommand(commandPtr, out var result)
+                ? result
+                : base.ExecuteCommand(commandPtr);
+        }
+
+#if ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION // Guard InputDeviceCharacteristics in method signature
         /// <summary>
         /// Creates a <see cref="MetaAimHand"/> and adds it to the Input System.
         /// </summary>
@@ -277,7 +293,7 @@ namespace UnityEngine.XR.Hands
         /// </param>
         /// <returns>
         /// A <see cref="MetaAimHand"/> retrieved from
-        /// <see cref="InputSystem.InputSystem.AddDevice(InputDeviceDescription)"/>.
+        /// <see cref="UnityEngine.InputSystem.InputSystem.AddDevice(InputDeviceDescription)"/>.
         /// </returns>
         /// <remarks>
         /// It is recommended that you do not call this yourself. It will be
@@ -293,7 +309,9 @@ namespace UnityEngine.XR.Hands
                 manufacturer = k_MetaAimHandDeviceManufacturerName,
                 capabilities = new XRDeviceDescriptor
                 {
+#if ENABLE_VR || UNITY_GAMECORE // UnityEngine.InputSystem.XR.XRDeviceDescriptor.characteristics is guarded with these defines starting with com.unity.inputsystem@1.14.2
                     characteristics = InputDeviceCharacteristics.HandTracking | InputDeviceCharacteristics.TrackedDevice | extraCharacteristics,
+#endif // ENABLE_VR || UNITY_GAMECORE
                     inputFeatures = new List<XRFeatureDescriptor>
                     {
                         new XRFeatureDescriptor
@@ -362,6 +380,7 @@ namespace UnityEngine.XR.Hands
             hand.m_Handedness = ((extraCharacteristics & InputDeviceCharacteristics.Left) != 0) ? Handedness.Left : Handedness.Right;
             return hand;
         }
+#endif // ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION
 
         /// <summary>
         /// Queues update events in the Input System based on the supplied hand.
@@ -371,7 +390,7 @@ namespace UnityEngine.XR.Hands
         /// <param name="isHandRootTracked">
         /// Whether the hand root pose is valid.
         /// </param>
-        /// <param name="aimFlags">
+        /// <param name="metaAimFlags">
         /// The aim flags to update in the Input System.
         /// </param>
         /// <param name="aimPose">
@@ -400,6 +419,7 @@ namespace UnityEngine.XR.Hands
         {
             m_AgnosticRepresentationMayNotBeFlushedYet.UpdateToAimRepresentation(
                 m_Handedness,
+                isHandRootTracked,
                 metaAimFlags,
                 aimPose,
                 pinchIndex,
@@ -407,78 +427,35 @@ namespace UnityEngine.XR.Hands
                 pinchRing,
                 pinchLittle);
 
-            if (metaAimFlags != m_PreviousFlags)
-            {
-                InputSystem.InputSystem.QueueDeltaStateEvent(aimFlags, (int)metaAimFlags);
-                m_PreviousFlags = metaAimFlags;
-            }
+            // We convert the 64-bit ulong MetaAimFlags flags to a 32-bit int for the MetaAimHand Input Device,
+            // but this should be safe to do since the named flags from the OpenXR feature spec
+            // all fall within the lower 32-bits.
+            m_DeviceState.aimFlags = (int)metaAimFlags;
 
-            bool isIndexPressed = pinchIndex > pressThreshold;
-            if (isIndexPressed != m_WasIndexPressed)
-            {
-                InputSystem.InputSystem.QueueDeltaStateEvent(indexPressed, isIndexPressed);
-                m_WasIndexPressed = isIndexPressed;
-            }
+            m_DeviceState.indexPressed = pinchIndex > pressThreshold;
+            m_DeviceState.middlePressed = pinchMiddle > pressThreshold;
+            m_DeviceState.ringPressed = pinchRing > pressThreshold;
+            m_DeviceState.littlePressed = pinchLittle > pressThreshold;
 
-            bool isMiddlePressed = pinchMiddle > pressThreshold;
-            if (isMiddlePressed != m_WasMiddlePressed)
-            {
-                InputSystem.InputSystem.QueueDeltaStateEvent(middlePressed, isMiddlePressed);
-                m_WasMiddlePressed = isMiddlePressed;
-            }
+            m_DeviceState.pinchStrengthIndex = pinchIndex;
+            m_DeviceState.pinchStrengthMiddle = pinchMiddle;
+            m_DeviceState.pinchStrengthRing = pinchRing;
+            m_DeviceState.pinchStrengthLittle = pinchLittle;
 
-            bool isRingPressed = pinchRing > pressThreshold;
-            if (isRingPressed != m_WasRingPressed)
-            {
-                InputSystem.InputSystem.QueueDeltaStateEvent(ringPressed, isRingPressed);
-                m_WasRingPressed = isRingPressed;
-            }
-
-            bool isLittlePressed = pinchLittle > pressThreshold;
-            if (isLittlePressed != m_WasLittlePressed)
-            {
-                InputSystem.InputSystem.QueueDeltaStateEvent(littlePressed, isLittlePressed);
-                m_WasLittlePressed = isLittlePressed;
-            }
-
-            InputSystem.InputSystem.QueueDeltaStateEvent(pinchStrengthIndex, pinchIndex);
-            InputSystem.InputSystem.QueueDeltaStateEvent(pinchStrengthMiddle, pinchMiddle);
-            InputSystem.InputSystem.QueueDeltaStateEvent(pinchStrengthRing, pinchRing);
-            InputSystem.InputSystem.QueueDeltaStateEvent(pinchStrengthLittle, pinchLittle);
-
-            if ((metaAimFlags & MetaAimFlags.Computed) == MetaAimFlags.None)
-            {
-                if (m_WasTracked)
-                {
-                    InputSystem.InputSystem.QueueDeltaStateEvent(isTracked, false);
-                    InputSystem.InputSystem.QueueDeltaStateEvent(trackingState, m_AgnosticRepresentationMayNotBeFlushedYet.trackingState);
-                    m_WasTracked = false;
-                }
-
-                return;
-            }
+            m_DeviceState.trackingState = (int)m_AgnosticRepresentationMayNotBeFlushedYet.trackingState;
 
             if (isHandRootTracked)
             {
-                InputSystem.InputSystem.QueueDeltaStateEvent(devicePosition, aimPose.position);
-                InputSystem.InputSystem.QueueDeltaStateEvent(deviceRotation, aimPose.rotation);
-
-                m_AgnosticRepresentationMayNotBeFlushedYet.SetTrackingStateToValidPose();
-
-                if (!m_WasTracked)
-                {
-                    InputSystem.InputSystem.QueueDeltaStateEvent(trackingState, m_AgnosticRepresentationMayNotBeFlushedYet.trackingState);
-                    InputSystem.InputSystem.QueueDeltaStateEvent(isTracked, true);
-                }
-
-                m_WasTracked = true;
+                m_DeviceState.devicePosition = aimPose.position;
+                m_DeviceState.deviceRotation = aimPose.rotation;
+                m_DeviceState.isTracked = true;
             }
-            else if (m_WasTracked)
+            else
             {
-                InputSystem.InputSystem.QueueDeltaStateEvent(trackingState, m_AgnosticRepresentationMayNotBeFlushedYet.trackingState);
-                InputSystem.InputSystem.QueueDeltaStateEvent(isTracked, false);
-                m_WasTracked = false;
+                m_DeviceState.isTracked = false;
             }
+
+            InputSystem.InputSystem.QueueStateEvent(this, m_DeviceState);
         }
 
         internal void FlushChanges() => m_AgnosticRepresentation = m_AgnosticRepresentationMayNotBeFlushedYet;
@@ -541,16 +518,10 @@ namespace UnityEngine.XR.Hands
         const string k_MetaAimHandDeviceManufacturerName = "OpenXR Meta";
 
         Handedness m_Handedness;
-        MetaAimFlags m_PreviousFlags;
-        bool m_WasTracked;
-        bool m_WasIndexPressed;
-        bool m_WasMiddlePressed;
-        bool m_WasRingPressed;
-        bool m_WasLittlePressed;
+
+        MetaAimHandDeviceState m_DeviceState;
 
         XRHandAimState m_AgnosticRepresentation;
         XRHandAimState m_AgnosticRepresentationMayNotBeFlushedYet;
     }
 }
-
-#endif // ENABLE_VR || UNITY_GAMECORE || PACKAGE_DOCS_GENERATION

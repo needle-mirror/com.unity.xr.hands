@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 <!-- Headers should be listed in this order: Added, Changed, Deprecated, Removed, Fixed, Security -->
 
-## [1.9.0-pre.1] - 2026-06-16
+## [1.9.0] - 2026-08-06
 
 ### Added
 
@@ -21,7 +21,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added support for the [Hand Joints Motion Range](xref:xrhands-openxr-motion-range-feature) OpenXR feature.
 
 ### Changed
+
 - Changed minimum supported version of the Unity Editor from 2022.3 to 6000.0 (LTS).
+- Re-serialized sample assets with Unity `6000.0.23f1`.
+- Changed some conditional define guards to not unnecessarily wrap the entire class, affecting [`MetaAimFlags`](xref:UnityEngine.XR.Hands.MetaAimFlags), [`MetaAimHand`](xref:UnityEngine.XR.Hands.MetaAimHand), and [`XRHandDevice`](xref:UnityEngine.XR.Hands.XRHandDevice).
 
 ### Fixed
 
@@ -30,6 +33,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed scripts to properly reset static fields to support fast-enter play mode settings when domain reload is disabled in Project Settings.
 - Fixed [`XRHandRecordingMetadata.GetSavedRecordingMetadata`](xref:UnityEngine.XR.Hands.Capture.Recording.XRHandRecordingMetadata.GetSavedRecordingMetadata) to clear the output list before populating it.
 - Fixed some scripts in Gestures package sample to retry finding a running `XRHandSubsystem` and skip updating if one is not found.
+- Fixed the Meta Hand Tracking Aim feature not updating the pose correctly when using the OpenXR Plugin (com.unity.xr.openxr) package version 1.16.0 or newer.
+- Fixed the `MetaAimHand` input device not updating to clear tracking data when hand tracking was not actively tracking.
+- Fixed [`MetaAimHandState`](xref:UnityEngine.XR.Hands.MetaAimHandState) and [`XRHandAimState`](xref:UnityEngine.XR.Hands.XRHandAimState) `isTracked` properties not getting set when using OpenXR.
+- Fixed Console warning (`Missing Poke Follow Transform assignment`) in the XR Hand Capture sample by removing unused `XRPokeFollowAffordance` components.
+- Fixed a false Console warning when importing recordings in the XR Hand Capture window, caused by newer `adb` versions (36+) writing success status to stderr. ADB command success is now determined solely by the process exit code.
+- Fixed `<XRHandDevice>/trackingState` not updating correctly when changing the configuration with [`UpdateHandsConfiguration`](xref:UnityEngine.XR.Hands.XRHandSubsystem.UpdateHandsConfiguration) during runtime.
+- Fixed some fields of the [`XRHandDevice`](xref:UnityEngine.XR.Hands.XRHandDevice) input device not getting reset when changing back to the legacy configuration.
+- Fixed (removed) runtime hand mesh objects with pink textures in the HandVisualizer sample.
+- Fixed hand material override in the Hand Visualizer component in the Hand Capture scene causing rendering issues when using the XR Interaction Toolkit XR Origin sample prefab.
+- Fixed `MetaAimHand` and `XRHandDevice` input devices so they report that they are capable of delivering input while the application is running in the background. This allows them to continue to report input data even when the game window is not in focus on PC.
 
 ## [1.8.0] - 2026-04-21
 

@@ -108,33 +108,25 @@ namespace UnityEngine.XR.Hands.OpenXR
                 s_MetaAim.OnUpdatedHandsInProvider(successFlags);
                 s_MetaAim.FlushMetaAimChanges();
 
-                var leftUpdated =
-                    (successFlags & (XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints)) != 0;
-                var rightUpdated =
-                    (successFlags & (XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints)) != 0;
+                const XRHandSubsystem.UpdateSuccessFlags leftSuccessFlags = XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints;
+                const XRHandSubsystem.UpdateSuccessFlags rightSuccessFlags = XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
 
-                if (leftUpdated)
+                var indexLeft = Handedness.Left.ToIndex();
+                var indexRight = Handedness.Right.ToIndex();
+
+                m_AgnosticAimStatesValidity[indexLeft] |= (successFlags & leftSuccessFlags) == leftSuccessFlags;
+                m_AgnosticAimStatesValidity[indexRight] |= (successFlags & rightSuccessFlags) == rightSuccessFlags;
+
+                if (m_AgnosticAimStatesValidity[indexLeft])
                 {
                     s_MetaAim.GetAimState(Handedness.Left, out var leftAimState);
-                    int idx = Handedness.Left.ToIndex();
-                    m_AgnosticAimStates[idx] = leftAimState;
-                    m_AgnosticAimStatesValidity[idx] = true;
-                }
-                else
-                {
-                    m_AgnosticAimStatesValidity[Handedness.Left.ToIndex()] = false;
+                    m_AgnosticAimStates[indexLeft] = leftAimState;
                 }
 
-                if (rightUpdated)
+                if (m_AgnosticAimStatesValidity[indexRight])
                 {
                     s_MetaAim.GetAimState(Handedness.Right, out var rightAimState);
-                    int idx = Handedness.Right.ToIndex();
-                    m_AgnosticAimStates[idx] = rightAimState;
-                    m_AgnosticAimStatesValidity[idx] = true;
-                }
-                else
-                {
-                    m_AgnosticAimStatesValidity[Handedness.Right.ToIndex()] = false;
+                    m_AgnosticAimStates[indexRight] = rightAimState;
                 }
             }
 

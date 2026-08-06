@@ -22,15 +22,15 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// <summary>
     /// This <see cref="OpenXRInteractionFeature"/> enables the use of
     /// hand-tracking data in OpenXR through the <see cref="XRHandSubsystem"/>.
-    /// It enables <see href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_EXT_hand_tracking">
-    /// XR_EXT_hand_tracking</see> in the underlying runtime. To retrieve hand
+    /// It enables <a href="https://registry.khronos.org/OpenXR/specs/1.0/html/xrspec.html#XR_EXT_hand_tracking">
+    /// XR_EXT_hand_tracking</a> in the underlying runtime. To retrieve hand
     /// data, use the <see cref="XRHandSubsystem"/> retrieved from
     /// <see cref="HandTracking.subsystem"/>.
     /// </summary>
     /// <remarks>
     /// For this extension to be available, you must install the
-    /// <see href="https://docs.unity3d.com/Packages/com.unity.xr.hands@latest/manual/index.html">
-    /// XR Hands package</see>.
+    /// <a href="https://docs.unity3d.com/Packages/com.unity.xr.openxr@latest">
+    /// OpenXR Plugin package</a>.
     /// </remarks>
 #if UNITY_EDITOR
     [UnityEditor.XR.OpenXR.Features.OpenXRFeature(UiName = "Hand Tracking Subsystem",
@@ -66,7 +66,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// <summary>
         /// The OpenXR Extension string. OpenXR uses this to check if this
         /// extension is available or enabled. See
-        /// <see href="https://www.khronos.org/registry/OpenXR/specs/1.0/html/xrspec.html#XR_EXT_hand_tracking">hand interaction extension</see>
+        /// <a href="https://www.khronos.org/registry/OpenXR/specs/1.0/html/xrspec.html#XR_EXT_hand_tracking">hand interaction extension</a>
         /// documentation for more information on this OpenXR extension.
         /// </summary>
         public const string extensionString = "XR_EXT_hand_tracking";

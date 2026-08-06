@@ -13,6 +13,12 @@ The XR Hands package implements the following hand-related features for applicat
 | [Hand Joints Motion Range](xref:xrhands-openxr-motion-range-feature) | Constrains hand joint poses to natural movement or controller-conforming movement. |
 | [Meta Aim Hand](xref:xrhands-meta-aim-feature) | Implements the Meta Aim Hand extension to OpenXR. |
 
+The package also lets you augment hand tracking with additional OpenXR extensions:
+
+| Capability | Description |
+| :---        | :---               |
+| [Hand tracking extensibility](xref:xrhands-openxr-hand-extensibility) | Lets you attach custom extension structures to the OpenXR hand tracker creation and joint location calls. Intended for device vendors and SDK authors. |
+
 The package also provides a helper component for managing the hand subsystem lifecycle:
 
 | Component | Description |
