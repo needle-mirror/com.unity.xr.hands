@@ -1,3 +1,6 @@
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if UNITY_OPENXR_PACKAGE || PACKAGE_DOCS_GENERATION
 
 using System;
@@ -42,10 +45,19 @@ namespace UnityEngine.XR.Hands.OpenXR
         OpenxrExtensionStrings = extensionString,
         Category = UnityEditor.XR.OpenXR.Features.FeatureCategory.Feature,
         FeatureId = featureId2,
-        Priority = -100)]
+        Priority = k_Priority)]
+#endif
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
 #endif
     public class HandTracking : OpenXRFeature
     {
+        /// <summary>
+        /// The priority of the Hand Tracking feature. Extensions that depend on
+        /// Hand Tracking should use a lower value to ensure they run after it.
+        /// </summary>
+        internal const int k_Priority = -100;
+
         /// <summary>
         /// (Deprecated) The feature ID string. This is used to give the feature a well known
         /// ID for reference.
@@ -374,6 +386,7 @@ namespace UnityEngine.XR.Hands.OpenXR
             internal static extern void OnSystemChange(ulong xrSystem);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnInstanceCreate")]
+            [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool OnInstanceCreate(ulong xrInstance, IntPtr xrGetInstanceProcAddr);
 
             [DllImport(k_LibraryName, EntryPoint = "UnityOpenXRHands_OnAppSpaceChange")]
@@ -413,7 +426,8 @@ namespace UnityEngine.XR.Hands.OpenXR
 #if UNITY_EDITOR
         internal static bool OpenXRLoaderEnabledForEditorPlayMode()
         {
-            var settings = XRGeneralSettings.Instance?.AssignedSettings ?? (XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Standalone)?.AssignedSettings);
+            var settings = XRGeneralSettings.Instance?.Manager ??
+                XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Standalone)?.Manager;
             if (!settings)
                 return false;
 

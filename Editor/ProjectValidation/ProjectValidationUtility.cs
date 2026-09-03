@@ -6,12 +6,18 @@ using Unity.XR.CoreUtils.Editor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.Hands.ProjectValidation
 {
     /// <summary>
     /// Utility class to help with project validation for XR Hands and Samples.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     static class ProjectValidationUtility
     {
         const string k_SamplesRootDirectoryName = "Samples";

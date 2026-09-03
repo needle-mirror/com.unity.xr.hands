@@ -1,10 +1,12 @@
 using System;
-using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine.SubsystemsImplementation;
 using UnityEngine.XR.Hands.Gestures;
 using UnityEngine.XR.Hands.Meshing;
 using UnityEngine.XR.Hands.Processing;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands.ProviderImplementation
 {
@@ -17,7 +19,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// <summary>
         /// Gets the layout of hand joints for this provider, by having the
         /// provider mark each index corresponding to a <see cref="XRHandJointID"/>
-        /// get marked as <c>true</c> if the provider attempts to track
+        /// get marked as <see langword="true"/> if the provider attempts to track
         /// that joint.
         /// </summary>
         /// <remarks>
@@ -30,7 +32,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// <param name="handJointsInLayout">
         /// Each index corresponds to a <see cref="XRHandJointID"/>. For each
         /// joint that the provider will attempt to track, mark that spot as
-        /// <c>true</c> by calling <c>.ToIndex()</c> on that ID.
+        /// <see langword="true"/> by calling <c>.ToIndex()</c> on that ID.
         /// </param>
         public abstract void GetHandLayout(NativeArray<bool> handJointsInLayout);
 
@@ -101,11 +103,42 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
             NativeArray<XRHandJoint> rightHandJoints);
 
         /// <summary>
-        /// Whether the provider is currently able to surface data from any of <see cref="TryGetAimPose"/>,
-        /// <see cref="TryGetAimActivateValue"/>, <see cref="TryGetGraspValue"/>, <see cref="TryGetGripPose"/>,
-        /// <see cref="TryGetPinchPose"/>, <see cref="TryGetPinchValue"/>, or <see cref="TryGetPinchPose"/>.
+        /// Whether the provider is currently able to surface data used for populating <see cref="XRCommonHandGestures"/>.
         /// </summary>
+        /// <seealso cref="TryGetAimPose"/>
+        /// <seealso cref="TryGetAimActivateValue"/>
+        /// <seealso cref="TryGetAimActivatedState"/>
+        /// <seealso cref="TryGetGraspValue"/>
+        /// <seealso cref="TryGetGraspFirmState"/>
+        /// <seealso cref="TryGetGripPose"/>
+        /// <seealso cref="TryGetPinchPose"/>
+        /// <seealso cref="TryGetPinchValue"/>
+        /// <seealso cref="TryGetPinchTouchedState"/>
+        /// <seealso cref="TryGetPokePose"/>
         public virtual bool canSurfaceCommonPoseData => false;
+
+        /// <summary>
+        /// Gets the common gestures state for the given <see cref="Handedness"/>.
+        /// Will only be called if <see cref="canSurfaceCommonPoseData"/> is enabled.
+        /// </summary>
+        /// <param name="handedness">
+        /// Which hand to retrieve data for.
+        /// </param>
+        /// <param name="commonGestures">
+        /// If <c>TryGetCommonGesturesState</c> returns <see langword="true"/>, this will be
+        /// filled out with common gestures state data for the given <see cref="Handedness"/>.
+        /// </param>
+        /// <returns>
+        /// Returns <see langword="true"/> if <c>TryGetCommonGesturesState</c> succeeds and
+        /// fills out common gestures state for the given <see cref="Handedness"/>.
+        /// All other methods related to populating common gestures will be skipped as this method
+        /// fully populates the common gestures state.
+        /// </returns>
+        internal virtual bool TryGetCommonGesturesState(Handedness handedness, out XRCommonHandGesturesState commonGestures)
+        {
+            commonGestures = default;
+            return false;
+        }
 
         /// <summary>
         /// Gets the aim pose. Will only be called if <see cref="XRHandSubsystemDescriptor.supportsAimPose"/>
@@ -116,11 +149,11 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// </param>
         /// <param name="aimPose">
         /// The pose to update the aim pose to, if available. Will not be used if
-        /// <c>false</c> is returned.
+        /// <see langword="false"/> is returned.
         /// </param>
         /// <returns>
-        /// Returns <c>true</c> if successful and the aim pose was
-        /// filled out, returns <c>false</c> otherwise.
+        /// Returns <see langword="true"/> if successful and the aim pose was
+        /// filled out, returns <see langword="false"/> otherwise.
         /// </returns>
         public virtual bool TryGetAimPose(Handedness handedness, out Pose aimPose)
         {
@@ -137,11 +170,11 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// </param>
         /// <param name="aimActivateValue">
         /// The aim activate value, if available. Will not be used if
-        /// <c>false</c> is returned.
+        /// <see langword="false"/> is returned.
         /// </param>
         /// <returns>
-        /// Returns <c>true</c> if successful and the aim activate value was
-        /// filled out, returns <c>false</c> otherwise.
+        /// Returns <see langword="true"/> if successful and the aim activate value was
+        /// filled out, returns <see langword="false"/> otherwise.
         /// </returns>
         public virtual bool TryGetAimActivateValue(Handedness handedness, out float aimActivateValue)
         {
@@ -155,20 +188,20 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// </summary>
         /// <remarks>
         /// Data to evaluate the gesture might not be available when you call this function. When data is available,
-        /// the function returns <c>true</c> and sets <paramref name="isAimActivated"/> to indicate
-        /// whether the aim gesture is fully activated. If this function returns <c>false</c>,
-        /// <paramref name="isAimActivated"/> will be <c>false</c> whether or not the aim gesture is activated.
+        /// the function returns <see langword="true"/> and sets <paramref name="isAimActivated"/> to indicate
+        /// whether the aim gesture is fully activated. If this function returns <see langword="false"/>,
+        /// <paramref name="isAimActivated"/> will be <see langword="false"/> whether or not the aim gesture is activated.
         /// </remarks>
         /// <param name="handedness">
         /// Which hand to retrieve data for.
         /// </param>
         /// <param name="isAimActivated">
-        /// Will be set to <c>true</c> if aim is fully activated;
-        /// otherwise, <c>false</c>.
+        /// Will be set to <see langword="true"/> if aim is fully activated;
+        /// otherwise, <see langword="false"/>.
         /// </param>
         /// <returns>
-        /// Returns <c>true</c> if the <paramref name="isAimActivated"/> value was
-        /// set based on valid data. Returns <c>false</c> if the state of the user's hand wasn't available.
+        /// Returns <see langword="true"/> if the <paramref name="isAimActivated"/> value was
+        /// set based on valid data. Returns <see langword="false"/> if the state of the user's hand wasn't available.
         /// </returns>
         public virtual bool TryGetAimActivatedState(Handedness handedness, out bool isAimActivated)
         {
@@ -185,11 +218,11 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// </param>
         /// <param name="graspValue">
         /// The grasp value, if available. Will not be used if
-        /// <c>false</c> is returned.
+        /// <see langword="false"/> is returned.
         /// </param>
         /// <returns>
-        /// Returns <c>true</c> if successful and the grasp value was
-        /// filled out, returns <c>false</c> otherwise.
+        /// Returns <see langword="true"/> if successful and the grasp value was
+        /// filled out, returns <see langword="false"/> otherwise.
         /// </returns>
         public virtual bool TryGetGraspValue(Handedness handedness, out float graspValue)
         {
@@ -203,20 +236,20 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// </summary>
         /// <remarks>
         /// Data to evaluate the gesture might not be available when you call this function. When data is available,
-        /// the function returns <c>true</c> and sets <paramref name="isGraspFirm"/> to indicate
-        /// whether the user is making a fist (firm grasp). If this function returns <c>false</c>,
-        /// <paramref name="isGraspFirm"/> will also be <c>false</c> (whether or not the user is making a fist).
+        /// the function returns <see langword="true"/> and sets <paramref name="isGraspFirm"/> to indicate
+        /// whether the user is making a fist (firm grasp). If this function returns <see langword="false"/>,
+        /// <paramref name="isGraspFirm"/> will also be <see langword="false"/> (whether or not the user is making a fist).
         /// </remarks>
         /// <param name="handedness">
         /// Which hand to retrieve data for.
         /// </param>
         /// <param name="isGraspFirm">
-        /// Will be set to <c>true</c> if the user is making a fist,
-        /// otherwise <c>false</c>.
+        /// Will be set to <see langword="true"/> if the user is making a fist,
+        /// otherwise <see langword="false"/>.
         /// </param>
         /// <returns>
-        /// Returns <c>true</c> if successful and the <paramref name="isGraspFirm"/> value was
-        /// set based on valid data. Returns <c>false</c> if the state of the user's hand wasn't available.
+        /// Returns <see langword="true"/> if successful and the <paramref name="isGraspFirm"/> value was
+        /// set based on valid data. Returns <see langword="false"/> if the state of the user's hand wasn't available.
         /// </returns>
         public virtual bool TryGetGraspFirmState(Handedness handedness, out bool isGraspFirm)
         {
@@ -233,11 +266,11 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// </param>
         /// <param name="gripPose">
         /// The pose to update the aim pose to, if available. Will not be used if
-        /// <c>false</c> is returned.
+        /// <see langword="false"/> is returned.
         /// </param>
         /// <returns>
-        /// Returns <c>true</c> if successful and the grip pose was
-        /// filled out, returns <c>false</c> otherwise.
+        /// Returns <see langword="true"/> if successful and the grip pose was
+        /// filled out, returns <see langword="false"/> otherwise.
         /// </returns>
         public virtual bool TryGetGripPose(Handedness handedness, out Pose gripPose)
         {
@@ -254,11 +287,11 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// </param>
         /// <param name="pinchPose">
         /// The pose to update the pinch pose to, if available. Will not be used if
-        /// <c>false</c> is returned.
+        /// <see langword="false"/> is returned.
         /// </param>
         /// <returns>
-        /// Returns <c>true</c> if successful and the pinch pose was
-        /// filled out, returns <c>false</c> otherwise.
+        /// Returns <see langword="true"/> if successful and the pinch pose was
+        /// filled out, returns <see langword="false"/> otherwise.
         /// </returns>
         public virtual bool TryGetPinchPose(Handedness handedness, out Pose pinchPose)
         {
@@ -275,11 +308,11 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// </param>
         /// <param name="pinchValue">
         /// The pinch value, if available. Will not be used if
-        /// <c>false</c> is returned.
+        /// <see langword="false"/> is returned.
         /// </param>
         /// <returns>
-        /// Returns <c>true</c> if successful and the grasp value was
-        /// filled out, returns <c>false</c> otherwise.
+        /// Returns <see langword="true"/> if successful and the grasp value was
+        /// filled out, returns <see langword="false"/> otherwise.
         /// </returns>
         public virtual bool TryGetPinchValue(Handedness handedness, out float pinchValue)
         {
@@ -293,20 +326,20 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// </summary>
         /// <remarks>
         /// Data to evaluate the gesture might not be available when you call this function. When data is available,
-        /// the function returns <c>true</c> and sets <paramref name="isPinched"/> to indicate
-        /// whether the hand is currently pinching. If this function returns <c>false</c>,
-        /// <paramref name="isPinched"/> will be <c>false</c> whether or not the hand is pinching.
+        /// the function returns <see langword="true"/> and sets <paramref name="isPinched"/> to indicate
+        /// whether the hand is currently pinching. If this function returns <see langword="false"/>,
+        /// <paramref name="isPinched"/> will be <see langword="false"/> whether or not the hand is pinching.
         /// </remarks>
         /// <param name="handedness">
         /// Which hand to retrieve data for.
         /// </param>
         /// <param name="isPinched">
-        /// Will be set to <c>true</c> if the user is pinching;
-        /// otherwise, <c>false</c>.
+        /// Will be set to <see langword="true"/> if the user is pinching;
+        /// otherwise, <see langword="false"/>.
         /// </param>
         /// <returns>
-        /// Returns <c>true</c> if the <paramref name="isPinched"/> value was
-        /// set based on valid data. Returns <c>false</c> if the state of the user's hand wasn't available.
+        /// Returns <see langword="true"/> if the <paramref name="isPinched"/> value was
+        /// set based on valid data. Returns <see langword="false"/> if the state of the user's hand wasn't available.
         /// </returns>
         public virtual bool TryGetPinchTouchedState(Handedness handedness, out bool isPinched)
         {
@@ -323,11 +356,11 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// </param>
         /// <param name="pokePose">
         /// The pose to update the poke pose to, if available. Will not be used if
-        /// <c>false</c> is returned.
+        /// <see langword="false"/> is returned.
         /// </param>
         /// <returns>
-        /// Returns <c>true</c> if successful and the poke pose was
-        /// filled out, returns <c>false</c> otherwise.
+        /// Returns <see langword="true"/> if successful and the poke pose was
+        /// filled out, returns <see langword="false"/> otherwise.
         /// </returns>
         public virtual bool TryGetPokePose(Handedness handedness, out Pose pokePose)
         {
@@ -346,8 +379,8 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// Input data for hand meshes.
         /// </param>
         /// <returns>
-        /// Returns <c>true</c> if successful and either hand has
-        /// valid data. Otherwise, returns <c>false</c>.
+        /// Returns <see langword="true"/> if successful and either hand has
+        /// valid data. Otherwise, returns <see langword="false"/>.
         /// </returns>
         public virtual bool TryGetMeshData(ref XRHandMeshDataQueryResult result, ref XRHandMeshDataQueryParams queryParams)
             => false;
@@ -394,6 +427,9 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         }
 
         // these defaults were captured using a Meta Quest 2
+#if UNITY_6000_5_OR_NEWER
+        [NoAutoStaticsCleanup]
+#endif
         internal static class FingerConfigDefaults
         {
             internal static XRFingerShapeConfiguration[] configurations => s_Configurations;

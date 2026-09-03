@@ -1,3 +1,6 @@
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
 using System.Collections;
 using System.Text.RegularExpressions;
@@ -18,6 +21,9 @@ namespace UnityEngine.XR.Hands.Tests.OpenXR
     /// Integration tests that verify HandExtensibilityManager lifecycle and
     /// chain accessor wiring via TestHandTrackingExtensionFeature.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public class HandExtensibilityManagerTests : OpenXRHandTrackingTestFixture
     {
         MockHandsEnvironment m_MockEnvironment;

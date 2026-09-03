@@ -170,7 +170,8 @@ namespace UnityEngine.XR.Hands.OpenXR
         static class NativeApi
         {
             [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_ToggleMetaAim")]
-            internal static extern bool ToggleMetaAim(bool enable);
+            [return: MarshalAs(UnmanagedType.I1)]
+            internal static extern bool ToggleMetaAim([MarshalAs(UnmanagedType.I1)] bool enable);
         }
     }
 }

@@ -154,7 +154,7 @@ namespace UnityEngine.XR.Hands.Capture
         /// <summary>
         /// Attempts to retrieve the per-<see cref="XRHandSubsystem"/><c>.</c><see cref="XRHandSubsystem.UpdateType"/>
         /// data during this frame of capture, such as <see cref="XRHand"/>, associated with the
-        /// given <see cref="Handedess"/>.
+        /// given <see cref="Handedness"/>.
         /// </summary>
         /// <param name="handedness">
         /// Denotes which hand you wish to get tracking data for. Must be

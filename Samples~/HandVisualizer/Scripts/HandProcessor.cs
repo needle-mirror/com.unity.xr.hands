@@ -1,5 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine.XR.Hands.Processing;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands.Samples.VisualizerSample
 {
@@ -8,6 +11,9 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
     /// modify the hands skeleton. Note it is possible to modify the bones
     /// directly for more advanced use cases that are not shown here.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public class HandProcessor : MonoBehaviour, IXRHandProcessor
     {
         /// <inheritdoc />

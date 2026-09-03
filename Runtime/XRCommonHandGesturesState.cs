@@ -1,6 +1,7 @@
 using System;
-using System.IO;
-using UnityEngine.XR.Hands.Capture.Recording;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.XR;
+using UnityEngine.XR.Hands.Capture;
 
 namespace UnityEngine.XR.Hands
 {
@@ -11,60 +12,6 @@ namespace UnityEngine.XR.Hands
     struct XRCommonHandGesturesState : IEquatable<XRCommonHandGesturesState>
     {
         /// <summary>
-        /// Initializes an <c>XRCommonHandGesturesState</c> as a copy of the state in
-        /// the given <see cref="XRCommonHandGestures"/>.
-        /// </summary>
-        /// <param name="copyFrom">
-        /// The <see cref="XRCommonHandGestures"/> retrieved from an <see cref="XRHandSubsystem"/>
-        /// through <see cref="XRHandSubsystem.GetHand"/>, <see cref="XRHandSubsystem.leftHandCommonGestures"/>,
-        /// <see cref="XRHandSubsystem.rightHandCommonGestures"/>, or successfully retrieved from
-        /// <see cref="XRHandSubsystem.TryGetHand"/>.
-        /// </param>
-        public XRCommonHandGesturesState(XRCommonHandGestures copyFrom)
-        {
-            m_Handedness = copyFrom.handedness;
-            m_CommonGesturesFlags = copyFrom.flags;
-
-            m_AimPose = copyFrom.TryGetAimPose(out var aimPose) ? aimPose : Pose.identity;
-            m_AimActivateValue = copyFrom.TryGetAimActivateValue(out var aimActivateValue) ? aimActivateValue : 0f;
-            m_GraspValue = copyFrom.TryGetGraspValue(out var graspValue) ? graspValue : 0f;
-            m_GripPose = copyFrom.TryGetGripPose(out var gripPose) ? gripPose : Pose.identity;
-            m_PinchPose = copyFrom.TryGetPinchPose(out var pinchPose) ? pinchPose : Pose.identity;
-            m_PinchValue = copyFrom.TryGetPinchValue(out var pinchValue) ? pinchValue : 0f;
-            m_PokePose = copyFrom.TryGetPokePose(out var pokePose) ? pokePose : Pose.identity;
-
-            if (copyFrom.TryGetAimActivatedState(out var isAimActivated))
-            {
-                m_IsAimActivated = isAimActivated;
-                m_CommonGesturesFlags |= XRCommonHandGesturesFlags.IsAimActivatedStateValid;
-            }
-            else
-            {
-                m_IsAimActivated = false;
-            }
-
-            if (copyFrom.TryGetGraspFirmState(out var isGraspFirm))
-            {
-                m_IsGraspFirm = isGraspFirm;
-                m_CommonGesturesFlags |= XRCommonHandGesturesFlags.IsGraspFirmStateValid;
-            }
-            else
-            {
-                m_IsGraspFirm = false;
-            }
-
-            if (copyFrom.TryGetPinchTouchedState(out var isPinchTouched))
-            {
-                m_IsPinchTouched = isPinchTouched;
-                m_CommonGesturesFlags |= XRCommonHandGesturesFlags.IsPinchTouchedStateValid;
-            }
-            else
-            {
-                m_IsPinchTouched = false;
-            }
-        }
-
-        /// <summary>
         /// Tests for equality.
         /// </summary>
         /// <param name="other">The <see cref="XRCommonHandGesturesState"/> to compare against.</param>
@@ -73,7 +20,7 @@ namespace UnityEngine.XR.Hands
         /// is equal to this <see cref="XRCommonHandGesturesState"/>.
         /// Returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool Equals(in XRCommonHandGesturesState other)
+        public readonly bool Equals(in XRCommonHandGesturesState other)
         {
             return m_Handedness == other.m_Handedness &&
                 m_CommonGesturesFlags == other.m_CommonGesturesFlags &&
@@ -90,7 +37,7 @@ namespace UnityEngine.XR.Hands
         }
 
         /// <inheritdoc cref="Equals(in XRCommonHandGesturesState)"/>
-        bool IEquatable<XRCommonHandGesturesState>.Equals(XRCommonHandGesturesState other) => Equals(in other);
+        readonly bool IEquatable<XRCommonHandGesturesState>.Equals(XRCommonHandGesturesState other) => Equals(in other);
 
         /// <summary>
         /// Tests for equality.
@@ -102,13 +49,13 @@ namespace UnityEngine.XR.Hands
         /// <see cref="Equals(in XRCommonHandGesturesState)"/> also
         /// returns <see langword="true"/>; otherwise returns <see langword="false"/>.
         /// </returns>
-        public override bool Equals(object obj) => obj is XRCommonHandGesturesState other && Equals(in other);
+        public readonly override bool Equals(object obj) => obj is XRCommonHandGesturesState other && Equals(in other);
 
         /// <summary>
         /// Computes a hash code from all fields of this <c>XRCommonHandGesturesState</c>.
         /// </summary>
         /// <returns>Returns a hash code of this object.</returns>
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             return HashCodeUtil.Combine(
                 m_Handedness.GetHashCode(),
@@ -148,20 +95,27 @@ namespace UnityEngine.XR.Hands
         public static bool operator !=(in XRCommonHandGesturesState lhs, in XRCommonHandGesturesState rhs) => !lhs.Equals(in rhs);
 
         /// <summary>
-        /// Denotes the hand this <c>XRCommonHandGesturesState</c> is associated
-        /// with.
+        /// Denotes the hand this <c>XRCommonHandGesturesState</c> is associated with.
         /// </summary>
         /// <value>
         /// If this was retrieved from a valid source, such as a successful call to
         /// <see cref="XRHandCaptureFrame"/><c>.</c><see cref="XRHandCaptureFrame.TryGetCommonGestures"/>,
         /// this can only ever be <see cref="Handedness.Left"/> or <see cref="Handedness.Right"/>.
         /// </value>
-        public Handedness handedness => m_Handedness;
+        public Handedness handedness
+        {
+            readonly get => m_Handedness;
+            internal set => m_Handedness = value;
+        }
 
         /// <summary>
         /// Describes the validity of data found in this <c>XRCommonHandGesturesState</c>.
         /// </summary>
-        public XRCommonHandGesturesFlags flags => m_CommonGesturesFlags;
+        public XRCommonHandGesturesFlags flags
+        {
+            readonly get => m_CommonGesturesFlags;
+            internal set => m_CommonGesturesFlags = value;
+        }
 
         /// <summary>
         /// Attempts to get the aim pose.
@@ -172,12 +126,26 @@ namespace UnityEngine.XR.Hands
         /// <returns>
         /// Returns <see langword="true"/> if successful, returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool TryGetAimPose(out Pose aimPose)
+        public readonly bool TryGetAimPose(out Pose aimPose)
         {
             bool ret = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsAimPoseValid) != 0;
             aimPose = ret ? m_AimPose : Pose.identity;
             return ret;
         }
+
+        /// <summary>
+        /// Gets whether the aim pose is tracked.
+        /// </summary>
+        /// <returns>
+        /// Returns <see langword="true"/> if the aim pose is tracked.
+        /// Returns <see langword="false"/> otherwise.
+        /// </returns>
+        /// <seealso cref="TrackedDevice.isTracked"/>
+        /// <seealso cref="PoseControl.isTracked"/>
+        public readonly bool GetAimPoseIsTracked() =>
+            m_CommonGesturesFlags.HasGesturesFlag(XRCommonHandGesturesFlags.HasExplicitIsTracked)
+                ? m_CommonGesturesFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsAimPoseTracked)
+                : m_CommonGesturesFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsAimPoseValid);
 
         /// <summary>
         /// Attempts to get the aim activate value.
@@ -189,7 +157,7 @@ namespace UnityEngine.XR.Hands
         /// Returns <see langword="true"/> and a valid value is filled out.
         /// Returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool TryGetAimActivateValue(out float aimActivateValue)
+        public readonly bool TryGetAimActivateValue(out float aimActivateValue)
         {
             bool ret = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsAimActivateValueValid) != 0;
             aimActivateValue = ret ? m_AimActivateValue : 0f;
@@ -206,7 +174,7 @@ namespace UnityEngine.XR.Hands
         /// Returns <see langword="true"/> and a valid value is filled out.
         /// Returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool TryGetGraspValue(out float graspValue)
+        public readonly bool TryGetGraspValue(out float graspValue)
         {
             bool ret = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsGraspValueValid) != 0;
             graspValue = ret ? m_GraspValue : 0f;
@@ -222,12 +190,26 @@ namespace UnityEngine.XR.Hands
         /// <returns>
         /// Returns <see langword="true"/> if successful, returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool TryGetGripPose(out Pose gripPose)
+        public readonly bool TryGetGripPose(out Pose gripPose)
         {
             bool ret = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsGripPoseValid) != 0;
             gripPose = ret ? m_GripPose : Pose.identity;
             return ret;
         }
+
+        /// <summary>
+        /// Gets whether the grip pose is tracked.
+        /// </summary>
+        /// <returns>
+        /// Returns <see langword="true"/> if the grip pose is tracked.
+        /// Returns <see langword="false"/> otherwise.
+        /// </returns>
+        /// <seealso cref="TrackedDevice.isTracked"/>
+        /// <seealso cref="PoseControl.isTracked"/>
+        public readonly bool GetGripPoseIsTracked() =>
+            m_CommonGesturesFlags.HasGesturesFlag(XRCommonHandGesturesFlags.HasExplicitIsTracked)
+                ? m_CommonGesturesFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsGripPoseTracked)
+                : m_CommonGesturesFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsGripPoseValid);
 
         /// <summary>
         /// Attempts to get the pinch pose.
@@ -238,12 +220,26 @@ namespace UnityEngine.XR.Hands
         /// <returns>
         /// Returns <see langword="true"/> if successful, returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool TryGetPinchPose(out Pose pinchPose)
+        public readonly bool TryGetPinchPose(out Pose pinchPose)
         {
             bool ret = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsPinchPoseValid) != 0;
             pinchPose = ret ? m_PinchPose : Pose.identity;
             return ret;
         }
+
+        /// <summary>
+        /// Gets whether the pinch pose is tracked.
+        /// </summary>
+        /// <returns>
+        /// Returns <see langword="true"/> if the pinch pose is tracked.
+        /// Returns <see langword="false"/> otherwise.
+        /// </returns>
+        /// <seealso cref="TrackedDevice.isTracked"/>
+        /// <seealso cref="PoseControl.isTracked"/>
+        public readonly bool GetPinchPoseIsTracked() =>
+            m_CommonGesturesFlags.HasGesturesFlag(XRCommonHandGesturesFlags.HasExplicitIsTracked)
+                ? m_CommonGesturesFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPinchPoseTracked)
+                : m_CommonGesturesFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPinchPoseValid);
 
         /// <summary>
         /// Attempts to get the pinch value.
@@ -255,7 +251,7 @@ namespace UnityEngine.XR.Hands
         /// Returns <see langword="true"/> and a valid value is filled out.
         /// Returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool TryGetPinchValue(out float pinchValue)
+        public readonly bool TryGetPinchValue(out float pinchValue)
         {
             bool ret = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsPinchValueValid) != 0;
             pinchValue = ret ? m_PinchValue : 0f;
@@ -271,12 +267,26 @@ namespace UnityEngine.XR.Hands
         /// <returns>
         /// Returns <see langword="true"/> if successful, returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool TryGetPokePose(out Pose pokePose)
+        public readonly bool TryGetPokePose(out Pose pokePose)
         {
             bool ret = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsPokePoseValid) != 0;
             pokePose = ret ? m_PokePose : Pose.identity;
             return ret;
         }
+
+        /// <summary>
+        /// Gets whether the poke pose is tracked.
+        /// </summary>
+        /// <returns>
+        /// Returns <see langword="true"/> if the poke pose is tracked.
+        /// Returns <see langword="false"/> otherwise.
+        /// </returns>
+        /// <seealso cref="TrackedDevice.isTracked"/>
+        /// <seealso cref="PoseControl.isTracked"/>
+        public readonly bool GetPokePoseIsTracked() =>
+            m_CommonGesturesFlags.HasGesturesFlag(XRCommonHandGesturesFlags.HasExplicitIsTracked)
+                ? m_CommonGesturesFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPokePoseTracked)
+                : m_CommonGesturesFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPokePoseValid);
 
         /// <summary>
         /// Attempts to get whether aim is fully activated.
@@ -288,7 +298,7 @@ namespace UnityEngine.XR.Hands
         /// Returns <see langword="true"/> if a valid evaluation of the aim activation state is available.
         /// Returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool TryGetAimActivatedState(out bool isAimActivated)
+        public readonly bool TryGetAimActivatedState(out bool isAimActivated)
         {
             bool ret = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsAimActivatedStateValid) != 0;
             isAimActivated = ret && m_IsAimActivated;
@@ -305,7 +315,7 @@ namespace UnityEngine.XR.Hands
         /// Returns <see langword="true"/> if a valid evaluation of the grasp firm state is available.
         /// Returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool TryGetGraspFirmState(out bool isGraspFirm)
+        public readonly bool TryGetGraspFirmState(out bool isGraspFirm)
         {
             bool ret = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsGraspFirmStateValid) != 0;
             isGraspFirm = ret && m_IsGraspFirm;
@@ -322,65 +332,72 @@ namespace UnityEngine.XR.Hands
         /// Returns <see langword="true"/> if a valid evaluation of the pinch touched state is available.
         /// Returns <see langword="false"/> otherwise.
         /// </returns>
-        public bool TryGetPinchTouchedState(out bool isPinchTouched)
+        public readonly bool TryGetPinchTouchedState(out bool isPinchTouched)
         {
             bool ret = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsPinchTouchedStateValid) != 0;
             isPinchTouched = ret && m_IsPinchTouched;
             return ret;
         }
 
-        internal XRCommonHandGesturesState(BinaryReader reader)
+        internal Pose aimPoseInternal
         {
-            m_Handedness = reader.ReadHandedness();
-            m_CommonGesturesFlags = reader.ReadCommonGesturesFlags();
-
-            if ((m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsAimPoseValid) != 0)
-                reader.ReadPose(out m_AimPose);
-            else
-                m_AimPose = Pose.identity;
-
-            m_AimActivateValue = ((m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsAimActivateValueValid) != 0)
-                ? reader.ReadSingle()
-                : 0f;
-
-            m_GraspValue = ((m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsGraspValueValid) != 0)
-                ? reader.ReadSingle()
-                : 0f;
-
-            if ((m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsGripPoseValid) != 0)
-                reader.ReadPose(out m_GripPose);
-            else
-                m_GripPose = Pose.identity;
-
-            if ((m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsPinchPoseValid) != 0)
-                reader.ReadPose(out m_PinchPose);
-            else
-                m_PinchPose = Pose.identity;
-
-            m_PinchValue = ((m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsPinchValueValid) != 0)
-                ? reader.ReadSingle()
-                : 0f;
-
-            if ((m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsPokePoseValid) != 0)
-                reader.ReadPose(out m_PokePose);
-            else
-                m_PokePose = Pose.identity;
-
-            m_IsAimActivated = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsAimActivatedStateValid) != 0 && reader.ReadBoolean();
-            m_IsGraspFirm = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsGraspFirmStateValid) != 0 && reader.ReadBoolean();
-            m_IsPinchTouched = (m_CommonGesturesFlags & XRCommonHandGesturesFlags.IsPinchTouchedStateValid) != 0 && reader.ReadBoolean();
+            readonly get => m_AimPose;
+            set => m_AimPose = value;
         }
 
-        internal Pose possiblyInvalidAimPose => m_AimPose;
-        internal float possiblyInvalidAimActivateValue => m_AimActivateValue;
-        internal float possiblyInvalidGraspValue => m_GraspValue;
-        internal Pose possiblyInvalidGripPose => m_GripPose;
-        internal Pose possiblyInvalidPinchPose => m_PinchPose;
-        internal float possiblyInvalidPinchValue => m_PinchValue;
-        internal Pose possiblyInvalidPokePose => m_PokePose;
-        internal bool possiblyInvalidIsAimActivated => m_IsAimActivated;
-        internal bool possiblyInvalidIsGraspFirm => m_IsGraspFirm;
-        internal bool possiblyInvalidIsPinchTouched => m_IsPinchTouched;
+        internal float aimActivateValueInternal
+        {
+            readonly get => m_AimActivateValue;
+            set => m_AimActivateValue = value;
+        }
+
+        internal float graspValueInternal
+        {
+            readonly get => m_GraspValue;
+            set => m_GraspValue = value;
+        }
+
+        internal Pose gripPoseInternal
+        {
+            readonly get => m_GripPose;
+            set => m_GripPose = value;
+        }
+
+        internal Pose pinchPoseInternal
+        {
+            readonly get => m_PinchPose;
+            set => m_PinchPose = value;
+        }
+
+        internal float pinchValueInternal
+        {
+            readonly get => m_PinchValue;
+            set => m_PinchValue = value;
+        }
+
+        internal Pose pokePoseInternal
+        {
+            readonly get => m_PokePose;
+            set => m_PokePose = value;
+        }
+
+        internal bool isAimActivatedInternal
+        {
+            readonly get => m_IsAimActivated;
+            set => m_IsAimActivated = value;
+        }
+
+        internal bool isGraspFirmInternal
+        {
+            readonly get => m_IsGraspFirm;
+            set => m_IsGraspFirm = value;
+        }
+
+        internal bool isPinchTouchedInternal
+        {
+            readonly get => m_IsPinchTouched;
+            set => m_IsPinchTouched = value;
+        }
 
         [SerializeField]
         Handedness m_Handedness;

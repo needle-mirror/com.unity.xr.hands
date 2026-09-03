@@ -9,6 +9,23 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- Headers should be listed in this order: Added, Changed, Deprecated, Removed, Fixed, Security -->
+## [1.10.0-pre.1] - 2026-09-03
+
+### Added
+
+- Added "Is Tracked" input controls for the four poses in `<XRHandDevice>` ([`gripIsTracked`](xref:UnityEngine.XR.Hands.XRHandDevice.gripIsTracked), [`pokeIsTracked`](xref:UnityEngine.XR.Hands.XRHandDevice.pokeIsTracked), [`pinchIsTracked`](xref:UnityEngine.XR.Hands.XRHandDevice.pinchIsTracked), and [`aimIsTracked`](xref:UnityEngine.XR.Hands.XRHandDevice.aimIsTracked)).
+- Added explicit wrist pose input controls in `<XRHandDevice>` ([`wristPosition`](xref:UnityEngine.XR.Hands.XRHandDevice.wristPosition), [`wristRotation`](xref:UnityEngine.XR.Hands.XRHandDevice.wristRotation), [`wristIsTracked`](xref:UnityEngine.XR.Hands.XRHandDevice.wristIsTracked), and [`wristTrackingState`](xref:UnityEngine.XR.Hands.XRHandDevice.wristTrackingState)). This can be used instead of the device input controls (`devicePosition`, `deviceRotation`, `isTracked`, and `trackingState`) which either maps to the wrist or grip pose depending on the hand subsystem configuration, see [XR Hand Device: Available controls](xref:xrhands-hand-device#available-controls).
+- Added [Meta Hand Tracking Frequency Hint](xref:xrhands-meta-frequency-hint-feature) OpenXR feature, which enables the `XR_META_hand_tracking_frequency_hint` extension to request higher frequency hand tracking updates. Requires the OpenXR Plugin (com.unity.xr.openxr) package version 1.19.0 or newer.
+- Added [Meta Hand Tracking Wide Motion Mode](xref:xrhands-meta-wide-motion-feature) OpenXR feature, which enables the `XR_META_hand_tracking_wide_motion_mode2` extension to estimate hand poses when hands are outside the camera tracking volume. Requires the OpenXR Plugin (com.unity.xr.openxr) package version 1.19.0 or newer.
+
+### Fixed
+
+- Fixed pose data provided to [`XRCommonHandGestures`](xref:UnityEngine.XR.Hands.XRCommonHandGestures) by the [`OpenXRHandProvider`](xref:UnityEngine.XR.Hands.OpenXR.OpenXRHandProvider) to use the "Tracking State" flags instead of the "Is Tracked" boolean data for validity. This affects the return value of `TryGetAimPose`, `TryGetGripPose`, `TryGetPinchPose`, and `TryGetPokePose` which now return `true` when the pose is valid even if it is not actively being tracked, such as during a brief occlusion, on runtimes that support this distinction.
+- Fixed [`XRCommonHandGestures`](xref:UnityEngine.XR.Hands.XRCommonHandGestures) methods `TryGetAimActivatedState`, `TryGetGraspFirmState`, and `TryGetPinchTouchedState` always returning false state values when using hand playback. This also fixes the associated events (`aimActivatedStateUpdated`, `graspFirmStateUpdated`, and `pinchTouchedStateUpdated`) when using hand playback.
+- Fixed the [`OpenXRHandSubsystemManager`](xref:UnityEngine.XR.Hands.OpenXR.OpenXRHandSubsystemManager) component showing as a missing script in the HandVisualizer sample or in any scene using the `Hand Debug Visualizer` prefab when the OpenXR package was not installed.
+- Fixed an initialization issue with `HandTrackingDataSourceFeature.OnInstanceCreate` where the preferred source lists were not created if an OpenXR instance is not created.
+- Fixed static-cleanup analyzer warnings when importing samples in Unity 6.5 or newer by adding the `[NoAutoStaticsCleanup]` attribute to sample types that hold static fields.
+- Fixed potential false positives reported by internal `OnInstanceCreate`, `ToggleMetaAim`, and `TryInitialize` P/Invoke declarations so the native bool return marshals as a single byte.
 
 ## [1.9.0] - 2026-08-06
 

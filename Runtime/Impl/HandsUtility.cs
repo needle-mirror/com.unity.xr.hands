@@ -2,9 +2,15 @@ using System.Collections.ObjectModel;
 using UnityEngine.XR.Hands.Capture;
 using UnityEngine.XR.Hands.Capture.Playback;
 using UnityEngine.XR.Hands.Capture.Recording;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands
 {
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     static class HandsUtility
     {
         public static bool IsValid(this Handedness handedness) => handedness == Handedness.Left || handedness == Handedness.Right;

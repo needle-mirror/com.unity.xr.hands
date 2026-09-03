@@ -1,11 +1,17 @@
 using Unity.Collections;
 using UnityEngine.XR.Hands.ProviderImplementation;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands.Capture.Playback
 {
     /// <summary>
     /// Hand tracking provider for the playback.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     class PlaybackProvider : XRHandSubsystemProvider
     {
         // These static fields should not be reset between Play mode sessions since registration list of subsystem descriptors are not cleared.
@@ -44,47 +50,38 @@ namespace UnityEngine.XR.Hands.Capture.Playback
 
         public override bool canSurfaceCommonPoseData => true;
 
-        public override bool TryGetAimPose(Handedness handedness, out Pose aimPose)
-        {
-            aimPose = Pose.identity;
-            return m_Playbacks[handedness.ToIndex()].TryGetAimPose(ref aimPose);
-        }
+        internal override bool TryGetCommonGesturesState(Handedness handedness, out XRCommonHandGesturesState commonGestures) =>
+            m_Playbacks[handedness.ToIndex()].TryGetCommonGesturesState(out commonGestures);
 
-        public override bool TryGetAimActivateValue(Handedness handedness, out float aimActivateValue)
-        {
-            aimActivateValue = 0f;
-            return m_Playbacks[handedness.ToIndex()].TryGetAimActivateValue(ref aimActivateValue);
-        }
+        public override bool TryGetAimPose(Handedness handedness, out Pose aimPose) =>
+            m_Playbacks[handedness.ToIndex()].TryGetAimPose(out aimPose);
 
-        public override bool TryGetGraspValue(Handedness handedness, out float graspValue)
-        {
-            graspValue = 0f;
-            return m_Playbacks[handedness.ToIndex()].TryGetGraspValue(ref graspValue);
-        }
+        public override bool TryGetAimActivateValue(Handedness handedness, out float aimActivateValue) =>
+            m_Playbacks[handedness.ToIndex()].TryGetAimActivateValue(out aimActivateValue);
 
-        public override bool TryGetGripPose(Handedness handedness, out Pose gripPose)
-        {
-            gripPose = Pose.identity;
-            return m_Playbacks[handedness.ToIndex()].TryGetGripPose(ref gripPose);
-        }
+        public override bool TryGetAimActivatedState(Handedness handedness, out bool isAimActivated) =>
+            m_Playbacks[handedness.ToIndex()].TryGetAimActivatedState(out isAimActivated);
 
-        public override bool TryGetPinchPose(Handedness handedness, out Pose pinchPose)
-        {
-            pinchPose = Pose.identity;
-            return m_Playbacks[handedness.ToIndex()].TryGetPinchPose(ref pinchPose);
-        }
+        public override bool TryGetGraspValue(Handedness handedness, out float graspValue) =>
+            m_Playbacks[handedness.ToIndex()].TryGetGraspValue(out graspValue);
 
-        public override bool TryGetPinchValue(Handedness handedness, out float pinchValue)
-        {
-            pinchValue = 0f;
-            return m_Playbacks[handedness.ToIndex()].TryGetPinchValue(ref pinchValue);
-        }
+        public override bool TryGetGraspFirmState(Handedness handedness, out bool isGraspFirm) =>
+            m_Playbacks[handedness.ToIndex()].TryGetGraspFirmState(out isGraspFirm);
 
-        public override bool TryGetPokePose(Handedness handedness, out Pose pokePose)
-        {
-            pokePose = Pose.identity;
-            return m_Playbacks[handedness.ToIndex()].TryGetPokePose(ref pokePose);
-        }
+        public override bool TryGetGripPose(Handedness handedness, out Pose gripPose) =>
+            m_Playbacks[handedness.ToIndex()].TryGetGripPose(out gripPose);
+
+        public override bool TryGetPinchPose(Handedness handedness, out Pose pinchPose) =>
+            m_Playbacks[handedness.ToIndex()].TryGetPinchPose(out pinchPose);
+
+        public override bool TryGetPinchValue(Handedness handedness, out float pinchValue) =>
+            m_Playbacks[handedness.ToIndex()].TryGetPinchValue(out pinchValue);
+
+        public override bool TryGetPinchTouchedState(Handedness handedness, out bool isPinched) =>
+            m_Playbacks[handedness.ToIndex()].TryGetPinchTouchedState(out isPinched);
+
+        public override bool TryGetPokePose(Handedness handedness, out Pose pokePose) =>
+            m_Playbacks[handedness.ToIndex()].TryGetPokePose(out pokePose);
 
         public override void Start()
         { }
@@ -101,7 +98,7 @@ namespace UnityEngine.XR.Hands.Capture.Playback
         public override bool TryGetAimState(Handedness handedness, out XRHandAimState aimState)
         {
             aimState = default;
-            return m_Playbacks[handedness.ToIndex()].TryGetAimState(ref aimState);
+            return m_Playbacks[handedness.ToIndex()].TryGetAimState(out aimState);
         }
 
         internal void Initialize(XRHandPlayback leftPlayback, XRHandPlayback rightPlayback)

@@ -26,7 +26,7 @@ namespace UnityEngine.XR.Hands.Processing
             => subsystem.SetHand(hand);
 
         /// <summary>
-        /// Gets the <see cref="NativeArray"/> of <see cref="XRHandJoints"/>
+        /// Gets the <see cref="NativeArray{T}"/> of <see cref="XRHandJoint"/>
         /// contained in the invoking hand.
         /// </summary>
         /// <param name="hand">
@@ -39,7 +39,7 @@ namespace UnityEngine.XR.Hands.Processing
         /// <remarks>
         /// After manipulating data for a particular joint, be sure to assign it
         /// back to the array you got it from, as you can only manipulate copies
-        /// of objects from a <see cref="NativeArray"/>.
+        /// of objects from a <see cref="NativeArray{T}"/>.
         /// </remarks>
         public static NativeArray<XRHandJoint> GetRawJointArray(this XRHand hand)
         {
@@ -98,7 +98,7 @@ namespace UnityEngine.XR.Hands.Processing
         /// <remarks>
         /// After manipulating data for a particular joint, be sure to assign it
         /// back to the array you got it from, as you can only manipulate copies
-        /// of objects from a <see cref="NativeArray"/>.
+        /// of objects from a <see cref="NativeArray{T}"/>.
         /// </remarks>
         public static void SetPose(this ref XRHandJoint joint, Pose pose)
         {
@@ -123,7 +123,7 @@ namespace UnityEngine.XR.Hands.Processing
         /// <remarks>
         /// After manipulating data for a particular joint, be sure to assign it
         /// back to the array you got it from, as you can only manipulate copies
-        /// of objects from a <see cref="NativeArray"/>.
+        /// of objects from a <see cref="NativeArray{T}"/>.
         /// </remarks>
         public static void SetLinearVelocity(this ref XRHandJoint joint, Vector3 linearVelocity)
         {
@@ -148,7 +148,7 @@ namespace UnityEngine.XR.Hands.Processing
         /// <remarks>
         /// After manipulating data for a particular joint, be sure to assign it
         /// back to the array you got it from, as you can only manipulate copies
-        /// of objects from a <see cref="NativeArray"/>.
+        /// of objects from a <see cref="NativeArray{T}"/>.
         /// </remarks>
         public static void SetAngularVelocity(this ref XRHandJoint joint, Vector3 angularVelocity)
         {

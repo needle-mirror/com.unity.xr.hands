@@ -16,6 +16,8 @@ namespace UnityEngine.XR.Hands.Capture.Playback
         bool m_IsCurrentFrameValid;
         bool m_IsNextFrameValid;
 
+        float currentElapsedTime => m_TimeController?.ElapsedTime ?? 0f;
+
         static readonly ProfilerMarker k_TryGetAimPoseMarker = new("PlaybackGestureHandler.TryGetAimPose");
         static readonly ProfilerMarker k_TryGetTwoCommonGesturesMarker = new("PlaybackGestureHandler.TryGetCommonGestureStates");
 
@@ -52,8 +54,8 @@ namespace UnityEngine.XR.Hands.Capture.Playback
         delegate T InterpolateFunc<T>(in T current, in T next, float blendScalar);
 
         // Cache interpolation functions to use as delegate to avoid GC Alloc
-        InterpolateFunc<Pose> m_InterpolatePose = PlaybackInterpolator.InterpolatePose;
-        InterpolateFunc<float> m_InterpolateValue = PlaybackInterpolator.InterpolateValue;
+        readonly InterpolateFunc<Pose> m_InterpolatePose = PlaybackInterpolator.InterpolatePose;
+        readonly InterpolateFunc<float> m_InterpolateValue = PlaybackInterpolator.InterpolateValue;
 
         /// <summary>
         /// Retrieves common gesture data and interpolates when applicable.
@@ -68,10 +70,10 @@ namespace UnityEngine.XR.Hands.Capture.Playback
         bool TryGetCommonGestureHelper<T>(
             TryGetFromGestures<T> getter,
             InterpolateFunc<T> interpolator,
-            ref T result,
+            out T result,
             T defaultValue)
         {
-            if (!TryGetCommonGestureStates(out bool isNextCommonGesturesValid, out var currentCommonGestures, out var nextCommonGestures, out float blendScalar))
+            if (!TryGetCommonGesturesStates(out bool isNextCommonGesturesValid, out var currentCommonGestures, out var nextCommonGestures, out float blendScalar))
             {
                 result = defaultValue;
                 return false;
@@ -89,9 +91,35 @@ namespace UnityEngine.XR.Hands.Capture.Playback
         }
 
         /// <summary>
-        /// Retrieves common gesture data and interpolates when applicable.
+        /// Retrieves common gesture data without interpolation.
         /// </summary>
         /// <typeparam name="T">Type of the common gesture data.</typeparam>
+        /// <param name="getter">Delegate used to retrieve common gesture data.</param>
+        /// <param name="result">Result of the common gesture data.</param>
+        /// <param name="defaultValue">Default value for result when common gesture data cannot be retrieved.</param>
+        /// <returns>Returns <see langword="false"/> if the current frame is invalid or common gesture data cannot be retrieved from current the current frame. Otherwise returns <see langword="true"/>.</returns>
+        /// <remarks>If the next frame is invalid or if common gesture data cannot be retrieved from the next frame, this function still returns true but does not interpolate.</remarks>
+        bool TryGetCommonGestureHelper<T>(
+            TryGetFromGestures<T> getter,
+            out T result,
+            T defaultValue)
+        {
+            if (!TryGetCommonGesturesStates(out _, out var currentCommonGestures, out _, out _))
+            {
+                result = defaultValue;
+                return false;
+            }
+
+            // Get current frame common gesture data
+            if (!getter(currentCommonGestures, out result))
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Retrieves common gesture data and interpolates when applicable.
+        /// </summary>
         /// <param name="getter">Delegate used to retrieve common gesture data.</param>
         /// <param name="interpolator">Delegate used to interpolate between two frames of common gesture data.</param>
         /// <param name="result">Result of the common gesture data.</param>
@@ -102,11 +130,11 @@ namespace UnityEngine.XR.Hands.Capture.Playback
         bool TryGetCommonGestureHelper(
             TryGetFromGestures<Pose> getter,
             InterpolateFunc<Pose> interpolator,
-            ref Pose result,
+            out Pose result,
             Pose defaultValue,
             bool applyCoordinateTransform)
         {
-            if (!TryGetCommonGestureHelper(getter, interpolator, ref result, defaultValue))
+            if (!TryGetCommonGestureHelper(getter, interpolator, out result, defaultValue))
                 return false;
 
             if (applyCoordinateTransform)
@@ -115,77 +143,101 @@ namespace UnityEngine.XR.Hands.Capture.Playback
             return true;
         }
 
-        public bool TryGetAimPose(ref Pose aimPose)
+        public bool TryGetAimPose(out Pose aimPose)
         {
             using (k_TryGetAimPoseMarker.Auto())
             {
                 return TryGetCommonGestureHelper(
                     (XRCommonHandGesturesState g, out Pose p) => g.TryGetAimPose(out p),
                     m_InterpolatePose,
-                    ref aimPose,
+                    out aimPose,
                     Pose.identity,
                     true);
             }
         }
 
-        public bool TryGetAimActivateValue(ref float aimActivateValue)
+        public bool TryGetAimActivateValue(out float aimActivateValue)
         {
             return TryGetCommonGestureHelper(
                 (XRCommonHandGesturesState g, out float v) => g.TryGetAimActivateValue(out v),
                 m_InterpolateValue,
-                ref aimActivateValue,
+                out aimActivateValue,
                 0f);
         }
 
-        public bool TryGetGraspValue(ref float graspValue)
+        public bool TryGetAimActivatedState(out bool isAimActivated)
+        {
+            return TryGetCommonGestureHelper(
+                (XRCommonHandGesturesState g, out bool v) => g.TryGetAimActivatedState(out v),
+                out isAimActivated,
+                false);
+        }
+
+        public bool TryGetGraspValue(out float graspValue)
         {
             return TryGetCommonGestureHelper(
                 (XRCommonHandGesturesState g, out float v) => g.TryGetGraspValue(out v),
                 m_InterpolateValue,
-                ref graspValue,
+                out graspValue,
                 0f);
         }
 
-        public bool TryGetGripPose(ref Pose gripPose)
+        public bool TryGetGraspFirmState(out bool isGraspFirm)
+        {
+            return TryGetCommonGestureHelper(
+                (XRCommonHandGesturesState g, out bool v) => g.TryGetGraspFirmState(out v),
+                out isGraspFirm,
+                false);
+        }
+
+        public bool TryGetGripPose(out Pose gripPose)
         {
             return TryGetCommonGestureHelper(
                 (XRCommonHandGesturesState g, out Pose p) => g.TryGetGripPose(out p),
                 m_InterpolatePose,
-                ref gripPose,
+                out gripPose,
                 Pose.identity,
                 true);
         }
 
-        public bool TryGetPinchPose(ref Pose pinchPose)
+        public bool TryGetPinchPose(out Pose pinchPose)
         {
             return TryGetCommonGestureHelper(
                 (XRCommonHandGesturesState g, out Pose p) => g.TryGetPinchPose(out p),
                 m_InterpolatePose,
-                ref pinchPose,
+                out pinchPose,
                 Pose.identity,
                 true);
         }
 
-        public bool TryGetPinchValue(ref float pinchValue)
+        public bool TryGetPinchValue(out float pinchValue)
         {
             return TryGetCommonGestureHelper(
                 (XRCommonHandGesturesState g, out float v) => g.TryGetPinchValue(out v),
                 m_InterpolateValue,
-                ref pinchValue,
+                out pinchValue,
                 0f);
         }
 
-        public bool TryGetPokePose(ref Pose pokePose)
+        public bool TryGetPinchTouchedState(out bool isPinched)
+        {
+            return TryGetCommonGestureHelper(
+                (XRCommonHandGesturesState g, out bool v) => g.TryGetPinchTouchedState(out v),
+                out isPinched,
+                false);
+        }
+
+        public bool TryGetPokePose(out Pose pokePose)
         {
             return TryGetCommonGestureHelper(
                 (XRCommonHandGesturesState g, out Pose p) => g.TryGetPokePose(out p),
                 m_InterpolatePose,
-                ref pokePose,
+                out pokePose,
                 Pose.identity,
                 true);
         }
 
-        public bool TryGetAimState(ref XRHandAimState aimState)
+        public bool TryGetAimState(out XRHandAimState aimState)
         {
             // Try to get current frame aim state
             if (!m_IsCurrentFrameValid || !m_CurrentFrame.TryGetAimState(m_Handedness, out aimState))
@@ -194,37 +246,40 @@ namespace UnityEngine.XR.Hands.Capture.Playback
                 return false;
             }
 
-            // If we can get the current frame aim state but can't get the next frame, return the aim state for the
-            // current frame and return early with a success.
-            if (!m_IsNextFrameValid || !m_NextFrame.TryGetAimState(m_Handedness, out var nextAimState))
+            // Try to get the next frame and interpolate between them
+            if (m_IsNextFrameValid && m_NextFrame.TryGetAimState(m_Handedness, out var nextAimState))
             {
-                // Apply coordinate transform to aim pose of current frame before returning early
-                if (aimState.TryGetAimPose(out var aimPose))
-                    aimState.aimPoseInternal = m_CoordinateTransform.TransformPose(aimPose);
-
-                return true;
+                float blendScalar = PlaybackInterpolator.CalculateBlendScalar(m_CurrentFrame, m_NextFrame, currentElapsedTime);
+                aimState = PlaybackInterpolator.InterpolateAimState(aimState, nextAimState, blendScalar);
             }
 
-            // Interpolate between the two frames
-            float currentElapsedTime = m_TimeController?.ElapsedTime ?? 0f;
-            float blendScalar = PlaybackInterpolator.CalculateBlendScalar(
-                m_CurrentFrame,
-                m_NextFrame,
-                currentElapsedTime);
+            // Apply coordinate transform to aim pose of frame before returning
+            aimState.aimPoseInternal = m_CoordinateTransform.TransformPose(aimState.aimPoseInternal);
 
-            // Use PlaybackInterpolator to interpolate aim state
-            if (PlaybackInterpolator.TryInterpolateAimState(
-                    aimState,
-                    nextAimState,
-                    blendScalar,
-                    out var interpolated))
+            return true;
+        }
+
+        public bool TryGetCommonGesturesState(out XRCommonHandGesturesState commonGestures)
+        {
+            // Try to get current frame common gestures state
+            if (!m_IsCurrentFrameValid || !m_CurrentFrame.TryGetCommonGestures(m_Handedness, out commonGestures))
             {
-                aimState = interpolated;
-
-                // Apply coordinate transform to aim pose if available
-                if (aimState.TryGetAimPose(out var aimPose))
-                    aimState.aimPoseInternal = m_CoordinateTransform.TransformPose(aimPose);
+                commonGestures = default;
+                return false;
             }
+
+            // Try to get the next frame and interpolate between them
+            if (m_IsNextFrameValid && m_NextFrame.TryGetCommonGestures(m_Handedness, out var nextCommonGesturesState))
+            {
+                float blendScalar = PlaybackInterpolator.CalculateBlendScalar(m_CurrentFrame, m_NextFrame, currentElapsedTime);
+                commonGestures = PlaybackInterpolator.InterpolateCommonGesturesState(commonGestures, nextCommonGesturesState, blendScalar);
+            }
+
+            // Apply coordinate transform to all poses of current frame before returning
+            commonGestures.aimPoseInternal = m_CoordinateTransform.TransformPose(commonGestures.aimPoseInternal);
+            commonGestures.gripPoseInternal = m_CoordinateTransform.TransformPose(commonGestures.gripPoseInternal);
+            commonGestures.pinchPoseInternal = m_CoordinateTransform.TransformPose(commonGestures.pinchPoseInternal);
+            commonGestures.pokePoseInternal = m_CoordinateTransform.TransformPose(commonGestures.pokePoseInternal);
 
             return true;
         }
@@ -237,7 +292,7 @@ namespace UnityEngine.XR.Hands.Capture.Playback
         /// <param name="next">The common gesture state for the next frame.</param>
         /// <param name="blendScalar">The blend scalar value for interpolation.</param>
         /// <returns></returns>
-        bool TryGetCommonGestureStates(out bool isNextValid, out XRCommonHandGesturesState current, out XRCommonHandGesturesState next, out float blendScalar)
+        bool TryGetCommonGesturesStates(out bool isNextValid, out XRCommonHandGesturesState current, out XRCommonHandGesturesState next, out float blendScalar)
         {
             using (k_TryGetTwoCommonGesturesMarker.Auto())
             {
@@ -258,11 +313,7 @@ namespace UnityEngine.XR.Hands.Capture.Playback
                 if (!isNextValid)
                     return true;
 
-                float currentElapsedTime = m_TimeController?.ElapsedTime ?? 0f;
-                blendScalar = PlaybackInterpolator.CalculateBlendScalar(
-                    m_CurrentFrame,
-                    m_NextFrame,
-                    currentElapsedTime);
+                blendScalar = PlaybackInterpolator.CalculateBlendScalar(m_CurrentFrame, m_NextFrame, currentElapsedTime);
                 return true;
             }
         }

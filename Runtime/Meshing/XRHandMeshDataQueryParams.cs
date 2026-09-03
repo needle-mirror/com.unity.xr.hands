@@ -9,7 +9,7 @@ namespace UnityEngine.XR.Hands.Meshing
     {
         /// <summary>
         /// <see cref="Allocator"/> to be used when allocating the
-        /// <see cref="NativeArray"/>s in <see cref="XRHandMeshData"/>.
+        /// <see cref="NativeArray{T}"/>s in <see cref="XRHandMeshData"/>.
         /// </summary>
         public Allocator allocator { get; set; }
     }

@@ -1,3 +1,6 @@
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
 
 using System;
@@ -23,6 +26,9 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// survive across sessions and are reused.
     /// </para>
     /// </remarks>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     internal sealed class HandExtensibilityManager : IHandTrackingExtensionProvider, IDisposable
     {
         XrStructureChain[] m_CreateChains;

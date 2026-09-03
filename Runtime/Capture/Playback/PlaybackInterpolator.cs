@@ -85,7 +85,7 @@ namespace UnityEngine.XR.Hands.Capture.Playback
         /// <param name="blendScalar">The blend parameter in [0,1].</param>
         /// <param name="handedness">The handedness of the hand being interpolated.</param>
         /// <param name="outputJoints">Output array to write interpolated joints to.</param>
-        /// <returns>True if interpolation succeeded, false if hands are not tracked.</returns>
+        /// <returns>Returns <see langword="true"/> if interpolation succeeded, <see langword="false"/> if hands are not tracked.</returns>
         public static bool TryInterpolateJoints(
             in XRHand handBefore,
             in XRHand handAfter,
@@ -161,21 +161,61 @@ namespace UnityEngine.XR.Hands.Capture.Playback
         }
 
         /// <summary>
+        /// Interpolates common gestures state between two frames.
+        /// Blends poses and float values. Booleans and flags are never interpolated.
+        /// </summary>
+        /// <param name="current">The current common gestures state.</param>
+        /// <param name="next">The next common gestures state.</param>
+        /// <param name="blendScalar">The blend parameter in [0,1].</param>
+        /// <return>Returns interpolated common gestures state.</return>
+        public static XRCommonHandGesturesState InterpolateCommonGesturesState(
+            in XRCommonHandGesturesState current,
+            in XRCommonHandGesturesState next,
+            float blendScalar)
+        {
+            var interpolated = current;
+
+            var currentFlags = current.flags;
+            var nextFlags = next.flags;
+
+            // Interpolate poses if both are valid.
+            if (currentFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsAimPoseValid) && nextFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsAimPoseValid))
+                interpolated.aimPoseInternal = InterpolatePose(current.aimPoseInternal, next.aimPoseInternal, blendScalar);
+            if (currentFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsGripPoseValid) && nextFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsGripPoseValid))
+                interpolated.gripPoseInternal = InterpolatePose(current.gripPoseInternal, next.gripPoseInternal, blendScalar);
+            if (currentFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPinchPoseValid) && nextFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPinchPoseValid))
+                interpolated.pinchPoseInternal = InterpolatePose(current.pinchPoseInternal, next.pinchPoseInternal, blendScalar);
+            if (currentFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPokePoseValid) && nextFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPokePoseValid))
+                interpolated.pokePoseInternal = InterpolatePose(current.pokePoseInternal, next.pokePoseInternal, blendScalar);
+
+            // Interpolate float values if both are valid.
+            // We could potentially still interpolate from some value to 0 when the next state's float property is not ready for smoother
+            // updates, but the PlaybackGestureHandler currently does this same valid checking for the individual TryGet- methods.
+            // So this is kept as a match for that behavior.
+            if (currentFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsAimActivateValueValid) && nextFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsAimActivateValueValid))
+                interpolated.aimActivateValueInternal = InterpolateValue(current.aimActivateValueInternal, next.aimActivateValueInternal, blendScalar);
+            if (currentFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsGraspValueValid) && nextFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsGraspValueValid))
+                interpolated.graspValueInternal = InterpolateValue(current.graspValueInternal, next.graspValueInternal, blendScalar);
+            if (currentFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPinchValueValid) && nextFlags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPinchValueValid))
+                interpolated.pinchValueInternal = InterpolateValue(current.pinchValueInternal, next.pinchValueInternal, blendScalar);
+
+            return interpolated;
+        }
+
+        /// <summary>
         /// Interpolates aim state between two frames.
-        /// Blends aim pose, pinch values, poke values, and tracking flags.
+        /// Blends aim pose and pinch values. Flags are never interpolated.
         /// </summary>
         /// <param name="current">The current aim state.</param>
         /// <param name="next">The next aim state.</param>
         /// <param name="blendScalar">The blend parameter in [0,1].</param>
-        /// <param name="interpolated">Output interpolated aim state.</param>
-        /// <returns>True if interpolation succeeded.</returns>
-        public static bool TryInterpolateAimState(
+        /// <return>Returns interpolated aim state.</return>
+        public static XRHandAimState InterpolateAimState(
             in XRHandAimState current,
             in XRHandAimState next,
-            float blendScalar,
-            out XRHandAimState interpolated)
+            float blendScalar)
         {
-            interpolated = current;
+            var interpolated = current;
 
             // Interpolate pinch strength values
             interpolated.pinchStrengthIndex = InterpolateValue(
@@ -205,7 +245,7 @@ namespace UnityEngine.XR.Hands.Capture.Playback
                 interpolated.aimPoseInternal = InterpolatePose(currentAimPose, nextAimPose, blendScalar);
             }
 
-            return true;
+            return interpolated;
         }
     }
 }

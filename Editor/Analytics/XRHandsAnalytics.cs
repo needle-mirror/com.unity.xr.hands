@@ -1,3 +1,6 @@
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if ENABLE_CLOUD_SERVICES_ANALYTICS || UNITY_2023_2_OR_NEWER
 #if !UNITY_2023_2_OR_NEWER
 using System.Reflection;
@@ -8,6 +11,9 @@ namespace UnityEditor.XR.Hands.Analytics
     /// <summary>
     /// The entry point class to send XR Hands analytics data.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     static class XRHandsAnalytics
     {
         internal const string k_VendorKey = "unity.xr.hands";

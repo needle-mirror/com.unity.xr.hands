@@ -1,18 +1,18 @@
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if UNITY_OPENXR_PACKAGE || PACKAGE_DOCS_GENERATION
 
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Scripting;
-using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.Meshing;
 using UnityEngine.XR.Hands.OpenXR.Meshing;
 using UnityEngine.XR.Hands.ProviderImplementation;
 using UnityEngine.XR.OpenXR;
-using UnityEngine.XR.OpenXR.Features;
 
 #if UNITY_OPENXR_PACKAGE_1_8
 using UnityEngine.XR.OpenXR.Features.Interactions;
@@ -23,6 +23,9 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// <summary>
     /// Hand tracking provider for the OpenXR platform.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     [Preserve]
     public unsafe class OpenXRHandProvider : XRHandSubsystemProvider
     {
@@ -153,6 +156,108 @@ namespace UnityEngine.XR.Hands.OpenXR
         bool m_IsHandInteractionProfileEnabled;
 
         /// <inheritdoc/>
+        internal override bool TryGetCommonGesturesState(Handedness handedness, out XRCommonHandGesturesState commonGestures)
+        {
+#if UNITY_OPENXR_PACKAGE_1_8
+            commonGestures = new XRCommonHandGesturesState
+            {
+                handedness = handedness,
+                // The "Is Tracked" data is explicitly provided by this method, so set this flag
+                // since otherwise it would be based purely on Valid ("Tracking State").
+                flags = XRCommonHandGesturesFlags.HasExplicitIsTracked,
+            };
+
+            // If there's no hand device, all other property values of the state should remain default.
+            if (!TryGetHandDevice(handedness, out var handDevice))
+                return true;
+
+            var flags = commonGestures.flags;
+
+            // Aim Pose
+            var aimPose = Pose.identity;
+            if (handDevice.TryGetFeatureValue(Usages.pointerPosition, out var position))
+                aimPose.position = position;
+            if (handDevice.TryGetFeatureValue(Usages.pointerRotation, out var rotation))
+                aimPose.rotation = rotation;
+            if (handDevice.TryGetFeatureValue(Usages.pointerTrackingState, out var trackingState) && IsValid(trackingState))
+                flags = flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsAimPoseValid);
+            if (handDevice.TryGetFeatureValue(Usages.pointerIsTracked, out var isTracked) && isTracked)
+                flags = flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsAimPoseTracked);
+
+            // Grip Pose
+            var gripPose = Pose.identity;
+            if (handDevice.TryGetFeatureValue(Usages.devicePosition, out position))
+                gripPose.position = position;
+            if (handDevice.TryGetFeatureValue(Usages.deviceRotation, out rotation))
+                gripPose.rotation = rotation;
+            if (handDevice.TryGetFeatureValue(Usages.deviceTrackingState, out trackingState) && IsValid(trackingState))
+                flags = flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsGripPoseValid);
+            if (handDevice.TryGetFeatureValue(Usages.deviceIsTracked, out isTracked) && isTracked)
+                flags = flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsGripPoseTracked);
+
+            // Pinch Pose
+            var pinchPose = Pose.identity;
+            if (handDevice.TryGetFeatureValue(Usages.pinchPosition, out position))
+                pinchPose.position = position;
+            if (handDevice.TryGetFeatureValue(Usages.pinchRotation, out rotation))
+                pinchPose.rotation = rotation;
+            if (handDevice.TryGetFeatureValue(Usages.pinchTrackingState, out trackingState) && IsValid(trackingState))
+                flags = flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsPinchPoseValid);
+            if (handDevice.TryGetFeatureValue(Usages.pinchIsTracked, out isTracked) && isTracked)
+                flags = flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsPinchPoseTracked);
+
+            // Poke Pose
+            var pokePose = Pose.identity;
+            if (handDevice.TryGetFeatureValue(Usages.pokePosition, out position))
+                pokePose.position = position;
+            if (handDevice.TryGetFeatureValue(Usages.pokeRotation, out rotation))
+                pokePose.rotation = rotation;
+            if (handDevice.TryGetFeatureValue(Usages.pokeTrackingState, out trackingState) && IsValid(trackingState))
+                flags = flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsPokePoseValid);
+            if (handDevice.TryGetFeatureValue(Usages.pokeIsTracked, out isTracked) && isTracked)
+                flags = flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsPokePoseTracked);
+
+            // Aim Activate
+            handDevice.TryGetFeatureValue(Usages.pointerActivateValue, out var aimActivateValue);
+            handDevice.TryGetFeatureValue(Usages.pointerActivated, out var isAimActivated);
+            if (handDevice.TryGetFeatureValue(Usages.pointerActivateReady, out var isReady) && isReady)
+                flags = flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsAimActivateValueValid | XRCommonHandGesturesFlags.IsAimActivatedStateValid);
+
+            // Grasp
+            handDevice.TryGetFeatureValue(Usages.graspValue, out var graspValue);
+            handDevice.TryGetFeatureValue(Usages.graspFirm, out var isGraspFirm);
+            if (handDevice.TryGetFeatureValue(Usages.graspReady, out isReady) && isReady)
+                flags = flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsGraspValueValid | XRCommonHandGesturesFlags.IsGraspFirmStateValid);
+
+            // Pinch
+            handDevice.TryGetFeatureValue(Usages.pinchValue, out var pinchValue);
+            handDevice.TryGetFeatureValue(Usages.pinchTouched, out var isPinchTouched);
+            if (handDevice.TryGetFeatureValue(Usages.pinchReady, out isReady) && isReady)
+                flags = flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsPinchValueValid | XRCommonHandGesturesFlags.IsPinchTouchedStateValid);
+
+            commonGestures.flags = flags;
+
+            commonGestures.aimPoseInternal = aimPose;
+            commonGestures.gripPoseInternal = gripPose;
+            commonGestures.pinchPoseInternal = pinchPose;
+            commonGestures.pokePoseInternal = pokePose;
+
+            commonGestures.aimActivateValueInternal = aimActivateValue;
+            commonGestures.isAimActivatedInternal = isAimActivated;
+
+            commonGestures.graspValueInternal = graspValue;
+            commonGestures.isGraspFirmInternal = isGraspFirm;
+
+            commonGestures.pinchValueInternal = pinchValue;
+            commonGestures.isPinchTouchedInternal = isPinchTouched;
+
+            return true;
+#else
+            return base.TryGetCommonGesturesState(handedness, out commonGestures);
+#endif
+        }
+
+        /// <inheritdoc/>
         public override bool TryGetAimPose(Handedness handedness, out Pose aimPose)
         {
             aimPose = Pose.identity;
@@ -160,13 +265,13 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
-            if (handDevice.TryGetFeatureValue(Usages.aimPosition, out var position))
+            if (handDevice.TryGetFeatureValue(Usages.pointerPosition, out var position))
                 aimPose.position = position;
 
-            if (handDevice.TryGetFeatureValue(Usages.aimRotation, out var rotation))
+            if (handDevice.TryGetFeatureValue(Usages.pointerRotation, out var rotation))
                 aimPose.rotation = rotation;
 
-            return handDevice.TryGetFeatureValue(Usages.isAimPoseTracked, out var isTracked) && isTracked;
+            return handDevice.TryGetFeatureValue(Usages.pointerTrackingState, out var trackingState) && IsValid(trackingState);
 #else
             return false;
 #endif
@@ -180,8 +285,8 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
-            handDevice.TryGetFeatureValue(Usages.aimActivateValue, out aimActivateValue);
-            return handDevice.TryGetFeatureValue(Usages.isAimActivateValueReady, out var isReady) && isReady;
+            handDevice.TryGetFeatureValue(Usages.pointerActivateValue, out aimActivateValue);
+            return handDevice.TryGetFeatureValue(Usages.pointerActivateReady, out var isReady) && isReady;
 #else
             return false;
 #endif
@@ -195,8 +300,8 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
-            handDevice.TryGetFeatureValue(Usages.isAimActivated, out isAimActivated);
-            return handDevice.TryGetFeatureValue(Usages.isAimActivateValueReady, out var isReady) && isReady;
+            handDevice.TryGetFeatureValue(Usages.pointerActivated, out isAimActivated);
+            return handDevice.TryGetFeatureValue(Usages.pointerActivateReady, out var isReady) && isReady;
 #else
             return false;
 #endif
@@ -211,7 +316,7 @@ namespace UnityEngine.XR.Hands.OpenXR
                 return false;
 
             handDevice.TryGetFeatureValue(Usages.graspValue, out graspValue);
-            return handDevice.TryGetFeatureValue(Usages.isGraspValueReady, out var isReady) && isReady;
+            return handDevice.TryGetFeatureValue(Usages.graspReady, out var isReady) && isReady;
 #else
             return false;
 #endif
@@ -225,8 +330,8 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
-            handDevice.TryGetFeatureValue(Usages.isGraspFirm, out isGraspFirm);
-            return handDevice.TryGetFeatureValue(Usages.isGraspValueReady, out var isReady) && isReady;
+            handDevice.TryGetFeatureValue(Usages.graspFirm, out isGraspFirm);
+            return handDevice.TryGetFeatureValue(Usages.graspReady, out var isReady) && isReady;
 #else
             return false;
 #endif
@@ -240,13 +345,13 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
-            if (handDevice.TryGetFeatureValue(Usages.gripPosition, out var position))
+            if (handDevice.TryGetFeatureValue(Usages.devicePosition, out var position))
                 gripPose.position = position;
 
-            if (handDevice.TryGetFeatureValue(Usages.gripRotation, out var rotation))
+            if (handDevice.TryGetFeatureValue(Usages.deviceRotation, out var rotation))
                 gripPose.rotation = rotation;
 
-            return handDevice.TryGetFeatureValue(Usages.isGripPoseTracked, out var isTracked) && isTracked;
+            return handDevice.TryGetFeatureValue(Usages.deviceTrackingState, out var trackingState) && IsValid(trackingState);
 #else
             return false;
 #endif
@@ -266,7 +371,7 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (handDevice.TryGetFeatureValue(Usages.pinchRotation, out var rotation))
                 pinchPose.rotation = rotation;
 
-            return handDevice.TryGetFeatureValue(Usages.isPinchPoseTracked, out var isTracked) && isTracked;
+            return handDevice.TryGetFeatureValue(Usages.pinchTrackingState, out var trackingState) && IsValid(trackingState);
 #else
             return false;
 #endif
@@ -281,7 +386,7 @@ namespace UnityEngine.XR.Hands.OpenXR
                 return false;
 
             handDevice.TryGetFeatureValue(Usages.pinchValue, out pinchValue);
-            return handDevice.TryGetFeatureValue(Usages.isPinchValueReady, out var isReady) && isReady;
+            return handDevice.TryGetFeatureValue(Usages.pinchReady, out var isReady) && isReady;
 #else
             return false;
 #endif
@@ -295,8 +400,8 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (!TryGetHandDevice(handedness, out var handDevice))
                 return false;
 
-            handDevice.TryGetFeatureValue(Usages.isPinchTouched, out isPinched);
-            return handDevice.TryGetFeatureValue(Usages.isPinchValueReady, out var isReady) && isReady;
+            handDevice.TryGetFeatureValue(Usages.pinchTouched, out isPinched);
+            return handDevice.TryGetFeatureValue(Usages.pinchReady, out var isReady) && isReady;
 #else
             return false;
 #endif
@@ -316,11 +421,18 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (handDevice.TryGetFeatureValue(Usages.pokeRotation, out var rotation))
                 pokePose.rotation = rotation;
 
-            return handDevice.TryGetFeatureValue(Usages.isPokePoseTracked, out var isTracked) && isTracked;
+            return handDevice.TryGetFeatureValue(Usages.pokeTrackingState, out var trackingState) && IsValid(trackingState);
 #else
             return false;
 #endif
         }
+
+#if UNITY_OPENXR_PACKAGE_1_8
+        static bool IsValid(uint trackingState)
+        {
+            return ((InputTrackingState)trackingState & (InputTrackingState.Position | InputTrackingState.Rotation)) == (InputTrackingState.Position | InputTrackingState.Rotation);
+        }
+#endif
 
         /// <summary>
         /// The <see cref="OpenXRHandProvider"/> calls into this when
@@ -368,35 +480,51 @@ namespace UnityEngine.XR.Hands.OpenXR
         }
 
 #if UNITY_OPENXR_PACKAGE_1_8
+#if UNITY_6000_5_OR_NEWER
+        [NoAutoStaticsCleanup]
+#endif
         static class Usages
         {
-            internal static readonly InputFeatureUsage<bool> isAimPoseTracked = new InputFeatureUsage<bool>("PointerIsTracked");
-            internal static readonly InputFeatureUsage<Vector3> aimPosition = new InputFeatureUsage<Vector3>("PointerPosition");
-            internal static readonly InputFeatureUsage<Quaternion> aimRotation = new InputFeatureUsage<Quaternion>("PointerRotation");
+            // Action poses for hand interactions:
+            // Aim Pose ("Pointer")
+            internal static readonly InputFeatureUsage<bool> pointerIsTracked = new InputFeatureUsage<bool>("PointerIsTracked");
+            internal static readonly InputFeatureUsage<uint> pointerTrackingState = new InputFeatureUsage<uint>("PointerTrackingState");
+            internal static readonly InputFeatureUsage<Vector3> pointerPosition = new InputFeatureUsage<Vector3>("PointerPosition");
+            internal static readonly InputFeatureUsage<Quaternion> pointerRotation = new InputFeatureUsage<Quaternion>("PointerRotation");
 
-            internal static readonly InputFeatureUsage<bool> isAimActivateValueReady = new InputFeatureUsage<bool>("PointerActivateReady");
-            internal static readonly InputFeatureUsage<float> aimActivateValue = new InputFeatureUsage<float>("PointerActivateValue");
-            internal static readonly InputFeatureUsage<bool> isAimActivated = new InputFeatureUsage<bool>("PointerActivated");
+            // Grip Pose ("Device")
+            internal static readonly InputFeatureUsage<bool> deviceIsTracked = new InputFeatureUsage<bool>("DeviceIsTracked");
+            internal static readonly InputFeatureUsage<uint> deviceTrackingState = new InputFeatureUsage<uint>("DeviceTrackingState");
+            internal static readonly InputFeatureUsage<Vector3> devicePosition = new InputFeatureUsage<Vector3>("DevicePosition");
+            internal static readonly InputFeatureUsage<Quaternion> deviceRotation = new InputFeatureUsage<Quaternion>("DeviceRotation");
 
-            internal static readonly InputFeatureUsage<bool> isGraspValueReady = new InputFeatureUsage<bool>("GraspReady");
-            internal static readonly InputFeatureUsage<float> graspValue = new InputFeatureUsage<float>("GraspValue");
-            internal static readonly InputFeatureUsage<bool> isGraspFirm = new InputFeatureUsage<bool>("GraspFirm");
-
-            internal static readonly InputFeatureUsage<bool> isGripPoseTracked = new InputFeatureUsage<bool>("DeviceIsTracked");
-            internal static readonly InputFeatureUsage<Vector3> gripPosition = new InputFeatureUsage<Vector3>("DevicePosition");
-            internal static readonly InputFeatureUsage<Quaternion> gripRotation = new InputFeatureUsage<Quaternion>("DeviceRotation");
-
-            internal static readonly InputFeatureUsage<bool> isPinchPoseTracked = new InputFeatureUsage<bool>("PinchIsTracked");
+            // Pinch Pose
+            internal static readonly InputFeatureUsage<bool> pinchIsTracked = new InputFeatureUsage<bool>("PinchIsTracked");
+            internal static readonly InputFeatureUsage<uint> pinchTrackingState = new InputFeatureUsage<uint>("PinchTrackingState");
             internal static readonly InputFeatureUsage<Vector3> pinchPosition = new InputFeatureUsage<Vector3>("PinchPosition");
             internal static readonly InputFeatureUsage<Quaternion> pinchRotation = new InputFeatureUsage<Quaternion>("PinchRotation");
 
-            internal static readonly InputFeatureUsage<bool> isPinchValueReady = new InputFeatureUsage<bool>("PinchReady");
-            internal static readonly InputFeatureUsage<float> pinchValue = new InputFeatureUsage<float>("PinchValue");
-            internal static readonly InputFeatureUsage<bool> isPinchTouched = new InputFeatureUsage<bool>("PinchTouched");
-
-            internal static readonly InputFeatureUsage<bool> isPokePoseTracked = new InputFeatureUsage<bool>("PokeIsTracked");
+            // Poke Pose
+            internal static readonly InputFeatureUsage<bool> pokeIsTracked = new InputFeatureUsage<bool>("PokeIsTracked");
+            internal static readonly InputFeatureUsage<uint> pokeTrackingState = new InputFeatureUsage<uint>("PokeTrackingState");
             internal static readonly InputFeatureUsage<Vector3> pokePosition = new InputFeatureUsage<Vector3>("PokePosition");
             internal static readonly InputFeatureUsage<Quaternion> pokeRotation = new InputFeatureUsage<Quaternion>("PokeRotation");
+
+            // Action inputs:
+            // Aim activate action
+            internal static readonly InputFeatureUsage<bool> pointerActivateReady = new InputFeatureUsage<bool>("PointerActivateReady");
+            internal static readonly InputFeatureUsage<float> pointerActivateValue = new InputFeatureUsage<float>("PointerActivateValue");
+            internal static readonly InputFeatureUsage<bool> pointerActivated = new InputFeatureUsage<bool>("PointerActivated");
+
+            // Grasp action
+            internal static readonly InputFeatureUsage<bool> graspReady = new InputFeatureUsage<bool>("GraspReady");
+            internal static readonly InputFeatureUsage<float> graspValue = new InputFeatureUsage<float>("GraspValue");
+            internal static readonly InputFeatureUsage<bool> graspFirm = new InputFeatureUsage<bool>("GraspFirm");
+
+            // Pinch action
+            internal static readonly InputFeatureUsage<bool> pinchReady = new InputFeatureUsage<bool>("PinchReady");
+            internal static readonly InputFeatureUsage<float> pinchValue = new InputFeatureUsage<float>("PinchValue");
+            internal static readonly InputFeatureUsage<bool> pinchTouched = new InputFeatureUsage<bool>("PinchTouched");
         }
 
         internal void FlushMetaAimChanges() => s_MetaAim?.FlushMetaAimChanges();
@@ -411,7 +539,8 @@ namespace UnityEngine.XR.Hands.OpenXR
                 device = m_LeftHandInteractionDevice;
                 return true;
             }
-            else if (handedness == Handedness.Right && m_RightHandInteractionDevice.isValid)
+
+            if (handedness == Handedness.Right && m_RightHandInteractionDevice.isValid)
             {
                 device = m_RightHandInteractionDevice;
                 return true;
@@ -425,10 +554,9 @@ namespace UnityEngine.XR.Hands.OpenXR
 
             for (int deviceIndex = 0; deviceIndex < s_DevicesReuse.Count; ++deviceIndex)
             {
-                if (s_DevicesReuse[deviceIndex].name != k_HandInteractionDeviceName)
-                    continue;
-
                 device = s_DevicesReuse[deviceIndex];
+                if (device.name != k_HandInteractionDeviceName)
+                    continue;
 
                 if (handedness == Handedness.Left)
                     m_LeftHandInteractionDevice = device;
@@ -525,6 +653,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         static class NativeApi
         {
             [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_TryInitialize")]
+            [return: MarshalAs(UnmanagedType.I1)]
             internal static extern bool TryInitialize();
 
             [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_Destroy")]

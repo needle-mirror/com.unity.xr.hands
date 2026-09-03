@@ -97,7 +97,7 @@ public class HandsExample : MonoBehaviour
 
 For a complete code example including how to handle late initialization, refer to the `HandVisualizer` component in the [HandVisualizer sample](xref:xrhands-manual#samples).
 
-## Get joint data
+## Get joint data {#get-joint-data}
 
 Get the data for individual joints with the [XRHand.GetJoint](xref:UnityEngine.XR.Hands.XRHand.GetJoint*) method, passing in the index of the joint. This method returns an [XRHandJoint](xref:UnityEngine.XR.Hands.XRHandJoint) object that contains the latest data for a joint.
 

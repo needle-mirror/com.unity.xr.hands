@@ -10,9 +10,15 @@ using UnityEngine.XR.Hands.Gestures;
 using UnityEngine.XR.Hands.Processing;
 using UnityEngine.XR.Hands.ProviderImplementation;
 using UnityEngine.XR.Hands.Capture;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.Hands.Capture
 {
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     class XRHandCapturePlayback
     {
         const int k_FingerCount = 5;

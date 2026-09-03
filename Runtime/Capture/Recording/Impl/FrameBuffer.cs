@@ -118,7 +118,7 @@ namespace UnityEngine.XR.Hands.Capture.Recording
 
                 if (subsystem.GetProvider().canSurfaceCommonPoseData)
                 {
-                    commonGestures[handedIndex] = new XRCommonHandGesturesState(subsystem.GetCommonGestures(handedness));
+                    commonGestures[handedIndex] = subsystem.GetCommonGestures(handedness).stateInternal;
                     frameFlags |= handedness.ToFrameFlagForCommonGestures();
                 }
 

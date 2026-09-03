@@ -1,3 +1,6 @@
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if UNITY_ANDROID
 using System;
 using System.Collections.Generic;
@@ -8,6 +11,9 @@ using UnityEngine;
 
 namespace UnityEditor.XR.Hands.Capture
 {
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     class AndroidDeviceFileService : IDeviceFileService
     {
         static string s_AdbPath;

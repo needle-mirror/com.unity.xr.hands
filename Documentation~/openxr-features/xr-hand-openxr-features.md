@@ -8,10 +8,12 @@ The XR Hands package implements the following hand-related features for applicat
 
 | Feature | Description |
 | :---        | :---               |
-| [Hand tracking](xref:xrhands-openxr-hands-feature) | Implements the XRHandSubsystem for OpenXR. You must enable this feature to access any hand tracking data.|
+| [Hand Tracking Subsystem](xref:xrhands-openxr-hands-feature) | Implements the XRHandSubsystem for OpenXR. You must enable this feature to access any hand tracking data. |
 | [Hand Tracking Data Source](xref:xrhands-openxr-data-source-feature) | Allows specifying preferred hand tracking data sources and querying the active source per hand. |
 | [Hand Joints Motion Range](xref:xrhands-openxr-motion-range-feature) | Constrains hand joint poses to natural movement or controller-conforming movement. |
-| [Meta Aim Hand](xref:xrhands-meta-aim-feature) | Implements the Meta Aim Hand extension to OpenXR. |
+| [Meta Hand Tracking Aim](xref:xrhands-meta-aim-feature) | Implements the Meta Aim Hand extension to OpenXR. |
+| [Meta Hand Tracking Frequency Hint](xref:xrhands-meta-frequency-hint-feature) | Allows requesting higher frequency hand tracking updates for improved responsiveness. |
+| [Meta Hand Tracking Wide Motion Mode](xref:xrhands-meta-wide-motion-feature) | Enable inference-based hand tracking when hands are outside the camera tracking volume. |
 
 The package also lets you augment hand tracking with additional OpenXR extensions:
 
@@ -27,5 +29,5 @@ The package also provides a helper component for managing the hand subsystem lif
 
 ## Additional resources
 
-* [OpenXR features](https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.6/manual/features.html)
-* [Khronos OpenXR specification](https://www.khronos.org/registry/OpenXR/specs/1.0/html/xrspec.html)
+* [OpenXR features](xref:openxr-features)
+* [Khronos OpenXR specification](https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html)

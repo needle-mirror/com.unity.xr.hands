@@ -1,3 +1,5 @@
 {
-  "xref": ["com.unity.xr.openxr@1.18"]
+  "xref": [
+            "com.unity.xr.openxr"
+          ]
 }

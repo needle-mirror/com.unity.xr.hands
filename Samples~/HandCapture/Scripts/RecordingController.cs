@@ -2,9 +2,15 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.XR.Hands.Capture;
 using UnityEngine.XR.Hands.Capture.Recording;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands.Samples.Capture
 {
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public class RecordingController
     {
         const int k_MaxRecordingCount = 5;

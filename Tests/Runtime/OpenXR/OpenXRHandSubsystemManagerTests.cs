@@ -1,3 +1,6 @@
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if UNITY_OPENXR_PACKAGE || PACKAGE_DOCS_GENERATION
 
 using System.Collections;
@@ -8,6 +11,9 @@ using UnityEngine.TestTools;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.OpenXR;
 
+#if UNITY_6000_5_OR_NEWER
+[NoAutoStaticsCleanup]
+#endif
 [TestFixture]
 class OpenXRHandSubsystemManagerTests
 {

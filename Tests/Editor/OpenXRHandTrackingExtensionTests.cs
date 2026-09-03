@@ -16,6 +16,10 @@ namespace UnityEditor.XR.Hands.Tests
                 "Unobstructed must equal XR_HAND_TRACKING_DATA_SOURCE_UNOBSTRUCTED_EXT (1).");
             Assert.AreEqual(2, (int)HandTrackingDataSource.Controller,
                 "Controller must equal XR_HAND_TRACKING_DATA_SOURCE_CONTROLLER_EXT (2).");
+#if OPENXR_1_19_OR_NEWER
+            Assert.AreEqual(1000695000, (int)HandTrackingDataSource.UnobstructedWideMotion,
+                "UnobstructedWideMotion must equal XR_HAND_TRACKING_DATA_SOURCE_UNOBSTRUCTED_WIDE_MOTION_META (1000695000).");
+#endif
         }
 
         [Test]
@@ -128,6 +132,46 @@ namespace UnityEditor.XR.Hands.Tests
                 UnityEngine.Object.DestroyImmediate(feature);
             }
         }
+
+#if OPENXR_1_19_OR_NEWER
+        [Test]
+        public void MetaHandTrackingWideMotionMode_FeatureId_MatchesOpenXRFeatureAttribute()
+        {
+            var attr = typeof(MetaHandTrackingWideMotionMode).GetCustomAttribute<OpenXRFeatureAttribute>();
+            Assert.IsNotNull(attr, "MetaHandTrackingWideMotionMode should have an OpenXRFeature attribute.");
+            Assert.AreEqual(MetaHandTrackingWideMotionMode.featureId, attr.FeatureId,
+                "The OpenXRFeature attribute FeatureId should match the feature's featureId constant.");
+        }
+
+        [Test]
+        public void HandTrackingDataSourceFeature_TryUpdateConfiguration_RoundTripsWithWideMotion()
+        {
+            var feature = UnityEngine.ScriptableObject.CreateInstance<HandTrackingDataSourceFeature>();
+            try
+            {
+                var wideMotionConfig = new HandTrackingDataSourceConfig
+                {
+                    leftPreferredSources = new[] { HandTrackingDataSource.Unobstructed, HandTrackingDataSource.UnobstructedWideMotion },
+                    rightPreferredSources = new[] { HandTrackingDataSource.Unobstructed, HandTrackingDataSource.UnobstructedWideMotion },
+                };
+
+                Assert.IsTrue(feature.TryUpdateConfiguration(wideMotionConfig));
+                Assert.IsTrue(feature.TryGetConfiguration(out var readBack));
+
+                Assert.AreEqual(2, readBack.leftPreferredSources.Length);
+                Assert.Contains(HandTrackingDataSource.Unobstructed, readBack.leftPreferredSources);
+                Assert.Contains(HandTrackingDataSource.UnobstructedWideMotion, readBack.leftPreferredSources);
+
+                Assert.AreEqual(2, readBack.rightPreferredSources.Length);
+                Assert.Contains(HandTrackingDataSource.Unobstructed, readBack.rightPreferredSources);
+                Assert.Contains(HandTrackingDataSource.UnobstructedWideMotion, readBack.rightPreferredSources);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(feature);
+            }
+        }
+#endif
 
 #if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
         [Test]

@@ -273,7 +273,7 @@ namespace UnityEngine.XR.Hands
         /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
         /// were retrieved from.
         /// </summary>
-        /// <value>
+        /// <remarks>
         /// If <c>IsAimPoseValid</c> is enabled, the aim pose is valid, which means
         /// that if these <c>XRCommonHandGesturesFlags</c> were just
         /// obtained from <see cref="XRCommonHandGestures"/> or
@@ -281,7 +281,7 @@ namespace UnityEngine.XR.Hands
         /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.TryGetAimPose"/>
         /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.TryGetAimPose"/>
         /// will succeed.
-        /// </value>
+        /// </remarks>
         IsAimPoseValid = 1 << 0,
 
         /// <summary>
@@ -289,7 +289,7 @@ namespace UnityEngine.XR.Hands
         /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
         /// were retrieved from.
         /// </summary>
-        /// <value>
+        /// <remarks>
         /// If <c>IsAimActivateValueValid</c> is enabled, the aim activate value is valid, which means
         /// that if these <c>XRCommonHandGesturesFlags</c> were just
         /// obtained from <see cref="XRCommonHandGestures"/> or
@@ -297,7 +297,7 @@ namespace UnityEngine.XR.Hands
         /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.TryGetAimActivateValue"/>
         /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.TryGetAimActivateValue"/>
         /// will succeed.
-        /// </value>
+        /// </remarks>
         IsAimActivateValueValid = 1 << 1,
 
         /// <summary>
@@ -305,7 +305,7 @@ namespace UnityEngine.XR.Hands
         /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
         /// were retrieved from.
         /// </summary>
-        /// <value>
+        /// <remarks>
         /// If <c>IsGraspValueValid</c> is enabled, the grasp value is valid, which means
         /// that if these <c>XRCommonHandGesturesFlags</c> were just
         /// obtained from <see cref="XRCommonHandGestures"/> or
@@ -313,7 +313,7 @@ namespace UnityEngine.XR.Hands
         /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.TryGetGraspValue"/>
         /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.TryGetGraspValue"/>
         /// will succeed.
-        /// </value>
+        /// </remarks>
         IsGraspValueValid = 1 << 2,
 
         /// <summary>
@@ -321,7 +321,7 @@ namespace UnityEngine.XR.Hands
         /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
         /// were retrieved from.
         /// </summary>
-        /// <value>
+        /// <remarks>
         /// If <c>IsGripPoseValid</c> is enabled, the grip pose is valid, which means
         /// that if these <c>XRCommonHandGesturesFlags</c> were just
         /// obtained from <see cref="XRCommonHandGestures"/> or
@@ -329,7 +329,7 @@ namespace UnityEngine.XR.Hands
         /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.TryGetGripPose"/>
         /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.TryGetGripPose"/>
         /// will succeed.
-        /// </value>
+        /// </remarks>
         IsGripPoseValid = 1 << 3,
 
         /// <summary>
@@ -337,7 +337,7 @@ namespace UnityEngine.XR.Hands
         /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
         /// were retrieved from.
         /// </summary>
-        /// <value>
+        /// <remarks>
         /// If <c>IsPinchPoseValid</c> is enabled, the pinch pose is valid, which means
         /// that if these <c>XRCommonHandGesturesFlags</c> were just
         /// obtained from <see cref="XRCommonHandGestures"/> or
@@ -345,7 +345,7 @@ namespace UnityEngine.XR.Hands
         /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.TryGetPinchPose"/>
         /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.TryGetPinchPose"/>
         /// will succeed.
-        /// </value>
+        /// </remarks>
         IsPinchPoseValid = 1 << 4,
 
         /// <summary>
@@ -353,7 +353,7 @@ namespace UnityEngine.XR.Hands
         /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
         /// were retrieved from.
         /// </summary>
-        /// <value>
+        /// <remarks>
         /// If <c>IsPinchValueValid</c> is enabled, the pinch value is valid, which means
         /// that if these <c>XRCommonHandGesturesFlags</c> were just
         /// obtained from <see cref="XRCommonHandGestures"/> or
@@ -361,7 +361,7 @@ namespace UnityEngine.XR.Hands
         /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.TryGetPinchValue"/>
         /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.TryGetPinchValue"/>
         /// will succeed.
-        /// </value>
+        /// </remarks>
         IsPinchValueValid = 1 << 5,
 
         /// <summary>
@@ -369,7 +369,7 @@ namespace UnityEngine.XR.Hands
         /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
         /// were retrieved from.
         /// </summary>
-        /// <value>
+        /// <remarks>
         /// If <c>IsPokePoseValid</c> is enabled, the poke pose is valid, which means
         /// that if these <c>XRCommonHandGesturesFlags</c> were just
         /// obtained from <see cref="XRCommonHandGestures"/> or
@@ -377,7 +377,7 @@ namespace UnityEngine.XR.Hands
         /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.TryGetPokePose"/>
         /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.TryGetPokePose"/>
         /// will succeed.
-        /// </value>
+        /// </remarks>
         IsPokePoseValid = 1 << 6,
 
         /// <summary>
@@ -385,7 +385,7 @@ namespace UnityEngine.XR.Hands
         /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
         /// were retrieved from.
         /// </summary>
-        /// <value>
+        /// <remarks>
         /// If <c>IsAimActivatedStateValid</c> is enabled, the aim activated state is valid, which means
         /// that if these <c>XRCommonHandGesturesFlags</c> were just
         /// obtained from <see cref="XRCommonHandGestures"/> or
@@ -393,7 +393,7 @@ namespace UnityEngine.XR.Hands
         /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.TryGetAimActivatedState"/>
         /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.TryGetAimActivatedState"/>
         /// will succeed.
-        /// </value>
+        /// </remarks>
         IsAimActivatedStateValid = 1 << 7,
 
         /// <summary>
@@ -401,7 +401,7 @@ namespace UnityEngine.XR.Hands
         /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
         /// were retrieved from.
         /// </summary>
-        /// <value>
+        /// <remarks>
         /// If <c>IsGraspFirmStateValid</c> is enabled, the grasp firm state is valid, which means
         /// that if these <c>XRCommonHandGesturesFlags</c> were just
         /// obtained from <see cref="XRCommonHandGestures"/> or
@@ -409,7 +409,7 @@ namespace UnityEngine.XR.Hands
         /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.TryGetGraspFirmState"/>
         /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.TryGetGraspFirmState"/>
         /// will succeed.
-        /// </value>
+        /// </remarks>
         IsGraspFirmStateValid = 1 << 8,
 
         /// <summary>
@@ -417,7 +417,7 @@ namespace UnityEngine.XR.Hands
         /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
         /// were retrieved from.
         /// </summary>
-        /// <value>
+        /// <remarks>
         /// If <c>IsPinchTouchedStateValid</c> is enabled, the pinch touched state is valid, which means
         /// that if these <c>XRCommonHandGesturesFlags</c> were just
         /// obtained from <see cref="XRCommonHandGestures"/> or
@@ -425,8 +425,139 @@ namespace UnityEngine.XR.Hands
         /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.TryGetPinchTouchedState"/>
         /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.TryGetPinchTouchedState"/>
         /// will succeed.
-        /// </value>
+        /// </remarks>
         IsPinchTouchedStateValid = 1 << 9,
+
+        /// <summary>
+        /// Whether the "Is Tracked" of poses are explicitly controlled by additional flags
+        /// or whether the effective "Is Tracked" state should copy the associated Valid state.
+        /// </summary>
+        /// <remarks>
+        /// When this flag is set, "Is Tracked" of a pose will be based on whether its "Tracked" flag
+        /// is set.
+        /// When this flag is not set, "Is Tracked" of a pose will be based on whether its "Valid" flag
+        /// is set.
+        /// This is for backwards compatibility where "Is Tracked" was not originally
+        /// stored or queried explicitly, and allows for input devices based on old recorded data to be driven since
+        /// the pair of "Tracking State" and "Is Tracked" are typically the same.
+        /// </remarks>
+        /// <seealso cref="IsAimPoseTracked"/>
+        /// <seealso cref="IsGripPoseTracked"/>
+        /// <seealso cref="IsPinchPoseTracked"/>
+        /// <seealso cref="IsPokePoseTracked"/>
+        /// <seealso cref="IsAimPoseValid"/>
+        /// <seealso cref="IsGripPoseValid"/>
+        /// <seealso cref="IsPinchPoseValid"/>
+        /// <seealso cref="IsPokePoseValid"/>
+        HasExplicitIsTracked = 1 << 10,
+
+        /// <summary>
+        /// Whether the aim pose is tracked in the <see cref="XRCommonHandGestures"/>
+        /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
+        /// were retrieved from.
+        /// </summary>
+        /// <remarks>
+        /// If <c>IsAimPoseTracked</c> and <see cref="HasExplicitIsTracked"/> is enabled, the aim pose is tracked, which means
+        /// that if these <c>XRCommonHandGesturesFlags</c> were just
+        /// obtained from <see cref="XRCommonHandGestures"/> or
+        /// <see cref="XRCommonHandGesturesState"/>, then the corresponding
+        /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.GetAimPoseIsTracked"/>
+        /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.GetAimPoseIsTracked"/>
+        /// will return <see langword="true"/>.
+        /// </remarks>
+        /// <seealso cref="HasExplicitIsTracked"/>
+        IsAimPoseTracked = 1 << 11,
+
+        /// <summary>
+        /// Whether the grip pose is tracked in the <see cref="XRCommonHandGestures"/>
+        /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
+        /// were retrieved from.
+        /// </summary>
+        /// <remarks>
+        /// If <c>IsGripPoseTracked</c> and <see cref="HasExplicitIsTracked"/> is enabled, the grip pose is tracked, which means
+        /// that if these <c>XRCommonHandGesturesFlags</c> were just
+        /// obtained from <see cref="XRCommonHandGestures"/> or
+        /// <see cref="XRCommonHandGesturesState"/>, then the corresponding
+        /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.GetGripPoseIsTracked"/>
+        /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.GetGripPoseIsTracked"/>
+        /// will return <see langword="true"/>.
+        /// </remarks>
+        /// <seealso cref="HasExplicitIsTracked"/>
+        IsGripPoseTracked = 1 << 12,
+
+        /// <summary>
+        /// Whether the pinch pose is tracked in the <see cref="XRCommonHandGestures"/>
+        /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
+        /// were retrieved from.
+        /// </summary>
+        /// <remarks>
+        /// If <c>IsPinchPoseTracked</c> and <see cref="HasExplicitIsTracked"/> is enabled, the pinch pose is tracked, which means
+        /// that if these <c>XRCommonHandGesturesFlags</c> were just
+        /// obtained from <see cref="XRCommonHandGestures"/> or
+        /// <see cref="XRCommonHandGesturesState"/>, then the corresponding
+        /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.GetPinchPoseIsTracked"/>
+        /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.GetPinchPoseIsTracked"/>
+        /// will return <see langword="true"/>.
+        /// </remarks>
+        /// <seealso cref="HasExplicitIsTracked"/>
+        IsPinchPoseTracked = 1 << 13,
+
+        /// <summary>
+        /// Whether the poke pose is tracked in the <see cref="XRCommonHandGestures"/>
+        /// or <see cref="XRCommonHandGesturesState"/> that these <c>XRCommonHandGesturesFlags</c>
+        /// were retrieved from.
+        /// </summary>
+        /// <remarks>
+        /// If <c>IsPokePoseTracked</c> and <see cref="HasExplicitIsTracked"/> is enabled, the poke pose is tracked, which means
+        /// that if these <c>XRCommonHandGesturesFlags</c> were just
+        /// obtained from <see cref="XRCommonHandGestures"/> or
+        /// <see cref="XRCommonHandGesturesState"/>, then the corresponding
+        /// <c>XRCommonHandGestures.</c><see cref="XRCommonHandGestures.GetPokePoseIsTracked"/>
+        /// and <c>XRCommonHandGesturesState.</c><see cref="XRCommonHandGesturesState.GetPokePoseIsTracked"/>
+        /// will return <see langword="true"/>.
+        /// </remarks>
+        /// <seealso cref="HasExplicitIsTracked"/>
+        IsPokePoseTracked = 1 << 14,
+    }
+
+    /// <summary>
+    /// Extension methods for <see cref="XRCommonHandGesturesFlags"/>.
+    /// </summary>
+    static class XRCommonHandGesturesFlagsExtensions
+    {
+        /// <summary>
+        /// Returns the flags enum with the given flag set.
+        /// </summary>
+        /// <param name="gesturesFlags">The flags enum instance.</param>
+        /// <param name="gestureFlag">The flag to also set in the returned instance.</param>
+        /// <returns>Returns the flags enum with the given flag set.</returns>
+        public static XRCommonHandGesturesFlags WithGesturesFlag(this XRCommonHandGesturesFlags gesturesFlags, XRCommonHandGesturesFlags gestureFlag)
+        {
+            return gesturesFlags | gestureFlag;
+        }
+
+        /// <summary>
+        /// Returns the flags enum with the given flag not set.
+        /// </summary>
+        /// <param name="gesturesFlags">The flags enum instance.</param>
+        /// <param name="gestureFlag">The flag to clear in the returned instance.</param>
+        /// <returns>Returns the flags enum with the given flag not set.</returns>
+        public static XRCommonHandGesturesFlags WithoutGesturesFlag(this XRCommonHandGesturesFlags gesturesFlags, XRCommonHandGesturesFlags gestureFlag)
+        {
+            return gesturesFlags & ~gestureFlag;
+        }
+
+        /// <summary>
+        /// Determines whether one or more bit fields are set in the flags
+        /// Non-boxing version of <c>HasFlag</c> for <see cref="XRCommonHandGesturesFlags"/>.
+        /// </summary>
+        /// <param name="gesturesFlags">The flags enum instance.</param>
+        /// <param name="gestureFlag">The flag to check if set.</param>
+        /// <returns>Returns <see langword="true"/> if the bit field or bit fields are set, otherwise returns <see langword="false"/>.</returns>
+        public static bool HasGesturesFlag(this XRCommonHandGesturesFlags gesturesFlags, XRCommonHandGesturesFlags gestureFlag)
+        {
+            return (gesturesFlags & gestureFlag) == gestureFlag;
+        }
     }
 
     /// <summary>

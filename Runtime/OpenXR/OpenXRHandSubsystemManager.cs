@@ -1,5 +1,3 @@
-#if UNITY_OPENXR_PACKAGE || PACKAGE_DOCS_GENERATION
-
 namespace UnityEngine.XR.Hands.OpenXR
 {
     /// <summary>
@@ -12,6 +10,8 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// (for example when <see cref="HandTracking.automaticallyInitializeSubsystem"/>
     /// is <see langword="false"/>), the component disables itself. Re-enable
     /// it from your own code when ready and <see cref="OnEnable"/> will create and start the subsystem.
+    ///
+    /// Without the OpenXR package installed, this component does nothing.
     /// </remarks>
     /// <example>
     /// <para>The following example mocks how a permissions checking script might respond
@@ -26,10 +26,15 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </summary>
         protected void Awake()
         {
+#if UNITY_OPENXR_PACKAGE || PACKAGE_DOCS_GENERATION
             if (HandTracking.subsystem == null)
                 enabled = false;
+#else
+            enabled = false;
+#endif
         }
 
+#if UNITY_OPENXR_PACKAGE || PACKAGE_DOCS_GENERATION
         /// <summary>
         /// Called when the component becomes enabled and active.
         /// If the Hand Tracking OpenXR feature is enabled,
@@ -61,7 +66,6 @@ namespace UnityEngine.XR.Hands.OpenXR
 
             return HandTracking.subsystem.running;
         }
+#endif // UNITY_OPENXR_PACKAGE || PACKAGE_DOCS_GENERATION
     }
 }
-
-#endif

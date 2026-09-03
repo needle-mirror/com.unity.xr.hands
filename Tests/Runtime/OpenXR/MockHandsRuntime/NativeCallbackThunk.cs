@@ -1,3 +1,6 @@
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
 using System;
 using System.Runtime.InteropServices;
@@ -23,6 +26,9 @@ namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
     /// <typeparam name="TDelegate">The delegate type matching the native function
     /// signature. Cannot be invoked generically — derived classes call
     /// <c>s_Current.mock(...)</c> with the concrete parameter list.</typeparam>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     abstract class NativeCallbackThunk<TDerived, TDelegate>
         where TDerived : NativeCallbackThunk<TDerived, TDelegate>
         where TDelegate : Delegate

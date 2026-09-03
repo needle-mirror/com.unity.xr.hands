@@ -7,6 +7,9 @@ using UnityEngine.InputSystem.Layouts;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.Scripting;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands
 {
@@ -108,6 +111,9 @@ namespace UnityEngine.XR.Hands
     /// it a child of the <c>CameraOffset</c> object below the <c>XROrigin</c>. Otherwise, you can use the
     /// Transform of the <c>CameraOffset</c> to transform the data into world space.
     /// </remarks>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
 #if UNITY_EDITOR
     [UnityEditor.InitializeOnLoad]
 #endif
@@ -486,7 +492,7 @@ namespace UnityEngine.XR.Hands
 
         [DllImport("UnityOpenXRHands")]
         static extern void UnityOpenXRHands_RetrieveMetaAim(
-            bool isLeft,
+            [MarshalAs(UnmanagedType.I1)] bool isLeft,
             out MetaAimFlags aimFlags,
             out Vector3 aimPosePosition,
             out Quaternion aimPoseRotation,

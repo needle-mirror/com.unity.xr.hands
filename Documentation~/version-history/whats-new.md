@@ -2,6 +2,25 @@
 uid: xrhands-whats-new
 ---
 
+# What's new in version 1.10
+
+The main updates in this release include:
+
+## Added
+
+### Meta Hand Tracking Frequency Hint OpenXR feature
+
+The Meta Hand Tracking Frequency Hint OpenXR feature allows applications to provide a frequency hint to the runtime to indicate the desired hand tracking update frequency. You can enable this feature to request higher-frequency hand tracking updates and improve responsiveness in your project.
+
+For more information, refer to [Meta Hand Tracking Frequency Hint OpenXR feature](xref:xrhands-meta-frequency-hint-feature).
+
+### Meta Hand Tracking Wide Motion Mode OpenXR feature
+
+The Meta Hand Tracking Wide Motion Mode OpenXR feature enables inference-based hand tracking when hands move outside the camera tracking volume. When enabled, the runtime uses prior tracking data, body movement, and additional sensors to estimate hand poses, and automatically configures the Hand Tracking Data Source feature to request both optical and inference-based tracking sources.
+
+For more information, refer to [Meta Hand Tracking Wide Motion Mode OpenXR feature](xref:xrhands-meta-wide-motion-feature).
+
+
 # What's new in version 1.9
 
 The main updates in this release include:
@@ -113,7 +132,7 @@ Summary of changes in XR Hands package version 1.4. The main updates in this rel
 
 The XR Hands package now enables detection of static hand gestures such as thumbs up, thumbs down, or pointing. The static hand gestures are the combination of a specific hand shape with an optional orientation applied. There are some hand gestures included in the Gestures sample, along with other tools to get you started.
 
-For additional information, refer to the [custom gesture documentation](xref:xrhands-custom-gestures).
+For additional information, refer to [Custom gestures](xref:xrhands-custom-gestures).
 
 ### Upper and lower tolerance threshold range for finger shapes
 ![Tolerance ranges](../images/upper-lower-tolerance.png)

@@ -1,6 +1,9 @@
 using System;
 using Unity.Mathematics;
 using UnityEngine.XR.Hands.ProviderImplementation;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if BURST_PRESENT
 using Unity.Burst;
 #endif
@@ -13,6 +16,9 @@ namespace UnityEngine.XR.Hands.Gestures
     /// to the Finger State Processor that is used to clear the cache of
     /// calculated values.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
 #if BURST_PRESENT
     [BurstCompile]
 #endif

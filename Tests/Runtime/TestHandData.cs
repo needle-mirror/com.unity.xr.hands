@@ -15,8 +15,8 @@ static class TestHandData
     {
         // this uses data captured from a run on OpenXR, so the data layout matches that
         jointsInLayout = new bool[XRHandJointID.EndMarker.ToIndex()];
-        jointsInLayout[XRHandJointID.Palm.ToIndex()] = true;
         jointsInLayout[XRHandJointID.Wrist.ToIndex()] = true;
+        jointsInLayout[XRHandJointID.Palm.ToIndex()] = true;
         jointsInLayout[XRHandJointID.ThumbMetacarpal.ToIndex()] = true;
         jointsInLayout[XRHandJointID.ThumbProximal.ToIndex()] = true;
         jointsInLayout[XRHandJointID.ThumbDistal.ToIndex()] = true;
@@ -43,7 +43,7 @@ static class TestHandData
         jointsInLayout[XRHandJointID.LittleTip.ToIndex()] = true;
 
         leftRoot = new Pose(
-            new Vector3(-0.05319f, 1.14112f, 0.08206f),
+            new Vector3(-0.08227f, 1.09858f, 0.06240f),
             new Quaternion(0.37018f, -0.42667f, -0.23629f, -0.79063f));
 
         leftHand = new Pose[XRHandJointID.EndMarker.ToIndex()];
@@ -127,7 +127,7 @@ static class TestHandData
             new Quaternion(-0.08543f, -0.44714f, -0.31003f, -0.83466f));
 
         rightRoot = new Pose(
-            new Vector3(0.26061f, 1.04213f, -0.12217f),
+            new Vector3(0.25036f, 1.00710f, -0.16350f),
             new Quaternion(-0.36011f, 0.06995f, -0.10860f, 0.92392f));
 
         rightHand = new Pose[XRHandJointID.EndMarker.ToIndex()];

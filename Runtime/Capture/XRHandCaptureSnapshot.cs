@@ -64,7 +64,7 @@ namespace UnityEngine.XR.Hands.Capture
         /// <see cref="XRHandSubsystem.TryUpdateHands"/> during capture.
         /// </summary>
         /// <param name="allocator">
-        /// The <see cref="Allocator"/> to create the <see cref="NativeArray"/>
+        /// The <see cref="Allocator"/> to create the <see cref="NativeArray{T}"/>
         /// of <see cref="XRHandJoint"/>s with in the requested <see cref="XRHand"/>.
         /// </param>
         /// <param name="hand">
@@ -83,7 +83,7 @@ namespace UnityEngine.XR.Hands.Capture
         /// <c>XRHand.</c><see cref="XRHand.Dispose"/> when you are done accessing its data,
         /// or you will leak memory.</para>
         /// <para>This overload of <c>TryGetHand</c> is just a shortcut for
-        /// calling the other one with <see cref="XRHandSubsytem.UpdateType.Dynamic"/>
+        /// calling the other one with <see cref="XRHandSubsystem.UpdateType.Dynamic"/>
         /// for the <see cref="XRHandSubsystem.Update"/>.</para>
         /// </remarks>
         public bool TryGetHand(Allocator allocator, out XRHand hand)
@@ -105,7 +105,7 @@ namespace UnityEngine.XR.Hands.Capture
         /// enabled, <c>TryGetHand</c> will always fail.
         /// </param>
         /// <param name="allocator">
-        /// The <see cref="Allocator"/> to create the <see cref="NativeArray"/>
+        /// The <see cref="Allocator"/> to create the <see cref="NativeArray{T}"/>
         /// of <see cref="XRHandJoint"/>s with in the requested <see cref="XRHand"/>.
         /// </param>
         /// <param name="hand">

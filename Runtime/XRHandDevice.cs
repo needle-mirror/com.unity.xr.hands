@@ -7,6 +7,9 @@ using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.Scripting;
 using UnityEngine.XR.Hands.Configuration;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -30,6 +33,9 @@ namespace UnityEngine.XR.Hands
     /// it a child of the <c>CameraOffset</c> object below the <c>XROrigin</c>. Otherwise, you can use the
     /// Transform of the <c>CameraOffset</c> to transform the data into world space.
     /// </remarks>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
 #if UNITY_EDITOR
     [InitializeOnLoad]
 #endif
@@ -47,6 +53,51 @@ namespace UnityEngine.XR.Hands
         /// common hand data populated by hand joint poses.
         /// </summary>
         public static XRHandDevice rightHand { get; internal set; }
+
+        /// <summary>
+        /// Represents whether the grip pose is fully tracked or unavailable/simulated.
+        /// </summary>
+        /// <remarks>
+        /// Fully tracked means that the pose is accurate and not using any simulated or extrapolated positions,
+        /// and the system tracking this pose is able to confidently track this object.
+        /// </remarks>
+        public ButtonControl gripIsTracked { get; private set; }
+
+        /// <summary>
+        /// Represents whether the poke pose is fully tracked or unavailable/simulated.
+        /// </summary>
+        /// <remarks>
+        /// Fully tracked means that the pose is accurate and not using any simulated or extrapolated positions,
+        /// and the system tracking this pose is able to confidently track this object.
+        /// </remarks>
+        public ButtonControl pokeIsTracked { get; private set; }
+
+        /// <summary>
+        /// Represents whether the pinch pose is fully tracked or unavailable/simulated.
+        /// </summary>
+        /// <remarks>
+        /// Fully tracked means that the pose is accurate and not using any simulated or extrapolated positions,
+        /// and the system tracking this pose is able to confidently track this object.
+        /// </remarks>
+        public ButtonControl pinchIsTracked { get; private set; }
+
+        /// <summary>
+        /// Represents whether the aim pose is fully tracked or unavailable/simulated.
+        /// </summary>
+        /// <remarks>
+        /// Fully tracked means that the pose is accurate and not using any simulated or extrapolated positions,
+        /// and the system tracking this pose is able to confidently track this object.
+        /// </remarks>
+        public ButtonControl aimIsTracked { get; private set; }
+
+        /// <summary>
+        /// Represents whether the wrist pose is fully tracked or unavailable/simulated.
+        /// </summary>
+        /// <remarks>
+        /// Fully tracked means that the pose is accurate and not using any simulated or extrapolated positions,
+        /// and the system tracking this pose is able to confidently track this object.
+        /// </remarks>
+        public ButtonControl wristIsTracked { get; private set; }
 
         /// <summary>
         /// Tracking status of the grip position and rotation. See <see cref="InputTrackingState"/> for more.
@@ -176,6 +227,25 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         public ButtonControl aimActivateReady { get; private set; }
 
+        /// <summary>
+        /// Tracking status of the wrist position and rotation. See <see cref="InputTrackingState"/> for more.
+        /// </summary>
+        public IntegerControl wristTrackingState { get; private set; }
+
+        /// <summary>
+        /// Position of the wrist pose.
+        /// When transformed relative to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin),
+        /// the position will be in the correct position in the scene relative to the user.
+        /// </summary>
+        public Vector3Control wristPosition { get; private set; }
+
+        /// <summary>
+        /// Rotation of the wrist pose.
+        /// When transformed relative to the [XROrigin](xref:Unity.XR.CoreUtils.XROrigin),
+        /// the rotation will be in the correct orientation in the scene relative to the user.
+        /// </summary>
+        public QuaternionControl wristRotation { get; private set; }
+
         Action<XRHandSubsystem, XRHandSubsystem.UpdateSuccessFlags, XRHandSubsystem.UpdateType> m_UpdateBehavior;
 
         XRHandDeviceState m_DeviceState;
@@ -188,6 +258,11 @@ namespace UnityEngine.XR.Hands
         {
             base.FinishSetup();
 
+            gripIsTracked = GetChildControl<ButtonControl>("gripIsTracked");
+            pokeIsTracked = GetChildControl<ButtonControl>("pokeIsTracked");
+            pinchIsTracked = GetChildControl<ButtonControl>("pinchIsTracked");
+            aimIsTracked = GetChildControl<ButtonControl>("aimIsTracked");
+            wristIsTracked = GetChildControl<ButtonControl>("wristIsTracked");
             gripPosition = GetChildControl<Vector3Control>("gripPosition");
             gripRotation = GetChildControl<QuaternionControl>("gripRotation");
             gripTrackingState = GetChildControl<IntegerControl>("gripTrackingState");
@@ -209,6 +284,9 @@ namespace UnityEngine.XR.Hands
             aimActivateValue = GetChildControl<AxisControl>("aimActivateValue");
             aimActivated = GetChildControl<ButtonControl>("aimActivated");
             aimActivateReady = GetChildControl<ButtonControl>("aimActivateReady");
+            wristTrackingState = GetChildControl<IntegerControl>("wristTrackingState");
+            wristPosition = GetChildControl<Vector3Control>("wristPosition");
+            wristRotation = GetChildControl<QuaternionControl>("wristRotation");
 
             // Explicitly initialize all rotations in the device state to identity (Quaternion(0f, 0f, 0f, 1f))
             // instead of the struct default (Quaternion(0f, 0f, 0f, 0f)).
@@ -216,6 +294,7 @@ namespace UnityEngine.XR.Hands
             m_DeviceState.pokeRotation = Quaternion.identity;
             m_DeviceState.pinchRotation = Quaternion.identity;
             m_DeviceState.aimRotation = Quaternion.identity;
+            m_DeviceState.wristRotation = Quaternion.identity;
             m_DeviceState.deviceRotation = Quaternion.identity;
 
             // Ensure these initial rotation state changes are pushed even when the hand is not valid
@@ -258,6 +337,31 @@ namespace UnityEngine.XR.Hands
 #endif // ENABLE_VR || UNITY_GAMECORE
                     inputFeatures = new List<XRFeatureDescriptor>
                     {
+                        new XRFeatureDescriptor
+                        {
+                            name = "grip_is_tracked",
+                            featureType = FeatureType.Binary
+                        },
+                        new XRFeatureDescriptor
+                        {
+                            name = "poke_is_tracked",
+                            featureType = FeatureType.Binary
+                        },
+                        new XRFeatureDescriptor
+                        {
+                            name = "pinch_is_tracked",
+                            featureType = FeatureType.Binary
+                        },
+                        new XRFeatureDescriptor
+                        {
+                            name = "aim_is_tracked",
+                            featureType = FeatureType.Binary
+                        },
+                        new XRFeatureDescriptor
+                        {
+                            name = "wrist_is_tracked",
+                            featureType = FeatureType.Binary
+                        },
                         new XRFeatureDescriptor
                         {
                             name = "grip_position",
@@ -363,6 +467,21 @@ namespace UnityEngine.XR.Hands
                             name = "aim_activate_ready",
                             featureType = FeatureType.Binary
                         },
+                        new XRFeatureDescriptor
+                        {
+                            name = "wrist_position",
+                            featureType = FeatureType.Axis3D
+                        },
+                        new XRFeatureDescriptor
+                        {
+                            name = "wrist_rotation",
+                            featureType = FeatureType.Rotation
+                        },
+                        new XRFeatureDescriptor
+                        {
+                            name = "wrist_tracking_state",
+                            featureType = FeatureType.DiscreteStates
+                        },
                     }
                 }.ToJson()
             };
@@ -419,6 +538,7 @@ namespace UnityEngine.XR.Hands
                 m_DeviceState.aimActivated = default;
                 m_DeviceState.aimPosition = default;
                 m_DeviceState.aimRotation = Quaternion.identity;
+                m_DeviceState.aimIsTracked = default;
                 m_DeviceState.aimTrackingState = (int)InputTrackingState.None;
 
                 m_DeviceStateDirty = true;
@@ -452,10 +572,15 @@ namespace UnityEngine.XR.Hands
                 if (m_WasValid)
                 {
                     m_DeviceState.isTracked = false;
+                    m_DeviceState.gripIsTracked = false;
+                    m_DeviceState.pokeIsTracked = false;
+                    m_DeviceState.pinchIsTracked = false;
+                    m_DeviceState.wristIsTracked = false;
                     m_DeviceState.trackingState = (int)InputTrackingState.None;
                     m_DeviceState.gripTrackingState = (int)InputTrackingState.None;
                     m_DeviceState.pokeTrackingState = (int)InputTrackingState.None;
                     m_DeviceState.pinchTrackingState = (int)InputTrackingState.None;
+                    m_DeviceState.wristTrackingState = (int)InputTrackingState.None;
                     m_WasValid = false;
 
                     m_DeviceStateDirty = true;
@@ -469,37 +594,73 @@ namespace UnityEngine.XR.Hands
 
             m_WasValid = true;
 
-            const int poseFullyTracked = (int)(InputTrackingState.Position | InputTrackingState.Rotation);
+            const int positionAndRotation = (int)(InputTrackingState.Position | InputTrackingState.Rotation);
 
-            m_DeviceState.isTracked = true;
-            m_DeviceState.trackingState = poseFullyTracked;
-            m_DeviceState.gripTrackingState = poseFullyTracked;
-            m_DeviceState.pokeTrackingState = poseFullyTracked;
-            m_DeviceState.pinchTrackingState = poseFullyTracked;
-
-            if (hand.GetJoint(XRHandJointID.Wrist).TryGetPose(out var wristPose))
+            // Wrist Pose
+            var wristJoint = hand.GetJoint(XRHandJointID.Wrist);
+            if (wristJoint.TryGetPose(out var wristPose))
             {
                 m_DeviceState.devicePosition = wristPose.position;
                 m_DeviceState.deviceRotation = wristPose.rotation;
+                m_DeviceState.trackingState = positionAndRotation;
+
+                m_DeviceState.wristPosition = wristPose.position;
+                m_DeviceState.wristRotation = wristPose.rotation;
+                m_DeviceState.wristTrackingState = positionAndRotation;
+            }
+            else
+            {
+                m_DeviceState.trackingState = (int)InputTrackingState.None;
+                m_DeviceState.wristTrackingState = (int)InputTrackingState.None;
             }
 
-            if (hand.GetJoint(XRHandJointID.Palm).TryGetPose(out var palmPose))
+            m_DeviceState.wristIsTracked = (wristJoint.trackingState & XRHandJointTrackingState.HighFidelityPose) != 0;
+            m_DeviceState.isTracked = m_DeviceState.wristIsTracked;
+
+            // Palm Pose
+            var palmJoint = hand.GetJoint(XRHandJointID.Palm);
+            if (palmJoint.TryGetPose(out var palmPose))
             {
                 m_DeviceState.gripPosition = palmPose.position;
                 m_DeviceState.gripRotation = palmPose.rotation;
+                m_DeviceState.gripTrackingState = positionAndRotation;
+            }
+            else
+            {
+                m_DeviceState.gripTrackingState = (int)InputTrackingState.None;
             }
 
-            if (hand.GetJoint(XRHandJointID.IndexTip).TryGetPose(out var indexTipPose))
+            m_DeviceState.gripIsTracked = (palmJoint.trackingState & XRHandJointTrackingState.HighFidelityPose) != 0;
+
+            // Index Tip Pose
+            var indexTipJoint = hand.GetJoint(XRHandJointID.IndexTip);
+            if (indexTipJoint.TryGetPose(out var indexTipPose))
             {
                 m_DeviceState.pokePosition = indexTipPose.position;
                 m_DeviceState.pokeRotation = indexTipPose.rotation;
+                m_DeviceState.pokeTrackingState = positionAndRotation;
+            }
+            else
+            {
+                m_DeviceState.pokeTrackingState = (int)InputTrackingState.None;
             }
 
-            if (hand.GetJoint(XRHandJointID.ThumbTip).TryGetPose(out var thumbTipPose))
+            m_DeviceState.pokeIsTracked = (indexTipJoint.trackingState & XRHandJointTrackingState.HighFidelityPose) != 0;
+
+            // Thumb Tip Pose
+            var thumbTipJoint = hand.GetJoint(XRHandJointID.ThumbTip);
+            if (thumbTipJoint.TryGetPose(out var thumbTipPose))
             {
                 m_DeviceState.pinchPosition = thumbTipPose.position;
                 m_DeviceState.pinchRotation = thumbTipPose.rotation;
+                m_DeviceState.pinchTrackingState = positionAndRotation;
             }
+            else
+            {
+                m_DeviceState.pinchTrackingState = (int)InputTrackingState.None;
+            }
+
+            m_DeviceState.pinchIsTracked = (thumbTipJoint.trackingState & XRHandJointTrackingState.HighFidelityPose) != 0;
 
             QueueStateEvent();
         }
@@ -507,16 +668,19 @@ namespace UnityEngine.XR.Hands
         void OnUpdatedHandsCommonGesture(XRHandSubsystem subsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateType)
         {
             XRCommonHandGestures commonGestures;
+            XRHand hand;
             bool isValid;
             if (m_Handedness == Handedness.Left)
             {
                 commonGestures = subsystem.leftHandCommonGestures;
+                hand = subsystem.leftHand;
                 const XRHandSubsystem.UpdateSuccessFlags success = XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints;
                 isValid = (updateSuccessFlags & success) == success;
             }
             else
             {
                 commonGestures = subsystem.rightHandCommonGestures;
+                hand = subsystem.rightHand;
                 const XRHandSubsystem.UpdateSuccessFlags success = XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
                 isValid = (updateSuccessFlags & success) == success;
             }
@@ -526,11 +690,17 @@ namespace UnityEngine.XR.Hands
                 if (m_WasValid)
                 {
                     m_DeviceState.isTracked = false;
+                    m_DeviceState.gripIsTracked = false;
+                    m_DeviceState.pokeIsTracked = false;
+                    m_DeviceState.pinchIsTracked = false;
+                    m_DeviceState.aimIsTracked = false;
+                    m_DeviceState.wristIsTracked = false;
                     m_DeviceState.trackingState = (int)InputTrackingState.None;
                     m_DeviceState.gripTrackingState = (int)InputTrackingState.None;
                     m_DeviceState.pokeTrackingState = (int)InputTrackingState.None;
                     m_DeviceState.pinchTrackingState = (int)InputTrackingState.None;
                     m_DeviceState.aimTrackingState = (int)InputTrackingState.None;
+                    m_DeviceState.wristTrackingState = (int)InputTrackingState.None;
                     m_WasValid = false;
 
                     m_DeviceStateDirty = true;
@@ -544,25 +714,29 @@ namespace UnityEngine.XR.Hands
 
             m_WasValid = true;
 
-            const int poseFullyTracked = (int)(InputTrackingState.Position | InputTrackingState.Rotation);
-
-            m_DeviceState.isTracked = true;
-            m_DeviceState.trackingState = poseFullyTracked;
+            const int positionAndRotation = (int)(InputTrackingState.Position | InputTrackingState.Rotation);
 
             // Grip Pose
             if (commonGestures.TryGetGripPose(out var gripPose))
             {
+                // The Device pose is treated as an alias for Grip pose to match the aliases in other
+                // input devices defined in the OpenXR package, such as `HandInteractionProfile.HandInteraction`.
                 m_DeviceState.devicePosition = gripPose.position;
                 m_DeviceState.deviceRotation = gripPose.rotation;
+                m_DeviceState.trackingState = positionAndRotation;
 
                 m_DeviceState.gripPosition = gripPose.position;
                 m_DeviceState.gripRotation = gripPose.rotation;
-                m_DeviceState.gripTrackingState = poseFullyTracked;
+                m_DeviceState.gripTrackingState = positionAndRotation;
             }
             else
             {
+                m_DeviceState.trackingState = (int)InputTrackingState.None;
                 m_DeviceState.gripTrackingState = (int)InputTrackingState.None;
             }
+
+            m_DeviceState.gripIsTracked = commonGestures.GetGripPoseIsTracked();
+            m_DeviceState.isTracked = m_DeviceState.gripIsTracked;
 
             // Grasp
             if (commonGestures.TryGetGraspValue(out var currentGraspValue))
@@ -583,24 +757,28 @@ namespace UnityEngine.XR.Hands
             {
                 m_DeviceState.pokePosition = pokePose.position;
                 m_DeviceState.pokeRotation = pokePose.rotation;
-                m_DeviceState.pokeTrackingState = poseFullyTracked;
+                m_DeviceState.pokeTrackingState = positionAndRotation;
             }
             else
             {
                 m_DeviceState.pokeTrackingState = (int)InputTrackingState.None;
             }
 
+            m_DeviceState.pokeIsTracked = commonGestures.GetPokePoseIsTracked();
+
             // Pinch Pose
             if (commonGestures.TryGetPinchPose(out var pinchPose))
             {
                 m_DeviceState.pinchPosition = pinchPose.position;
                 m_DeviceState.pinchRotation = pinchPose.rotation;
-                m_DeviceState.pinchTrackingState = poseFullyTracked;
+                m_DeviceState.pinchTrackingState = positionAndRotation;
             }
             else
             {
                 m_DeviceState.pinchTrackingState = (int)InputTrackingState.None;
             }
+
+            m_DeviceState.pinchIsTracked = commonGestures.GetPinchPoseIsTracked();
 
             // Pinch
             if (commonGestures.TryGetPinchValue(out var currentPinchValue))
@@ -621,12 +799,14 @@ namespace UnityEngine.XR.Hands
             {
                 m_DeviceState.aimPosition = aimPose.position;
                 m_DeviceState.aimRotation = aimPose.rotation;
-                m_DeviceState.aimTrackingState = poseFullyTracked;
+                m_DeviceState.aimTrackingState = positionAndRotation;
             }
             else
             {
                 m_DeviceState.aimTrackingState = (int)InputTrackingState.None;
             }
+
+            m_DeviceState.aimIsTracked = commonGestures.GetAimPoseIsTracked();
 
             // Aim
             if (commonGestures.TryGetAimActivateValue(out var currentAimValue))
@@ -641,6 +821,21 @@ namespace UnityEngine.XR.Hands
             }
 
             m_DeviceState.aimActivated = commonGestures.TryGetAimActivatedState(out var isAimActivated) && isAimActivated;
+
+            // Wrist Pose
+            var wristJoint = hand.GetJoint(XRHandJointID.Wrist);
+            if (wristJoint.TryGetPose(out var wristPose))
+            {
+                m_DeviceState.wristPosition = wristPose.position;
+                m_DeviceState.wristRotation = wristPose.rotation;
+                m_DeviceState.wristTrackingState = positionAndRotation;
+            }
+            else
+            {
+                m_DeviceState.wristTrackingState = (int)InputTrackingState.None;
+            }
+
+            m_DeviceState.wristIsTracked = (wristJoint.trackingState & XRHandJointTrackingState.HighFidelityPose) != 0;
 
             QueueStateEvent();
         }

@@ -202,7 +202,7 @@ class PlaybackInterpolatorTests
     }
 
     [Test]
-    public void TryInterpolateAimState_AtZero_MatchesCurrentState()
+    public void InterpolateAimState_AtZero_MatchesCurrentState()
     {
         var current = new XRHandAimState();
         current.pinchStrengthIndex = 0.2f;
@@ -216,17 +216,17 @@ class PlaybackInterpolatorTests
         next.pinchStrengthRing = 0.6f;
         next.pinchStrengthLittle = 0.5f;
 
-        bool success = PlaybackInterpolator.TryInterpolateAimState(current, next, 0f, out var result);
+        var result = PlaybackInterpolator.InterpolateAimState(current, next, 0f);
 
-        Assert.IsTrue(success, "Interpolation should succeed");
-        Assert.AreEqual(0.2f, result.pinchStrengthIndex, 0.001f, "Index should match current at t=0");
-        Assert.AreEqual(0.3f, result.pinchStrengthMiddle, 0.001f, "Middle should match current at t=0");
-        Assert.AreEqual(0.4f, result.pinchStrengthRing, 0.001f, "Ring should match current at t=0");
-        Assert.AreEqual(0.5f, result.pinchStrengthLittle, 0.001f, "Little should match current at t=0");
+        const float range = 1e-5f;
+        Assert.That(result.pinchStrengthIndex, Is.EqualTo(current.pinchStrengthIndex).Within(range), "Index should match current at t=0");
+        Assert.That(result.pinchStrengthMiddle, Is.EqualTo(current.pinchStrengthMiddle).Within(range), "Middle should match current at t=0");
+        Assert.That(result.pinchStrengthRing, Is.EqualTo(current.pinchStrengthRing).Within(range), "Ring should match current at t=0");
+        Assert.That(result.pinchStrengthLittle, Is.EqualTo(current.pinchStrengthLittle).Within(range), "Little should match current at t=0");
     }
 
     [Test]
-    public void TryInterpolateAimState_AtOne_MatchesNextState()
+    public void InterpolateAimState_AtOne_MatchesNextState()
     {
         var current = new XRHandAimState();
         current.pinchStrengthIndex = 0.2f;
@@ -240,60 +240,206 @@ class PlaybackInterpolatorTests
         next.pinchStrengthRing = 0.6f;
         next.pinchStrengthLittle = 0.5f;
 
-        bool success = PlaybackInterpolator.TryInterpolateAimState(current, next, 1f, out var result);
+        var result = PlaybackInterpolator.InterpolateAimState(current, next, 1f);
 
-        Assert.IsTrue(success, "Interpolation should succeed");
-        Assert.AreEqual(0.8f, result.pinchStrengthIndex, 0.001f, "Index should match next at t=1");
-        Assert.AreEqual(0.7f, result.pinchStrengthMiddle, 0.001f, "Middle should match next at t=1");
-        Assert.AreEqual(0.6f, result.pinchStrengthRing, 0.001f, "Ring should match next at t=1");
-        Assert.AreEqual(0.5f, result.pinchStrengthLittle, 0.001f, "Little should match next at t=1");
+        const float range = 1e-5f;
+        Assert.That(result.pinchStrengthIndex, Is.EqualTo(next.pinchStrengthIndex).Within(range), "Index should match next at t=1");
+        Assert.That(result.pinchStrengthMiddle, Is.EqualTo(next.pinchStrengthMiddle).Within(range), "Middle should match next at t=1");
+        Assert.That(result.pinchStrengthRing, Is.EqualTo(next.pinchStrengthRing).Within(range), "Ring should match next at t=1");
+        Assert.That(result.pinchStrengthLittle, Is.EqualTo(next.pinchStrengthLittle).Within(range), "Little should match next at t=1");
     }
 
     [Test]
-    public void TryInterpolateAimState_AtHalf_InterpolatesValues()
+    public void InterpolateAimState_InterpolatesValues()
     {
-        var current = new XRHandAimState();
-        current.pinchStrengthIndex = 0.0f;
-        current.pinchStrengthMiddle = 0.0f;
-        current.pinchStrengthRing = 0.0f;
-        current.pinchStrengthLittle = 0.0f;
-
-        var next = new XRHandAimState();
-        next.pinchStrengthIndex = 1.0f;
-        next.pinchStrengthMiddle = 1.0f;
-        next.pinchStrengthRing = 1.0f;
-        next.pinchStrengthLittle = 1.0f;
-
-        bool success = PlaybackInterpolator.TryInterpolateAimState(current, next, 0.5f, out var result);
-
-        Assert.IsTrue(success, "Interpolation should succeed");
-        Assert.AreEqual(0.5f, result.pinchStrengthIndex, 0.001f, "Index should be halfway");
-        Assert.AreEqual(0.5f, result.pinchStrengthMiddle, 0.001f, "Middle should be halfway");
-        Assert.AreEqual(0.5f, result.pinchStrengthRing, 0.001f, "Ring should be halfway");
-        Assert.AreEqual(0.5f, result.pinchStrengthLittle, 0.001f, "Little should be halfway");
-    }
-
-    [Test]
-    public void TryInterpolateAimState_InterpolatesPinchValues()
-    {
-        // Note: We only test pinch value interpolation here because XRHandAimState
-        // requires proper initialization from capture frames to use SetAimPose.
-        // The aim pose interpolation is tested implicitly through integration tests
-        // where aim states come from real capture frames.
-
         var current = new XRHandAimState();
         current.pinchStrengthIndex = 0.2f;
         current.pinchStrengthMiddle = 0.3f;
+        current.pinchStrengthRing = 0f;
+        current.pinchStrengthLittle = 1f;
+        current.aimPoseInternal = new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity);
+        current.aimStateFlags = AimStateFlags.HasAimPose;
 
         var next = new XRHandAimState();
         next.pinchStrengthIndex = 0.8f;
         next.pinchStrengthMiddle = 0.7f;
+        next.pinchStrengthRing = 1f;
+        next.pinchStrengthLittle = 0f;
+        next.aimPoseInternal = new Pose(new Vector3(20f, 0f, 0f), Quaternion.identity);
+        next.aimStateFlags = AimStateFlags.HasAimPose;
 
-        bool success = PlaybackInterpolator.TryInterpolateAimState(current, next, 0.5f, out var result);
+        var result = PlaybackInterpolator.InterpolateAimState(current, next, 0.5f);
 
-        Assert.IsTrue(success, "Interpolation should succeed");
-        Assert.AreEqual(0.5f, result.pinchStrengthIndex, 0.001f, "Index pinch should be interpolated");
-        Assert.AreEqual(0.5f, result.pinchStrengthMiddle, 0.001f, "Middle pinch should be interpolated");
+        const float range = 1e-5f;
+        Assert.That(result.pinchStrengthIndex, Is.EqualTo(0.5f).Within(range), "Index should be interpolated");
+        Assert.That(result.pinchStrengthMiddle, Is.EqualTo(0.5f).Within(range), "Middle should be interpolated");
+        Assert.That(result.pinchStrengthRing, Is.EqualTo(0.5f).Within(range), "Ring should be interpolated");
+        Assert.That(result.pinchStrengthLittle, Is.EqualTo(0.5f).Within(range), "Little should be interpolated");
+        Assert.That(result.aimPoseInternal, Is.EqualTo(new Pose(new Vector3(15f, 0f, 0f), Quaternion.identity)), "Aim pose should be interpolated");
+    }
+
+    [Test]
+    public void InterpolateAimState_DoesNotInterpolateDiscreteValues()
+    {
+        var current = new XRHandAimState
+        {
+            pinchStrengthIndex = 1f,
+            aimPoseInternal = new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity),
+            aimStateFlags = AimStateFlags.IsTracked | AimStateFlags.IsIndexPressed | AimStateFlags.HasAimPose,
+        };
+
+        var next = new XRHandAimState
+        {
+            pinchStrengthIndex = 0.7f,
+            aimPoseInternal = new Pose(new Vector3(20f, 0f, 0f), Quaternion.identity),
+            aimStateFlags = AimStateFlags.HasAimPose,
+        };
+
+        var result = PlaybackInterpolator.InterpolateAimState(current, next, 0.8f);
+
+        const float range = 1e-5f;
+        Assert.That(result.pinchStrengthIndex, Is.EqualTo(0.76f).Within(range), "Index should be interpolated");
+        Assert.That(result.aimPoseInternal, Is.EqualTo(new Pose(new Vector3(18f, 0f, 0f), Quaternion.identity)), "Aim pose should be interpolated");
+        Assert.That(result.aimStateFlags, Is.EqualTo(current.aimStateFlags), "Flags should not be interpolated");
+    }
+
+    [Test]
+    public void InterpolateAimState_DoesNotInterpolateToInvalidPose()
+    {
+        var current = new XRHandAimState
+        {
+            aimPoseInternal = new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity),
+            aimStateFlags = AimStateFlags.HasAimPose,
+        };
+
+        var next = new XRHandAimState
+        {
+            aimPoseInternal = new Pose(new Vector3(20f, 0f, 0f), Quaternion.identity),
+            aimStateFlags = AimStateFlags.None,
+        };
+
+        var result = PlaybackInterpolator.InterpolateAimState(current, next, 0.8f);
+
+        Assert.That(result.aimPoseInternal, Is.EqualTo(new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity)), "Aim pose should not be interpolated to invalid pose");
+        Assert.That(result.aimStateFlags, Is.EqualTo(current.aimStateFlags), "Flags should not be interpolated");
+    }
+
+    [Test]
+    public void InterpolateCommonGesturesState_InterpolatesValues()
+    {
+        var current = new XRCommonHandGesturesState
+        {
+            aimActivateValueInternal = 0.2f,
+            graspValueInternal = 0.3f,
+            pinchValueInternal = 0f,
+            isAimActivatedInternal = false,
+            isGraspFirmInternal = false,
+            isPinchTouchedInternal = false,
+            aimPoseInternal = new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity),
+            gripPoseInternal = new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity),
+            pinchPoseInternal = new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity),
+            pokePoseInternal = new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity),
+            flags =
+                XRCommonHandGesturesFlags.IsAimPoseValid |
+                XRCommonHandGesturesFlags.IsGripPoseValid |
+                XRCommonHandGesturesFlags.IsPinchPoseValid |
+                XRCommonHandGesturesFlags.IsPokePoseValid |
+                XRCommonHandGesturesFlags.IsAimActivateValueValid |
+                XRCommonHandGesturesFlags.IsGraspValueValid |
+                XRCommonHandGesturesFlags.IsPinchValueValid |
+                XRCommonHandGesturesFlags.IsAimActivatedStateValid |
+                XRCommonHandGesturesFlags.IsGraspFirmStateValid |
+                XRCommonHandGesturesFlags.IsPinchTouchedStateValid,
+        };
+
+        var next = new XRCommonHandGesturesState
+        {
+            aimActivateValueInternal = 0.8f,
+            graspValueInternal = 0.7f,
+            pinchValueInternal = 1f,
+            isAimActivatedInternal = true,
+            isGraspFirmInternal = true,
+            isPinchTouchedInternal = true,
+            aimPoseInternal = new Pose(new Vector3(20f, 0f, 0f), Quaternion.identity),
+            gripPoseInternal = new Pose(new Vector3(20f, 0f, 0f), Quaternion.identity),
+            pinchPoseInternal = new Pose(new Vector3(20f, 0f, 0f), Quaternion.identity),
+            pokePoseInternal = new Pose(new Vector3(20f, 0f, 0f), Quaternion.identity),
+            flags =
+                XRCommonHandGesturesFlags.IsAimPoseValid |
+                XRCommonHandGesturesFlags.IsGripPoseValid |
+                XRCommonHandGesturesFlags.IsPinchPoseValid |
+                XRCommonHandGesturesFlags.IsPokePoseValid |
+                XRCommonHandGesturesFlags.IsAimActivateValueValid |
+                XRCommonHandGesturesFlags.IsGraspValueValid |
+                XRCommonHandGesturesFlags.IsPinchValueValid |
+                XRCommonHandGesturesFlags.IsAimActivatedStateValid |
+                XRCommonHandGesturesFlags.IsGraspFirmStateValid |
+                XRCommonHandGesturesFlags.IsPinchTouchedStateValid,
+        };
+
+        var result = PlaybackInterpolator.InterpolateCommonGesturesState(current, next, 0.5f);
+
+        const float range = 1e-5f;
+        Assert.That(result.aimActivateValueInternal, Is.EqualTo(0.5f).Within(range));
+        Assert.That(result.graspValueInternal, Is.EqualTo(0.5f).Within(range));
+        Assert.That(result.pinchValueInternal, Is.EqualTo(0.5f).Within(range));
+        Assert.That(result.isAimActivatedInternal, Is.EqualTo(current.isAimActivatedInternal));
+        Assert.That(result.isGraspFirmInternal, Is.EqualTo(current.isGraspFirmInternal));
+        Assert.That(result.isPinchTouchedInternal, Is.EqualTo(current.isPinchTouchedInternal));
+        Assert.That(result.aimPoseInternal, Is.EqualTo(new Pose(new Vector3(15f, 0f, 0f), Quaternion.identity)));
+        Assert.That(result.gripPoseInternal, Is.EqualTo(new Pose(new Vector3(15f, 0f, 0f), Quaternion.identity)));
+        Assert.That(result.pinchPoseInternal, Is.EqualTo(new Pose(new Vector3(15f, 0f, 0f), Quaternion.identity)));
+        Assert.That(result.pokePoseInternal, Is.EqualTo(new Pose(new Vector3(15f, 0f, 0f), Quaternion.identity)));
+        Assert.That(result.flags, Is.EqualTo(current.flags), "Flags should not be interpolated");
+    }
+
+    [Test]
+    public void InterpolateCommonGesturesState_DoesNotInterpolateToInvalidValues()
+    {
+        var current = new XRCommonHandGesturesState
+        {
+            aimActivateValueInternal = 0.2f,
+            graspValueInternal = 0.3f,
+            pinchValueInternal = 1f,
+            isAimActivatedInternal = true,
+            isGraspFirmInternal = true,
+            isPinchTouchedInternal = true,
+            aimPoseInternal = new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity),
+            gripPoseInternal = new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity),
+            pinchPoseInternal = new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity),
+            pokePoseInternal = new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity),
+            flags =
+                XRCommonHandGesturesFlags.IsAimPoseValid |
+                XRCommonHandGesturesFlags.IsGripPoseValid |
+                XRCommonHandGesturesFlags.IsPinchPoseValid |
+                XRCommonHandGesturesFlags.IsPokePoseValid |
+                XRCommonHandGesturesFlags.IsAimActivateValueValid |
+                XRCommonHandGesturesFlags.IsGraspValueValid |
+                XRCommonHandGesturesFlags.IsPinchValueValid |
+                XRCommonHandGesturesFlags.IsAimActivatedStateValid |
+                XRCommonHandGesturesFlags.IsGraspFirmStateValid |
+                XRCommonHandGesturesFlags.IsPinchTouchedStateValid,
+        };
+
+        var next = new XRCommonHandGesturesState
+        {
+            flags = XRCommonHandGesturesFlags.None,
+        };
+
+        var result = PlaybackInterpolator.InterpolateCommonGesturesState(current, next, 0.8f);
+
+        const float range = 1e-5f;
+        Assert.That(result.aimActivateValueInternal, Is.EqualTo(current.aimActivateValueInternal).Within(range));
+        Assert.That(result.graspValueInternal, Is.EqualTo(current.graspValueInternal).Within(range));
+        Assert.That(result.pinchValueInternal, Is.EqualTo(current.pinchValueInternal).Within(range));
+        Assert.That(result.isAimActivatedInternal, Is.EqualTo(current.isAimActivatedInternal));
+        Assert.That(result.isGraspFirmInternal, Is.EqualTo(current.isGraspFirmInternal));
+        Assert.That(result.isPinchTouchedInternal, Is.EqualTo(current.isPinchTouchedInternal));
+        Assert.That(result.aimPoseInternal, Is.EqualTo(new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity)), "Pose should not be interpolated to invalid pose");
+        Assert.That(result.gripPoseInternal, Is.EqualTo(new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity)), "Pose should not be interpolated to invalid pose");
+        Assert.That(result.pinchPoseInternal, Is.EqualTo(new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity)), "Pose should not be interpolated to invalid pose");
+        Assert.That(result.pokePoseInternal, Is.EqualTo(new Pose(new Vector3(10f, 0f, 0f), Quaternion.identity)), "Pose should not be interpolated to invalid pose");
+        Assert.That(result.flags, Is.EqualTo(current.flags), "Flags should not be interpolated");
     }
 
     [Test]

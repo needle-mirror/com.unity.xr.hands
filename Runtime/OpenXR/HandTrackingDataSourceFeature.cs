@@ -96,10 +96,9 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (!base.OnInstanceCreate(xrInstance))
                 return false;
 
-            // Initialize preferred sources from serialized preferences if not
-            // already set by a prior TryUpdateConfiguration call.
-            m_LeftPreferredSources ??= PreferenceToSources(m_LeftHandPreference);
-            m_RightPreferredSources ??= PreferenceToSources(m_RightHandPreference);
+            // Reset preferred sources from serialized preferences.
+            m_LeftPreferredSources = PreferenceToSources(m_LeftHandPreference);
+            m_RightPreferredSources = PreferenceToSources(m_RightHandPreference);
             RebuildCaches();
 
             return true;
@@ -155,6 +154,8 @@ namespace UnityEngine.XR.Hands.OpenXR
             XrHandEXT hand,
             XrStructureChain extensionChain)
         {
+            EnsurePreferredSources();
+
             ref var nativeSources = ref (hand == XrHandEXT.Left
                 ? ref m_LeftRequestedSources
                 : ref m_RightRequestedSources);
@@ -241,6 +242,8 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// <inheritdoc/>
         public bool TryGetConfiguration(out HandTrackingDataSourceConfig config)
         {
+            EnsurePreferredSources();
+
             config = new HandTrackingDataSourceConfig
             {
                 leftPreferredSources = m_LeftPreferredSourcesCache,
@@ -256,16 +259,16 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </remarks>
         public bool TryUpdateConfiguration(HandTrackingDataSourceConfig config)
         {
+            EnsurePreferredSources();
+
             if (config.leftPreferredSources != null)
             {
-                m_LeftPreferredSources ??= new List<HandTrackingDataSource>();
                 m_LeftPreferredSources.Clear();
                 m_LeftPreferredSources.AddRange(config.leftPreferredSources);
             }
 
             if (config.rightPreferredSources != null)
             {
-                m_RightPreferredSources ??= new List<HandTrackingDataSource>();
                 m_RightPreferredSources.Clear();
                 m_RightPreferredSources.AddRange(config.rightPreferredSources);
             }
@@ -273,6 +276,16 @@ namespace UnityEngine.XR.Hands.OpenXR
             RebuildCaches();
             RequestHandTrackerRestart();
             return true;
+        }
+
+        void EnsurePreferredSources()
+        {
+            if (m_LeftPreferredSources != null && m_RightPreferredSources != null)
+                return;
+
+            m_LeftPreferredSources ??= PreferenceToSources(m_LeftHandPreference);
+            m_RightPreferredSources ??= PreferenceToSources(m_RightHandPreference);
+            RebuildCaches();
         }
 
         void RebuildCaches()

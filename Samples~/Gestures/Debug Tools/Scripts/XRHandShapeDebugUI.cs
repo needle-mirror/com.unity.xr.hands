@@ -6,6 +6,9 @@ using UnityEngine.UI;
 using UnityEngine.XR.Hands.Analytics;
 using UnityEngine.XR.Hands.Gestures;
 using UnityEngine.XR.Hands.Samples.GestureSample;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 {
@@ -13,6 +16,9 @@ namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
     /// Controls the debug UI for <see cref="XRHandShape"/> that shows the target and tolerances on the UI controlled
     /// by a <see cref="XRAllFingerShapesDebugUI"/>.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public class XRHandShapeDebugUI : MonoBehaviour
     {
         [SerializeField]

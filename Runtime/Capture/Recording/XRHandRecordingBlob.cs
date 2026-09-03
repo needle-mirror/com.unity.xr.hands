@@ -7,6 +7,9 @@ using UnityEngine;
 using UnityEngine.SubsystemsImplementation.Extensions;
 using UnityEngine.XR.Hands.Gestures;
 using UnityEngine.XR.Hands.ProviderImplementation;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands.Capture.Recording
 {
@@ -15,6 +18,9 @@ namespace UnityEngine.XR.Hands.Capture.Recording
     /// This class manages the lifecycle of a recording,
     /// including capturing data from the <see cref="XRHandSubsystem"/>, saving and deleting the data.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public class XRHandRecordingBlob : XRHandRecordingBase, IDisposable
     {
         /// <summary>

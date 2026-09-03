@@ -119,6 +119,22 @@ namespace UnityEditor.XR.Hands.OpenXR
                     "uses-feature",
                     "oculus.software.handtracking",
                     ("required", "false"));
+
+#if OPENXR_1_19_OR_NEWER
+                var wideMotionFeature = OpenXRSettings.ActiveBuildTargetInstance.GetFeature<MetaHandTrackingWideMotionMode>();
+                if (wideMotionFeature != null && wideMotionFeature.enabled)
+                {
+                    UpdateOrCreateAttribute(
+                        ManifestElement,
+                        "uses-permission",
+                        "com.oculus.permission.BODY_TRACKING");
+                    UpdateOrCreateAttribute(
+                        ManifestElement,
+                        "uses-feature",
+                        "com.oculus.software.body_tracking",
+                        ("required", "false"));
+                }
+#endif
             }
 
             XmlAttribute CreateAndroidAttribute(string key, string value)

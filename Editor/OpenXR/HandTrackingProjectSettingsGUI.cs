@@ -18,6 +18,9 @@ namespace UnityEditor.XR.Hands.OpenXR
         const string k_ParentFoldKey = "XRHands.ProjectSettingsGUI.ParentExpanded";
         const string k_DataSourceFoldKey = "XRHands.ProjectSettingsGUI.DataSourceExpanded";
         const string k_MotionRangeFoldKey = "XRHands.ProjectSettingsGUI.MotionRangeExpanded";
+#if OPENXR_1_19_OR_NEWER
+        const string k_FrequencyHintFoldKey = "XRHands.ProjectSettingsGUI.FrequencyHintExpanded";
+#endif
 
         static readonly GUIContent k_Header =
             EditorGUIUtility.TrTextContent("OpenXR Hand Tracking Project Settings");
@@ -38,6 +41,19 @@ namespace UnityEditor.XR.Hands.OpenXR
         static readonly GUIContent k_MotionRangeDescription =
             EditorGUIUtility.TrTextContent(
                 "Controls hand joint motion range: full natural range or constrained to mimic gripping a held controller.");
+
+#if OPENXR_1_19_OR_NEWER
+        static readonly GUIContent k_FrequencyHintSection =
+            EditorGUIUtility.TrTextContent("Requested Hand Tracking Update Frequency");
+        static readonly GUIContent k_FrequencyHintDescription =
+            EditorGUIUtility.TrTextContent(
+                "Controls the hand tracking update frequency. Setting below is passed to the " +
+                "runtime as a suggestion. The runtime may choose to ignore it.");
+        const string k_FrequencyHintHelp =
+            "Higher frequency improves responsiveness but may increase power consumption.";
+        static readonly GUIContent k_Frequency =
+            EditorGUIUtility.TrTextContent("Frequency");
+#endif
 
         static readonly GUIContent k_LeftHand =
             EditorGUIUtility.TrTextContent("Left Hand");
@@ -73,6 +89,10 @@ namespace UnityEditor.XR.Hands.OpenXR
                     DrawDataSourceSection(settings);
                     EditorGUILayout.Space();
                     DrawMotionRangeSection(settings);
+#if OPENXR_1_19_OR_NEWER
+                    EditorGUILayout.Space();
+                    DrawFrequencyHintSection(settings);
+#endif
                 }
             }
         }
@@ -142,6 +162,36 @@ namespace UnityEditor.XR.Hands.OpenXR
                     HandJointsMotionRangeFeatureDrawer.s_Values);
             }
         }
+
+#if OPENXR_1_19_OR_NEWER
+        static void DrawFrequencyHintSection(OpenXRSettings settings)
+        {
+            var feature = settings != null ? settings.GetFeature<MetaHandTrackingFrequencyHintFeature>() : null;
+            bool featureEnabled = feature != null && feature.enabled;
+
+            bool stored = SessionState.GetBool(k_FrequencyHintFoldKey, true);
+            bool expanded = EditorGUILayout.Foldout(featureEnabled && stored, k_FrequencyHintSection, true);
+
+            if (featureEnabled)
+                SessionState.SetBool(k_FrequencyHintFoldKey, expanded);
+
+            if (!expanded || !featureEnabled)
+                return;
+
+            EditorGUILayout.LabelField(k_FrequencyHintDescription, EditorStyles.wordWrappedMiniLabel);
+            EditorGUILayout.HelpBox(k_FrequencyHintHelp, MessageType.Info);
+
+            using (new EditorGUI.IndentLevelScope())
+            {
+                int frequencyValue = (int)feature.m_FrequencyHint;
+
+                EditorGUILayout.IntPopup(
+                    k_Frequency, frequencyValue,
+                    MetaHandTrackingFrequencyHintFeatureDrawer.s_Options,
+                    MetaHandTrackingFrequencyHintFeatureDrawer.s_Values);
+            }
+        }
+#endif
     }
 }
 

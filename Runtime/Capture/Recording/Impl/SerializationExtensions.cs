@@ -266,39 +266,96 @@ namespace UnityEngine.XR.Hands.Capture.Recording
             var flags = commonHandGestures.flags;
             writer.Write(flags);
 
-            if ((flags & XRCommonHandGesturesFlags.IsAimPoseValid) != 0)
-                writer.Write(commonHandGestures.possiblyInvalidAimPose);
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsAimPoseValid))
+                writer.Write(commonHandGestures.aimPoseInternal);
 
-            if ((flags & XRCommonHandGesturesFlags.IsAimActivateValueValid) != 0)
-                writer.Write(commonHandGestures.possiblyInvalidAimActivateValue);
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsAimActivateValueValid))
+                writer.Write(commonHandGestures.aimActivateValueInternal);
 
-            if ((flags & XRCommonHandGesturesFlags.IsGraspValueValid) != 0)
-                writer.Write(commonHandGestures.possiblyInvalidGraspValue);
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsGraspValueValid))
+                writer.Write(commonHandGestures.graspValueInternal);
 
-            if ((flags & XRCommonHandGesturesFlags.IsGripPoseValid) != 0)
-                writer.Write(commonHandGestures.possiblyInvalidGripPose);
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsGripPoseValid))
+                writer.Write(commonHandGestures.gripPoseInternal);
 
-            if ((flags & XRCommonHandGesturesFlags.IsPinchPoseValid) != 0)
-                writer.Write(commonHandGestures.possiblyInvalidPinchPose);
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPinchPoseValid))
+                writer.Write(commonHandGestures.pinchPoseInternal);
 
-            if ((flags & XRCommonHandGesturesFlags.IsPinchValueValid) != 0)
-                writer.Write(commonHandGestures.possiblyInvalidPinchValue);
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPinchValueValid))
+                writer.Write(commonHandGestures.pinchValueInternal);
 
-            if ((flags & XRCommonHandGesturesFlags.IsPokePoseValid) != 0)
-                writer.Write(commonHandGestures.possiblyInvalidPokePose);
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPokePoseValid))
+                writer.Write(commonHandGestures.pokePoseInternal);
 
-            if ((flags & XRCommonHandGesturesFlags.IsAimActivatedStateValid) != 0)
-                writer.Write(commonHandGestures.possiblyInvalidIsAimActivated);
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsAimActivatedStateValid))
+                writer.Write(commonHandGestures.isAimActivatedInternal);
 
-            if ((flags & XRCommonHandGesturesFlags.IsGraspFirmStateValid) != 0)
-                writer.Write(commonHandGestures.possiblyInvalidIsGraspFirm);
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsGraspFirmStateValid))
+                writer.Write(commonHandGestures.isGraspFirmInternal);
 
-            if ((flags & XRCommonHandGesturesFlags.IsPinchTouchedStateValid) != 0)
-                writer.Write(commonHandGestures.possiblyInvalidIsPinchTouched);
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPinchTouchedStateValid))
+                writer.Write(commonHandGestures.isPinchTouchedInternal);
         }
 
-        public static void ReadCommonGestures(this BinaryReader reader, out XRCommonHandGesturesState commonHandGesturesState)
-            => commonHandGesturesState = new XRCommonHandGesturesState(reader);
+        public static void ReadCommonGestures(this BinaryReader reader, out XRCommonHandGesturesState commonHandGestures)
+        {
+            commonHandGestures = new XRCommonHandGesturesState
+            {
+                handedness = reader.ReadHandedness(),
+                flags = reader.ReadCommonGesturesFlags(),
+            };
+
+            var flags = commonHandGestures.flags;
+
+            // If the flags read above indicates that there is a Pose present, read it now.
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsAimPoseValid))
+            {
+                reader.ReadPose(out var aimPose);
+                commonHandGestures.aimPoseInternal = aimPose;
+            }
+            else
+                commonHandGestures.aimPoseInternal = Pose.identity;
+
+            commonHandGestures.aimActivateValueInternal = flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsAimActivateValueValid)
+                ? reader.ReadSingle()
+                : 0f;
+
+            commonHandGestures.graspValueInternal = flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsGraspValueValid)
+                ? reader.ReadSingle()
+                : 0f;
+
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsGripPoseValid))
+            {
+                reader.ReadPose(out var gripPose);
+                commonHandGestures.gripPoseInternal = gripPose;
+            }
+            else
+                commonHandGestures.gripPoseInternal = Pose.identity;
+
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPinchPoseValid))
+            {
+                reader.ReadPose(out var pinchPose);
+                commonHandGestures.pinchPoseInternal = pinchPose;
+            }
+            else
+                commonHandGestures.pinchPoseInternal = Pose.identity;
+
+            commonHandGestures.pinchValueInternal = flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPinchValueValid)
+                ? reader.ReadSingle()
+                : 0f;
+
+            if (flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPokePoseValid))
+            {
+                reader.ReadPose(out var pokePose);
+                commonHandGestures.pokePoseInternal = pokePose;
+            }
+            else
+                commonHandGestures.pokePoseInternal = Pose.identity;
+
+            commonHandGestures.isAimActivatedInternal = flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsAimActivatedStateValid) && reader.ReadBoolean();
+            commonHandGestures.isGraspFirmInternal = flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsGraspFirmStateValid) && reader.ReadBoolean();
+            commonHandGestures.isPinchTouchedInternal = flags.HasGesturesFlag(XRCommonHandGesturesFlags.IsPinchTouchedStateValid) && reader.ReadBoolean();
+        }
 
         public static void Write(this BinaryWriter writer, in XRHandAimState aimState)
         {

@@ -20,7 +20,7 @@ class TestHandProvider : XRHandSubsystemProvider
     {
         Disabled,
         CorePosesOnly,
-        Extended
+        Extended,
     }
 
     public CommonGestureBehavior commonGestureBehavior { get; set; }
@@ -57,11 +57,11 @@ class TestHandProvider : XRHandSubsystemProvider
         ++numDestroyCalls;
     }
 
-    public override void GetHandLayout(NativeArray<bool> jointsInLayout)
+    public override void GetHandLayout(NativeArray<bool> handJointsInLayout)
     {
         ++numGetHandLayoutCalls;
-        for (int jointIndex = 0; jointIndex < jointsInLayout.Length; ++jointIndex)
-            jointsInLayout[jointIndex] = TestHandData.jointsInLayout[jointIndex];
+        for (int jointIndex = 0; jointIndex < handJointsInLayout.Length; ++jointIndex)
+            handJointsInLayout[jointIndex] = TestHandData.jointsInLayout[jointIndex];
     }
 
     public override XRHandSubsystem.UpdateSuccessFlags TryUpdateHands(
@@ -109,6 +109,12 @@ class TestHandProvider : XRHandSubsystemProvider
             successFlags &= ~XRHandSubsystem.UpdateSuccessFlags.RightHandJoints & ~XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose;
 
         return successFlags;
+    }
+
+    internal override bool TryGetCommonGesturesState(Handedness handedness, out XRCommonHandGesturesState commonGestures)
+    {
+        commonGestures = TestCommonGestureData.GetCommonGesturesState(handedness, commonGestureBehavior);
+        return commonGestureBehavior.AreCoreCommonGesturesEnabled();
     }
 
     public override bool TryGetAimPose(Handedness handedness, out Pose aimPose)

@@ -1,11 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine.XR.Hands.Gestures;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands.Samples.Gestures.DebugTools
 {
     /// <summary>
     /// Controls the debug UI for finger state values by setting that values in each <see cref="XRFingerShapeDebugUI"/>.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public class XRAllFingerShapesDebugUI : MonoBehaviour
     {
         [SerializeField]

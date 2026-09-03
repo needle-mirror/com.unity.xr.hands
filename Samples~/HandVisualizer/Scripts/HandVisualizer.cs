@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine.Serialization;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands.Samples.VisualizerSample
 {
@@ -15,6 +18,9 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
     /// <summary>
     /// This component visualizes the hand joints and mesh for the left and right hands.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public class HandVisualizer : MonoBehaviour
     {
         /// <summary>
@@ -371,6 +377,9 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
                 m_CombinedSuccessFlags = XRHandSubsystem.UpdateSuccessFlags.None;
         }
 
+#if UNITY_6000_5_OR_NEWER
+        [NoAutoStaticsCleanup]
+#endif
         class HandGameObjects
         {
             GameObject m_HandRoot;

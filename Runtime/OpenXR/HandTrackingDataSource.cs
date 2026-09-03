@@ -24,6 +24,15 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// Maps to <c>XR_HAND_TRACKING_DATA_SOURCE_CONTROLLER_EXT</c>.
         /// </summary>
         Controller = 2,
+
+#if OPENXR_1_19_OR_NEWER || PACKAGE_DOCS_GENERATION
+        /// <summary>
+        /// Hand tracking data is derived from inference algorithms that estimate
+        /// hand poses when hands are outside the normal camera tracking volume.
+        /// Maps to <c>XR_HAND_TRACKING_DATA_SOURCE_UNOBSTRUCTED_WIDE_MOTION_META</c>.
+        /// </summary>
+        UnobstructedWideMotion = 1000695000,
+#endif
     }
 }
 

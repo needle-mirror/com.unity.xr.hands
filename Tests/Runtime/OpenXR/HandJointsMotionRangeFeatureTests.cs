@@ -1,3 +1,6 @@
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
 using System.Collections;
 using NUnit.Framework;
@@ -12,6 +15,9 @@ using XrSession = System.UInt64;
 
 namespace UnityEngine.XR.Hands.Tests.OpenXR
 {
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public class HandJointsMotionRangeFeatureTests : OpenXRHandTrackingTestFixture
     {
         MockHandsEnvironment m_MockEnvironment;

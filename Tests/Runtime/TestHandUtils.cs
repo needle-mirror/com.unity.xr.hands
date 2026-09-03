@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.XR.Hands;
+using UnityEngine.XR.Hands.Capture.Playback;
 using Is = Unity.XR.Hands.Tests.NUnitExtensions.Is;
 
 static class TestHandUtils
@@ -9,6 +10,7 @@ static class TestHandUtils
     static readonly float k_EpsilonSqrt = Mathf.Sqrt(Mathf.Epsilon);
 
     internal delegate bool TryGetFunc<T>(out T param);
+    internal delegate bool TryGetFuncHandedness<T>(Handedness handedness, out T param);
 
     public static void AssertSubsystemGestureSupport(XRHandSubsystemDescriptor.Cinfo cinfo, XRHandSubsystemDescriptor descriptor)
     {
@@ -94,73 +96,69 @@ static class TestHandUtils
         return (result, param);
     }
 
+    internal static (bool, T) InvokeTryGetFunc<T>(Handedness handedness, TryGetFuncHandedness<T> func)
+    {
+        bool result = func(handedness, out T param);
+        return (result, param);
+    }
+
     public static void AssertAimPoseUpdated(Handedness handedness, XRCommonHandGestures.AimPoseUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
-        Assert.IsTrue(args.m_IsAimPoseTracked);
         Assert.That(InvokeTryGetFunc<Pose>(args.TryGetAimPose), Is.EqualTo((true, expectedData.aimPose)));
     }
 
     public static void AssertAimActivateUpdated(Handedness handedness, XRCommonHandGestures.AimActivateValueUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
-        Assert.IsTrue(args.m_IsAimActivateValueReady);
         Assert.That(InvokeTryGetFunc<float>(args.TryGetAimActivateValue), Is.EqualTo((true, expectedData.aimActivateValue)));
     }
 
     public static void AssertAimActivatedStateUpdated(Handedness handedness, XRCommonHandGestures.AimActivatedStateUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
-        Assert.IsTrue(args.m_IsAimActivatedStateReady);
         Assert.That(InvokeTryGetFunc<bool>(args.TryGetAimActivatedState), Is.EqualTo((true, expectedData.aimActivatedState)));
     }
 
     public static void AssertGripPoseUpdated(Handedness handedness, XRCommonHandGestures.GripPoseUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
-        Assert.IsTrue(args.m_IsGripPoseTracked);
         Assert.That(InvokeTryGetFunc<Pose>(args.TryGetGripPose), Is.EqualTo((true, expectedData.gripPose)));
     }
 
     public static void AssertGraspValueUpdated(Handedness handedness, XRCommonHandGestures.GraspValueUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
-        Assert.IsTrue(args.m_IsGraspValueReady);
         Assert.That(InvokeTryGetFunc<float>(args.TryGetGraspValue), Is.EqualTo((true, expectedData.graspValue)));
     }
 
     public static void AssertGraspFirmStateUpdated(Handedness handedness, XRCommonHandGestures.GraspFirmStateUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
-        Assert.IsTrue(args.m_IsGraspFirmStateReady);
         Assert.That(InvokeTryGetFunc<bool>(args.TryGetGraspFirmState), Is.EqualTo((true, expectedData.graspFirmState)));
     }
 
     public static void AssertPinchPoseUpdated(Handedness handedness, XRCommonHandGestures.PinchPoseUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
-        Assert.IsTrue(args.m_IsPinchPoseTracked);
         Assert.That(InvokeTryGetFunc<Pose>(args.TryGetPinchPose), Is.EqualTo((true, expectedData.pinchPose)));
     }
 
     public static void AssertPinchValueUpdated(Handedness handedness, XRCommonHandGestures.PinchValueUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
-        Assert.IsTrue(args.m_IsPinchValueReady);
         Assert.That(InvokeTryGetFunc<float>(args.TryGetPinchValue), Is.EqualTo((true, expectedData.pinchValue)));
     }
 
     public static void AssertPinchTouchedStateUpdated(Handedness handedness, XRCommonHandGestures.PinchTouchedStateUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
-        Assert.IsTrue(args.m_IsPinchTouchedStateReady);
         Assert.That(InvokeTryGetFunc<bool>(args.TryGetPinchTouchedState), Is.EqualTo((true, expectedData.pinchTouchedState)));
     }
 
     public static void AssertPokePoseUpdated(Handedness handedness, XRCommonHandGestures.PokePoseUpdatedEventArgs args)
     {
         var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
-        Assert.IsTrue(args.m_IsPokePoseTracked);
         Assert.That(InvokeTryGetFunc<Pose>(args.TryGetPokePose), Is.EqualTo((true, expectedData.pokePose)));
     }
 
@@ -196,6 +194,16 @@ static class TestHandUtils
         {
             id = TestHandProvider.descriptorId,
             providerType = typeof(TestHandProvider)
+        };
+        return CreateTestSubsystem(handsSubsystemCinfo);
+    }
+
+    public static XRHandSubsystem CreatePlaybackProviderTestSubsystem()
+    {
+        var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
+        {
+            id = Constants.k_PlaybackDescriptorID,
+            providerType = typeof(PlaybackProvider)
         };
         return CreateTestSubsystem(handsSubsystemCinfo);
     }

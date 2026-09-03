@@ -483,11 +483,13 @@ namespace UnityEngine.XR.Hands
                     // this needs to be an option (enabled by default?) instead of blanket disabling
                     if (provider.AllowJointProcessing())
                     {
-                        for (int processorIndex = 0; processorIndex < m_Processors.Count; ++processorIndex)
+                        for (var processorIndex = 0; processorIndex < m_Processors.Count; ++processorIndex)
+                        {
                             m_Processors[processorIndex].ProcessJoints(this, updateSuccessFlags, updateType);
+                        }
                     }
 
-                    if (updateType == UpdateType.Dynamic)
+                    if (updateType == UpdateType.Dynamic && provider.canSurfaceCommonPoseData)
                     {
                         // Avoid foreach allocation by iterating handedness values directly
                         using (s_RetrieveCommonPoseDataMarker.Auto())
@@ -536,7 +538,7 @@ namespace UnityEngine.XR.Hands
         /// Denotes the hand you wish to obtain aim state for.
         /// </param>
         /// <param name="aimState">
-        /// If <c>TryGetAimState</c> returns <see langword="true"/>, this will
+        /// If <c>TryGetAimState</c> returns <see langword="true"/>, this will be
         /// filled out with aim state data for the given <see cref="Handedness"/>.
         /// </param>
         /// <returns>
@@ -714,8 +716,11 @@ namespace UnityEngine.XR.Hands
 
         void RetrieveCommonPoseData(Handedness handedness, XRCommonHandGestures commonGestures)
         {
-            if (!provider.canSurfaceCommonPoseData)
+            if (provider.TryGetCommonGesturesState(handedness, out var commonGesturesState))
+            {
+                commonGestures.UpdateState(commonGesturesState);
                 return;
+            }
 
             if (subsystemDescriptor.supportsAimPose)
             {

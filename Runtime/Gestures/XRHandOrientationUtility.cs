@@ -2,12 +2,18 @@ using System;
 using Unity.Burst;
 using Unity.Mathematics;
 using Unity.XR.CoreUtils;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands.Gestures
 {
     /// <summary>
     /// Utility class for calculating hand orientation.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
 #if BURST_PRESENT
     [BurstCompile]
 #endif

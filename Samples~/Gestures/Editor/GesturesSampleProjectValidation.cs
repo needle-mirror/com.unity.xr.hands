@@ -10,6 +10,9 @@ using UnityEditor.PackageManager.Requests;
 using UnityEditor.PackageManager.UI;
 using UnityEditor.XR.Hands.ProjectValidation;
 using UnityEngine;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
 using System.IO;
 using TMPro;
@@ -21,6 +24,9 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample.Editor
     /// Unity Editor class which registers Project Validation rules for the Gestures sample,
     /// checking that other required samples and packages are installed.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     static class HandsSampleProjectValidation
     {
         const string k_SampleDisplayName = "Gestures Sample";

@@ -1,9 +1,15 @@
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 namespace UnityEngine.XR.Hands.Analytics
 {
     /// <summary>
     /// Internal struct that tracks information about the XRHands systems during a frame in PlayMode.  This is primarily used
     /// by the XRHandsAnalytics system to gather PlayMode Analytics.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     struct XRHandFeatureUsageData
     {
 #pragma warning disable UDR0001 // No method with RuntimeInitializeOnLoadMethod attribute -- Reset in `ResetData` triggered by analytics upon entering Play mode.

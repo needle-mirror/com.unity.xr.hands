@@ -268,7 +268,10 @@ namespace UnityEngine.XR.Hands.Capture.Playback
             m_Handedness = handedness;
             m_CoordinateTransform = CreateCoordinateTransform(m_Options);
             foreach (var coordinateTransformer in m_CoordinateTransformers)
-                coordinateTransformer.UpdateAnchor(Pose.identity); // UpdateRootPose with identity anchor
+            {
+                // UpdateRootPose with identity anchor
+                coordinateTransformer.UpdateAnchor(Pose.identity);
+            }
 
             m_TimeController = CreateTimeController(m_Options);
             m_FrameProvider = new PlaybackFrameProvider(m_SourceCaptureSequence, m_Handedness);
@@ -333,7 +336,7 @@ namespace UnityEngine.XR.Hands.Capture.Playback
                 m_IsNextFrameValid = TryGetNextActiveFrame(out m_NextFrame);
 
                 // Update gesture handler with current frame state
-                m_GestureHandler?.UpdateFrameState(m_CurrentFrame, m_NextFrame, m_IsCurrentFrameValid, m_IsNextFrameValid);
+                m_GestureHandler.UpdateFrameState(m_CurrentFrame, m_NextFrame, m_IsCurrentFrameValid, m_IsNextFrameValid);
 
                 // Use time controller to determine if interpolation is needed
                 if (m_TimeController != null && m_TimeController.NeedsInterpolation(m_CurrentFrame))
@@ -547,8 +550,8 @@ namespace UnityEngine.XR.Hands.Capture.Playback
         XRHandSubsystem.UpdateSuccessFlags TryUpdateHandFromOneFrame(
             XRHandSubsystem.UpdateType updateType,
             ref Pose handRootPose,
-            NativeArray<XRHandJoint> handJoints)
-            => UpdateHandFromFrame(m_CurrentFrame, updateType, ref handRootPose, handJoints);
+            NativeArray<XRHandJoint> handJoints) =>
+            UpdateHandFromFrame(m_CurrentFrame, updateType, ref handRootPose, handJoints);
 
         bool TryGetEitherHand(in XRHandCaptureFrame frame, XRHandSubsystem.UpdateType preferredUpdateType, out XRHand hand)
         {
@@ -562,24 +565,32 @@ namespace UnityEngine.XR.Hands.Capture.Playback
                 || handCaptureSnapshot.TryGetHand(preferredUpdateType.GetOtherUpdateType(), Allocator.Temp, out hand);
         }
 
-        internal bool TryGetAimPose(ref Pose aimPose) => m_GestureHandler?.TryGetAimPose(ref aimPose) ?? false;
+        internal bool TryGetCommonGesturesState(out XRCommonHandGesturesState commonGestures) => m_GestureHandler.TryGetCommonGesturesState(out commonGestures);
 
-        internal bool TryGetAimActivateValue(ref float aimActivateValue) => m_GestureHandler?.TryGetAimActivateValue(ref aimActivateValue) ?? false;
+        internal bool TryGetAimPose(out Pose aimPose) => m_GestureHandler.TryGetAimPose(out aimPose);
 
-        internal bool TryGetGraspValue(ref float graspValue) => m_GestureHandler?.TryGetGraspValue(ref graspValue) ?? false;
+        internal bool TryGetAimActivateValue(out float aimActivateValue) => m_GestureHandler.TryGetAimActivateValue(out aimActivateValue);
 
-        internal bool TryGetGripPose(ref Pose gripPose) => m_GestureHandler?.TryGetGripPose(ref gripPose) ?? false;
+        internal bool TryGetAimActivatedState(out bool isAimActivated) => m_GestureHandler.TryGetAimActivatedState(out isAimActivated);
 
-        internal bool TryGetPinchPose(ref Pose pinchPose) => m_GestureHandler?.TryGetPinchPose(ref pinchPose) ?? false;
+        internal bool TryGetGraspValue(out float graspValue) => m_GestureHandler.TryGetGraspValue(out graspValue);
 
-        internal bool TryGetPinchValue(ref float pinchValue) => m_GestureHandler?.TryGetPinchValue(ref pinchValue) ?? false;
+        internal bool TryGetGraspFirmState(out bool isGraspFirm) => m_GestureHandler.TryGetGraspFirmState(out isGraspFirm);
 
-        internal bool TryGetPokePose(ref Pose pokePose) => m_GestureHandler?.TryGetPokePose(ref pokePose) ?? false;
+        internal bool TryGetGripPose(out Pose gripPose) => m_GestureHandler.TryGetGripPose(out gripPose);
+
+        internal bool TryGetPinchPose(out Pose pinchPose) => m_GestureHandler.TryGetPinchPose(out pinchPose);
+
+        internal bool TryGetPinchValue(out float pinchValue) => m_GestureHandler.TryGetPinchValue(out pinchValue);
+
+        internal bool TryGetPinchTouchedState(out bool isPinched) => m_GestureHandler.TryGetPinchTouchedState(out isPinched);
+
+        internal bool TryGetPokePose(out Pose pokePose) => m_GestureHandler.TryGetPokePose(out pokePose);
 
         internal XRDetectedHandMeshLayout detectedHandMeshLayout
             => m_SourceCaptureSequence?.detectedHandMeshLayout ?? XRDetectedHandMeshLayout.Unknown;
 
-        internal bool TryGetAimState(ref XRHandAimState aimState) => m_GestureHandler?.TryGetAimState(ref aimState) ?? false;
+        internal bool TryGetAimState(out XRHandAimState aimState) => m_GestureHandler.TryGetAimState(out aimState);
 
         void ReflectOptionsToHandlers()
         {
@@ -712,6 +723,6 @@ namespace UnityEngine.XR.Hands.Capture.Playback
 
         IPlaybackCoordinateTransform m_CoordinateTransform;
         IPlaybackTimeController m_TimeController;
-        PlaybackGestureHandler m_GestureHandler;
+        readonly PlaybackGestureHandler m_GestureHandler;
     }
 }

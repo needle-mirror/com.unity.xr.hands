@@ -3,12 +3,18 @@ using UnityEngine.SubsystemsImplementation;
 using UnityEngine.XR.Hands.Capture;
 using UnityEngine.XR.Hands.Capture.Playback;
 using UnityEngine.XR.Hands.ProviderImplementation;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands
 {
     /// <summary>
     /// Describes the capabilities of an <see cref="XRHandSubsystem"/>.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     public class XRHandSubsystemDescriptor
         : SubsystemDescriptorWithProvider<XRHandSubsystem, XRHandSubsystemProvider>
     {

@@ -10,13 +10,12 @@ The XR Hands package defines an API that allows you to access hand tracking data
 The XR Hand package provides:
 
 * [XRHandSubsystem](xref:UnityEngine.XR.Hands.XRHandSubsystem): defines the XR subsystem interface for hand  tracking data.
-* [OpenXR HandTracking feature](xref:xrhands-openxr-hands-feature): this feature implements the `XRHandSubsystem` for the OpenXR provider plug-in. This means that you can access hand data if you have both the OpenXR and this XR Hand packages installed in a project. Other provider plug-ins must be updated to implement the XRHandSubsystem before you can access hand data when using them.
-* [Open XR Meta Aim Hand feature](xref:xrhands-meta-aim-feature): this feature provides data from the XR_FB_hand_tracking_aim  extension to the OpenXR specification. This extension provides basic gesture recognition.
+* [OpenXR Hand Tracking Subsystem feature](xref:xrhands-openxr-hands-feature): this feature implements the `XRHandSubsystem` for the OpenXR provider plug-in. This means that you can access hand data if you have both the OpenXR and this XR Hand packages installed in a project. Other provider plug-ins must be updated to implement the XRHandSubsystem before you can access hand data when using them.
+* [OpenXR features](xref:xrhands-openxr-features): a set of hand-related features this package implements for the OpenXR provider plug-in, including the hand tracking data source, hand joints motion range, and the Meta hand tracking aim, frequency hint, and wide motion mode features.
 * [XRHand struct](xref:UnityEngine.XR.Hands.XRHand): the data for an individual tracked hand.
 * [XRHandJoint struct](xref:UnityEngine.XR.Hands.XRHandJoint): the data for an individual joint or other tracked point of the hand.
-* [MetaAimHand class](xref:UnityEngine.XR.Hands.MetaAimHand): the pinch and aim gesture data from the Meta Aim hand OpenXR feature.
 
-Refer to [Hand tracking data](xref:xrhands-tracking-data) and [Hand Gestures](xref:xrhands-custom-gestures) for more information about using hand data in an application.
+Refer to [Hand tracking data](xref:xrhands-tracking-data) and [Custom gestures](xref:xrhands-custom-gestures) for more information about using hand data in an application.
 
 > [!NOTE]
 > If you are implementing hand tracking for a Unity provider plug-in, see [Implement a provider](xref:xrhands-implement-a-provider). If you are intercepting hand tracking data to filter or process it before it's reported to the caller, see [Process joints](xref:xrhands-process-joints).

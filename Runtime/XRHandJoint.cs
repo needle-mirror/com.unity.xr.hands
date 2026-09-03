@@ -35,9 +35,11 @@ namespace UnityEngine.XR.Hands
         /// <summary>
         /// Represents which tracking data is valid.
         /// </summary>
-        /// <value>A flag is set for each valid type of data. If the
+        /// <value>A flag is set for each valid type of data.</value>
+        /// <remarks>
         /// The <see cref="XRHandJointTrackingState.WillNeverBeValid"/> flag is set
-        /// when this joint ID isn't supported by the hand data provider.</value>
+        /// when this joint ID isn't supported by the hand data provider.
+        /// </remarks>
         public XRHandJointTrackingState trackingState => m_TrackingState;
 
         /// <summary>

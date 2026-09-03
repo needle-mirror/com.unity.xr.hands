@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using Unity.XR.CoreUtils.Bindings.Variables;
 using UnityEngine.Events;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.Hands
 {
@@ -34,6 +37,9 @@ namespace UnityEngine.XR.Hands
     /// Component that subscribes to hand tracking events from the <see cref="XRHandSubsystem"/> for a particular
     /// <see cref="Handedness"/> and sends UnityEvents for tracking updates.
     /// </summary>
+#if UNITY_6000_5_OR_NEWER
+    [NoAutoStaticsCleanup]
+#endif
     [HelpURL(XRHelpURLConstants.k_XRHandTrackingEvents)]
     public class XRHandTrackingEvents : MonoBehaviour
     {
