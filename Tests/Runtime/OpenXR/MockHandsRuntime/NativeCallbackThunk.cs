@@ -5,7 +5,7 @@ using Unity.Scripting.LifecycleManagement;
 using System;
 using System.Runtime.InteropServices;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
+namespace UnityEngine.XR.Hands.OpenXR.MockHandsRuntime.Tests
 {
     /// <summary>
     /// Base class for implementing a native entry point that manages delegate lifetime

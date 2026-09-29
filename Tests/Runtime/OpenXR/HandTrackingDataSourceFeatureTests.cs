@@ -4,20 +4,21 @@ using Unity.Scripting.LifecycleManagement;
 #if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
 using System.Collections;
 using NUnit.Framework;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.Scripting.APIUpdating;
 using UnityEngine.TestTools;
 using UnityEngine.XR.Hands.OpenXR;
-using UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime;
-using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.XR.Hands.OpenXR.MockHandsRuntime.Tests;
 using UnityEngine.XR.OpenXR.NativeTypes;
-
 using XrHandTrackerEXT = System.UInt64;
 using XrSession = System.UInt64;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR
+namespace UnityEngine.XR.Hands.OpenXR.Tests
 {
 #if UNITY_6000_5_OR_NEWER
     [NoAutoStaticsCleanup]
 #endif
+    [MovedFrom("UnityEngine.XR.Hands.Tests.OpenXR")]
     public class HandTrackingDataSourceFeatureTests : OpenXRHandTrackingTestFixture
     {
         MockHandsEnvironment m_MockEnvironment;

@@ -26,6 +26,13 @@ class TestHandProvider : XRHandSubsystemProvider
     public CommonGestureBehavior commonGestureBehavior { get; set; }
     public override bool canSurfaceCommonPoseData => commonGestureBehavior.AreCoreCommonGesturesEnabled();
 
+    public bool unextrapolatedPosesSupported { get; set; }
+    public override bool canSurfaceUnextrapolatedPoses => unextrapolatedPosesSupported;
+
+    public bool unextrapolatedPosesTracked { get; set; } = true;
+    public long? unextrapolatedCaptureTime { get; set; } = TestHandData.unextrapolatedCaptureTime;
+    public int numTryUpdateUnextrapolatedPosesCalls { get; private set; }
+
     public int numStartCalls { get; private set; }
     public int numStopCalls { get; private set; }
     public int numDestroyCalls { get; private set; }
@@ -109,6 +116,37 @@ class TestHandProvider : XRHandSubsystemProvider
             successFlags &= ~XRHandSubsystem.UpdateSuccessFlags.RightHandJoints & ~XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose;
 
         return successFlags;
+    }
+
+    public override XRHandSubsystem.UpdateSuccessFlags TryUpdateUnextrapolatedPoses(
+        Handedness handedness,
+        ref Pose rootPose,
+        NativeArray<XRHandJoint> joints,
+        out long? captureTime)
+    {
+        ++numTryUpdateUnextrapolatedPosesCalls;
+        captureTime = unextrapolatedCaptureTime;
+
+        if (!unextrapolatedPosesTracked)
+            return XRHandSubsystem.UpdateSuccessFlags.None;
+
+        var isLeftHand = handedness == Handedness.Left;
+        rootPose = TestHandData.ToUnextrapolated(isLeftHand ? TestHandData.leftRoot : TestHandData.rightRoot);
+
+        var extrapolatedJointPoses = isLeftHand ? TestHandData.leftHand : TestHandData.rightHand;
+        for (var jointIndex = 0; jointIndex < TestHandData.jointsInLayout.Length; ++jointIndex)
+        {
+            if (!TestHandData.jointsInLayout[jointIndex])
+                continue;
+
+            joints[jointIndex] = XRHandProviderUtility.CreateJoint(
+                handedness,
+                XRHandJointTrackingState.Pose | XRHandJointTrackingState.HighFidelityPose,
+                XRHandJointIDUtility.FromIndex(jointIndex),
+                TestHandData.ToUnextrapolated(extrapolatedJointPoses[jointIndex]));
+        }
+
+        return handedness.ToUpdateSuccessFlags();
     }
 
     internal override bool TryGetCommonGesturesState(Handedness handedness, out XRCommonHandGesturesState commonGestures)

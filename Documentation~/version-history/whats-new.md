@@ -20,6 +20,12 @@ The Meta Hand Tracking Wide Motion Mode OpenXR feature enables inference-based h
 
 For more information, refer to [Meta Hand Tracking Wide Motion Mode OpenXR feature](xref:xrhands-meta-wide-motion-feature).
 
+### Meta Hand Tracking Unextrapolated Poses OpenXR feature
+
+The Meta Hand Tracking Unextrapolated Poses OpenXR feature surfaces hand joint poses that the runtime has not extrapolated, along with the time at which they were captured. You can enable this feature when your project needs the poses as the runtime captured them, together with the time of capture, rather than the runtime's estimate of where the hands are now. The default hand data is unchanged, so hand tracking already in your project continues to behave exactly as before.
+
+For more information, refer to [Meta Hand Tracking Unextrapolated Poses OpenXR feature](xref:xrhands-meta-unextrapolated-poses-feature).
+
 
 # What's new in version 1.9
 

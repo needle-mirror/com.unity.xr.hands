@@ -89,7 +89,44 @@ namespace UnityEngine.XR.Hands
         /// <returns>
         /// String representation of the value.
         /// </returns>
-        public override string ToString() => m_Handedness + " XRHand";
+        public override string ToString() =>
+            (m_ExtrapolationMode == XRHandExtrapolation.Unextrapolated ? "Unextrapolated " : string.Empty)
+            + m_Handedness + " XRHand";
+
+        /// <summary>
+        /// Which extrapolation mode produced the poses in this hand.
+        /// </summary>
+        /// <seealso cref="XRHandSubsystem.GetHand(Handedness, XRHandExtrapolation)"/>
+        public XRHandExtrapolation extrapolationMode => m_ExtrapolationMode;
+
+        /// <summary>
+        /// Retrieves the time at which these poses were captured.
+        /// </summary>
+        /// <param name="timestamp">
+        /// Assigned the capture time on the provider's clock, if successful.
+        /// Set to zero, if unsuccessful.
+        /// </param>
+        /// <returns>
+        /// Returns <c>true</c> if successful and the capture time was
+        /// filled out, returns <c>false</c> otherwise.
+        /// </returns>
+        /// <remarks>
+        /// The <paramref name="timestamp"/> is only available on hands retrieved with
+        /// <see cref="XRHandExtrapolation.Unextrapolated"/>, and only once the provider has
+        /// reported a capture time on a tracked update. It advances only while the hand is
+        /// tracked, otherwise it returns the time of the last tracked poses.
+        /// </remarks>
+        public bool TryGetTimestamp(out long timestamp)
+        {
+            if (!m_Timestamp.HasValue)
+            {
+                timestamp = 0;
+                return false;
+            }
+
+            timestamp = m_Timestamp.Value;
+            return true;
+        }
 
         /// <summary>
         /// Tests for equality.
@@ -104,7 +141,9 @@ namespace UnityEngine.XR.Hands
             return m_Joints == other.m_Joints &&
                 m_RootPose == other.m_RootPose &&
                 m_Handedness == other.m_Handedness &&
-                m_IsTracked == other.m_IsTracked;
+                m_IsTracked == other.m_IsTracked &&
+                m_ExtrapolationMode == other.m_ExtrapolationMode &&
+                m_Timestamp == other.m_Timestamp;
         }
 
         /// <summary>
@@ -130,6 +169,8 @@ namespace UnityEngine.XR.Hands
                 hash = hash * 486187739 + m_RootPose.GetHashCode();
                 hash = hash * 486187739 + m_Handedness.GetHashCode();
                 hash = hash * 486187739 + isTracked.GetHashCode();
+                hash = hash * 486187739 + m_ExtrapolationMode.GetHashCode();
+                hash = hash * 486187739 + m_Timestamp.GetHashCode();
                 return hash;
             }
         }
@@ -151,23 +192,36 @@ namespace UnityEngine.XR.Hands
         public static bool operator !=(XRHand lhs, XRHand rhs) => !lhs.Equals(rhs);
 
         internal XRHand(Allocator allocator, Handedness handedness, LifetimeType lifetimeType)
+            : this(allocator, handedness, lifetimeType, XRHandExtrapolation.Extrapolated, false, Pose.identity)
         {
-            m_Joints = new NativeArray<XRHandJoint>(Constants.k_NumJointsPerHand, allocator);
-            m_RootPose = Pose.identity;
-            m_Handedness = handedness;
-            m_IsTracked = false;
+        }
 
-            m_LifetimeType = lifetimeType;
+        internal XRHand(Allocator allocator, Handedness handedness, LifetimeType lifetimeType, XRHandExtrapolation extrapolationMode)
+            : this(allocator, handedness, lifetimeType, extrapolationMode, false, Pose.identity)
+        {
         }
 
         internal XRHand(Handedness handedness, Allocator allocator, bool isTracked, in Pose rootPose)
+            : this(allocator, handedness, LifetimeType.FreelyDispose, XRHandExtrapolation.Extrapolated, isTracked, rootPose)
+        {
+        }
+
+        XRHand(
+            Allocator allocator,
+            Handedness handedness,
+            LifetimeType lifetimeType,
+            XRHandExtrapolation extrapolationMode,
+            bool isTracked,
+            in Pose rootPose)
         {
             m_Joints = new NativeArray<XRHandJoint>(Constants.k_NumJointsPerHand, allocator);
             m_RootPose = rootPose;
             m_Handedness = handedness;
             m_IsTracked = isTracked;
+            m_ExtrapolationMode = extrapolationMode;
+            m_Timestamp = null;
 
-            m_LifetimeType = LifetimeType.FreelyDispose;
+            m_LifetimeType = lifetimeType;
         }
 
         internal void ApplyJointLayout(NativeArray<bool> jointsInLayout)
@@ -195,6 +249,8 @@ namespace UnityEngine.XR.Hands
 
         internal NativeArray<XRHandJoint> m_Joints;
         internal Pose m_RootPose;
+        internal long? m_Timestamp;
+        readonly XRHandExtrapolation m_ExtrapolationMode;
         readonly Handedness m_Handedness;
         bool m_IsTracked;
 

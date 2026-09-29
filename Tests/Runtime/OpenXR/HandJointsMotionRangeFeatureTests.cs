@@ -6,18 +6,20 @@ using System.Collections;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 using UnityEngine.XR.Hands.OpenXR;
-using UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime;
+using UnityEngine.XR.Hands.OpenXR.MockHandsRuntime.Tests;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.XR.OpenXR.NativeTypes;
 
 using XrHandTrackerEXT = System.UInt64;
 using XrSession = System.UInt64;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR
+namespace UnityEngine.XR.Hands.OpenXR.Tests
 {
 #if UNITY_6000_5_OR_NEWER
     [NoAutoStaticsCleanup]
 #endif
+    [MovedFrom("UnityEngine.XR.Hands.Tests.OpenXR")]
     public class HandJointsMotionRangeFeatureTests : OpenXRHandTrackingTestFixture
     {
         MockHandsEnvironment m_MockEnvironment;

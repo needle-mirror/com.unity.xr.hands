@@ -4,7 +4,7 @@ using UnityEngine.XR.Hands.OpenXR;
 using UnityEngine.XR.Hands.OpenXR.NativeInterop;
 using UnityEngine.XR.OpenXR.NativeTypes;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
+namespace UnityEngine.XR.Hands.OpenXR.MockHandsRuntime.Tests
 {
     /// <summary>
     /// Mock extension struct for testing chain persistence.

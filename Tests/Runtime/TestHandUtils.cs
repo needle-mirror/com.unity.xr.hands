@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.SubsystemsImplementation.Extensions;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.Capture.Playback;
 using Is = Unity.XR.Hands.Tests.NUnitExtensions.Is;
@@ -187,6 +188,18 @@ static class TestHandUtils
         AssertAreApproximatelyEqual(expected.position, actual.position, message);
         AssertAreApproximatelyEqual(expected.rotation, actual.rotation, message);
     }
+
+    public static readonly Handedness[] handednessOptions =
+    {
+        Handedness.Left,
+        Handedness.Right
+    };
+
+    public static readonly XRHandExtrapolation[] extrapolationOptions =
+    {
+        XRHandExtrapolation.Extrapolated,
+        XRHandExtrapolation.Unextrapolated
+    };
 
     public static XRHandSubsystem CreateTestSubsystem()
     {

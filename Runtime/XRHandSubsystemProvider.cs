@@ -118,6 +118,53 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         public virtual bool canSurfaceCommonPoseData => false;
 
         /// <summary>
+        /// Whether this provider can surface unextrapolated hand joint poses.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this provider can surface unextrapolated hand joint poses,
+        /// <c>false</c> otherwise. Defaults to <c>false</c>.
+        /// </value>
+        /// <remarks>
+        /// A provider that returns <c>true</c> must override <see cref="TryUpdateUnextrapolatedPoses"/>.
+        /// While <c>false</c>, <see cref="XRHandSubsystem.TryGetHand(Handedness, XRHandExtrapolation, out XRHand)"/>
+        /// returns <c>false</c> for <see cref="XRHandExtrapolation.Unextrapolated"/>.
+        /// </remarks>
+        /// <seealso cref="TryUpdateUnextrapolatedPoses"/>
+        public virtual bool canSurfaceUnextrapolatedPoses => false;
+
+        /// <summary>
+        /// Fills out unextrapolated joint poses for the given <see cref="Handedness"/>.
+        /// </summary>
+        /// <remarks>
+        /// Will only be called if <see cref="canSurfaceUnextrapolatedPoses"/> is enabled,
+        /// and only during an <see cref="XRHandSubsystem.UpdateType.Dynamic"/> update.
+        /// </remarks>
+        /// <param name="handedness">Which hand to retrieve poses for.</param>
+        /// <param name="rootPose">The root pose to fill out.</param>
+        /// <param name="joints">
+        /// The joint array to fill out. Contains the hand's joint data from the previous update,
+        /// so you don't need to fill out a joint whose last known tracking data is still valid.
+        /// </param>
+        /// <param name="captureTime">
+        /// The time at which these poses were captured, on the provider's clock, or
+        /// <c>null</c> if the provider cannot report it.
+        /// </param>
+        /// <returns>
+        /// Returns the flags describing which data was updated successfully for the
+        /// requested hand.
+        /// </returns>
+        /// <seealso cref="canSurfaceUnextrapolatedPoses"/>
+        public virtual XRHandSubsystem.UpdateSuccessFlags TryUpdateUnextrapolatedPoses(
+            Handedness handedness,
+            ref Pose rootPose,
+            NativeArray<XRHandJoint> joints,
+            out long? captureTime)
+        {
+            captureTime = null;
+            return XRHandSubsystem.UpdateSuccessFlags.None;
+        }
+
+        /// <summary>
         /// Gets the common gestures state for the given <see cref="Handedness"/>.
         /// Will only be called if <see cref="canSurfaceCommonPoseData"/> is enabled.
         /// </summary>

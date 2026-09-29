@@ -16,7 +16,7 @@ namespace UnityEditor.XR.Hands.Tests
                 "Unobstructed must equal XR_HAND_TRACKING_DATA_SOURCE_UNOBSTRUCTED_EXT (1).");
             Assert.AreEqual(2, (int)HandTrackingDataSource.Controller,
                 "Controller must equal XR_HAND_TRACKING_DATA_SOURCE_CONTROLLER_EXT (2).");
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
             Assert.AreEqual(1000695000, (int)HandTrackingDataSource.UnobstructedWideMotion,
                 "UnobstructedWideMotion must equal XR_HAND_TRACKING_DATA_SOURCE_UNOBSTRUCTED_WIDE_MOTION_META (1000695000).");
 #endif
@@ -133,7 +133,18 @@ namespace UnityEditor.XR.Hands.Tests
             }
         }
 
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_2_OR_NEWER
+        [Test]
+        public void MetaHandTrackingUnextrapolatedPoses_FeatureId_MatchesOpenXRFeatureAttribute()
+        {
+            var attr = typeof(MetaHandTrackingUnextrapolatedPoses).GetCustomAttribute<OpenXRFeatureAttribute>();
+            Assert.IsNotNull(attr, "MetaHandTrackingUnextrapolatedPoses should have an OpenXRFeature attribute.");
+            Assert.AreEqual(MetaHandTrackingUnextrapolatedPoses.featureId, attr.FeatureId,
+                "The OpenXRFeature attribute FeatureId should match the feature's featureId constant.");
+        }
+#endif // OPENXR_1_19_0_PRE_2_OR_NEWER
+
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
         [Test]
         public void MetaHandTrackingWideMotionMode_FeatureId_MatchesOpenXRFeatureAttribute()
         {

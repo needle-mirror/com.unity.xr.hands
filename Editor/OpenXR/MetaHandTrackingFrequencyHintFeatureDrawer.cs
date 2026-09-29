@@ -1,4 +1,4 @@
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
 
 using UnityEditor;
 using UnityEngine;
@@ -34,4 +34,4 @@ namespace UnityEditor.XR.Hands.OpenXR
     }
 }
 
-#endif // OPENXR_1_19_OR_NEWER
+#endif // OPENXR_1_19_0_PRE_1_OR_NEWER

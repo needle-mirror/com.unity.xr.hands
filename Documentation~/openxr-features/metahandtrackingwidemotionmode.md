@@ -20,7 +20,7 @@ When you enable this feature, it automatically configures the [Hand Tracking Dat
 
 To use the Meta Hand Tracking Wide Motion Mode feature, your project must meet the following requirements:
 
-* Install the [OpenXR package](https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.19) `1.19.0` or newer.
+* Install the [OpenXR package](https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.19) `1.19.0-pre.1` or newer.
 * Enable the [Hand Tracking Subsystem](xref:xrhands-openxr-hands-feature) feature and the [Hand Tracking Data Source](xref:xrhands-openxr-data-source-feature) feature. Validation rules alert you if either is missing.
 
 ### Android manifest requirements

@@ -50,40 +50,40 @@ namespace UnityEngine.XR.Hands.Meshing
         XRHandMeshData m_LeftHand;
         XRHandMeshData m_RightHand;
     }
+}
 
-    namespace ProviderImplementation
+namespace UnityEngine.XR.Hands.Meshing.ProviderImplementation
+{
+    /// <summary>
+    /// Contains extensions to <see cref="XRHandMeshData"/> relevant
+    /// to supplying data when <see cref="XRHandSubsystem.TryGetMeshData"/> is called.
+    /// </summary>
+    public static class XRHandMeshDataQueryResultExtensions
     {
         /// <summary>
-        /// Contains extensions to <see cref="XRHandMeshData"/> relevant
-        /// to supplying data when <see cref="XRHandSubsystem.TryGetMeshData"/> is called.
+        /// Flush <see cref="XRHandMeshData"/> changes.
         /// </summary>
-        public static class XRHandMeshDataQueryResultExtensions
+        /// <param name="result">
+        /// Mesh data query result to flush mesh data to.
+        /// </param>
+        /// <param name="meshData">
+        /// Mesh data to flush to the query result.
+        /// </param>
+        /// <remarks>
+        /// You should call this for each hand that has valid data. In
+        /// other words,i.e., if both hands have any valid data, this
+        /// should be called with both your altered copies of
+        /// <see cref="XRHandMeshDataQueryResult.leftHand"/> and
+        /// <see cref="XRHandMeshDataQueryResult.rightHand"/>.
+        /// </remarks>
+        public static void FlushChanges(this ref XRHandMeshDataQueryResult result, XRHandMeshData meshData)
         {
-            /// <summary>
-            /// Flush <see cref="XRHandMeshData"/> changes.
-            /// </summary>
-            /// <param name="result">
-            /// Mesh data query result to flush mesh data to.
-            /// </param>
-            /// <param name="meshData">
-            /// Mesh data to flush to the query result.
-            /// </param>
-            /// <remarks>
-            /// You should call this for each hand that has valid data. In
-            /// other words,i.e., if both hands have any valid data, this
-            /// should be called with both your altered copies of
-            /// <see cref="XRHandMeshDataQueryResult.leftHand"/> and
-            /// <see cref="XRHandMeshDataQueryResult.rightHand"/>.
-            /// </remarks>
-            public static void FlushChanges(this ref XRHandMeshDataQueryResult result, XRHandMeshData meshData)
-            {
-                if (meshData.handedness == Handedness.Left)
-                    result.leftHand = meshData;
-                else if (meshData.handedness == Handedness.Right)
-                    result.rightHand = meshData;
-                else
-                    throw new ArgumentException("Invalid XRHandMeshData object - you should only set data on and flush one retrieved from a XRHandMeshDataQueryResult!", nameof(meshData));
-            }
+            if (meshData.handedness == Handedness.Left)
+                result.leftHand = meshData;
+            else if (meshData.handedness == Handedness.Right)
+                result.rightHand = meshData;
+            else
+                throw new ArgumentException("Invalid XRHandMeshData object - you should only set data on and flush one retrieved from a XRHandMeshDataQueryResult!", nameof(meshData));
         }
     }
 }

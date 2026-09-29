@@ -12,12 +12,6 @@ using UnityEngine.XR.Hands.ProviderImplementation;
 
 class Tests
 {
-    static readonly Handedness[] s_HandednessOptions =
-    {
-        Handedness.Left,
-        Handedness.Right
-    };
-
     [Test]
     public void TestHandProcessingUtilHasFlagSameAsBitwiseCheck()
     {
@@ -467,7 +461,7 @@ class Tests
     }
 
     [UnityTest]
-    public IEnumerator CommonGesturePoseUpdatesXRHandDevice([ValueSource(nameof(s_HandednessOptions))] Handedness handedness)
+    public IEnumerator CommonGesturePoseUpdatesXRHandDevice([ValueSource(typeof(TestHandUtils), nameof(TestHandUtils.handednessOptions))] Handedness handedness)
     {
 #if ENABLE_INPUT_SYSTEM
         Assume.That(handedness, Is.Not.EqualTo(Handedness.Invalid));
@@ -596,7 +590,7 @@ class Tests
     }
 
     [UnityTest]
-    public IEnumerator LegacyJointRecognitionPoseUpdatesXRHandDevice([ValueSource(nameof(s_HandednessOptions))] Handedness handedness)
+    public IEnumerator LegacyJointRecognitionPoseUpdatesXRHandDevice([ValueSource(typeof(TestHandUtils), nameof(TestHandUtils.handednessOptions))] Handedness handedness)
     {
 #if ENABLE_INPUT_SYSTEM
         Assume.That(handedness, Is.Not.EqualTo(Handedness.Invalid));
@@ -711,7 +705,7 @@ class Tests
     }
 
     [UnityTest]
-    public IEnumerator ConfigurationUpdateResetsXRHandDevice([ValueSource(nameof(s_HandednessOptions))] Handedness handedness)
+    public IEnumerator ConfigurationUpdateResetsXRHandDevice([ValueSource(typeof(TestHandUtils), nameof(TestHandUtils.handednessOptions))] Handedness handedness)
     {
 #if ENABLE_INPUT_SYSTEM
         Assume.That(handedness, Is.Not.EqualTo(Handedness.Invalid));
@@ -823,7 +817,7 @@ class Tests
     }
 
     [UnityTest]
-    public IEnumerator ConfigurationUpdateWorksWithTrackingStateAction([ValueSource(nameof(s_HandednessOptions))] Handedness handedness)
+    public IEnumerator ConfigurationUpdateWorksWithTrackingStateAction([ValueSource(typeof(TestHandUtils), nameof(TestHandUtils.handednessOptions))] Handedness handedness)
     {
 #if ENABLE_INPUT_SYSTEM
         Assume.That(handedness, Is.Not.EqualTo(Handedness.Invalid));

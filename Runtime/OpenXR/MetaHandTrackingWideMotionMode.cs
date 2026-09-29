@@ -1,4 +1,4 @@
-#if OPENXR_1_19_OR_NEWER || PACKAGE_DOCS_GENERATION
+#if OPENXR_1_19_0_PRE_1_OR_NEWER || PACKAGE_DOCS_GENERATION
 
 using System.Collections.Generic;
 using UnityEngine.XR.OpenXR;
@@ -160,4 +160,4 @@ namespace UnityEngine.XR.Hands.OpenXR
     }
 }
 
-#endif // OPENXR_1_19_OR_NEWER || PACKAGE_DOCS_GENERATION
+#endif // OPENXR_1_19_0_PRE_1_OR_NEWER || PACKAGE_DOCS_GENERATION

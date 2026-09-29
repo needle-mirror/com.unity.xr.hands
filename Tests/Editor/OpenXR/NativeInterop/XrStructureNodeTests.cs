@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine.TestTools;
 using UnityEngine.XR.Hands.OpenXR.NativeInterop;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR.NativeInterop
+namespace UnityEngine.XR.Hands.OpenXR.NativeInterop.Tests
 {
     struct TooSmallStruct
     {

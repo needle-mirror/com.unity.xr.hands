@@ -39,7 +39,7 @@ handSubsystemManager.enabled = true;
 
 You can toggle hand tracking on and off at any time by enabling and disabling the component:
 
-[!code-cs [subsystem-manager-sample](../../DocCodeSamples.Tests/SubsystemManagerSample.cs)]
+[!code-cs [subsystem-manager-sample](../../Tests/Editor/DocCodeSamples/SubsystemManagerSample.cs)]
 
 ## Additional resources
 

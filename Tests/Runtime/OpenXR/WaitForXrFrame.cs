@@ -3,7 +3,7 @@ using System.Diagnostics;
 using NUnit.Framework;
 using UnityEngine.XR.OpenXR.Features.Mock;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR
+namespace UnityEngine.XR.Hands.OpenXR.Tests
 {
     /// <summary>
     /// Custom yield instruction that waits for xrEndFrame to be called within OpenXR.

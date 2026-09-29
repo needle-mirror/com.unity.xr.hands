@@ -12,7 +12,7 @@ The runtime value of [XRHandSubsystem.handSubsystemConfiguration](xref:UnityEngi
 
 A simple way to change from the default [Legacy](#legacy) mode to [Common Gestures](#common-gestures) mode is to add the following component to a GameObject:
 
-[!code-cs [update_hands_configuration_sample](../../DocCodeSamples.Tests/UpdateHandsConfigurationSample.cs)]
+[!code-cs [update_hands_configuration_sample](../../Tests/Editor/DocCodeSamples/UpdateHandsConfigurationSample.cs)]
 
 The Common Gestures mode is the recommended path to use for your OpenXR project. The Legacy mode is default to avoid breaking existing projects which already made use of the `<XRHandDevice>` and the locations of each of the poses, and for maximum compatibility in projects which are not targeting OpenXR which may not support common gestures.
 

@@ -13,7 +13,7 @@ using UnityEngine.XR.OpenXR.TestTooling;
 using XrHandTrackerEXT = System.UInt64;
 using XrSession = System.UInt64;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
+namespace UnityEngine.XR.Hands.OpenXR.MockHandsRuntime.Tests
 {
 #if UNITY_6000_5_OR_NEWER
     [NoAutoStaticsCleanup]
@@ -27,7 +27,7 @@ namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
         // Current version of XR_EXT_hand_tracking in the OpenXR spec.
         const uint k_DefaultHandTrackingExtensionVersion = 4;
 
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
         const string k_HandTrackingFrequencyHintExtensionName = "XR_META_hand_tracking_frequency_hint";
         const uint k_DefaultHandTrackingFrequencyHintExtensionVersion = 1;
 #endif
@@ -45,14 +45,14 @@ namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
             Marshal.GetFunctionPointerForDelegate(s_SystemPropertiesDelegate);
 
         readonly MockOpenXREnvironment m_Environment;
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
         bool m_HandTrackingFrequencyHintEnabled;
 #endif
 
         public CreateHandTrackerThunk createHandTracker { get; }
         public LocateHandJointsThunk locateHandJoints { get; }
         public DestroyHandTrackerThunk destroyHandTracker { get; }
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
         public SetHandTrackingFrequencyHintThunk setHandTrackingFrequencyHint { get; }
 #endif
 
@@ -64,7 +64,7 @@ namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
             createHandTracker = new CreateHandTrackerThunk();
             locateHandJoints = new LocateHandJointsThunk();
             destroyHandTracker = new DestroyHandTrackerThunk();
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
             setHandTrackingFrequencyHint = new SetHandTrackingFrequencyHintThunk();
 #endif
         }
@@ -78,7 +78,7 @@ namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
             RegisterProviderOnce();
         }
 
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
         public void SetUpHandTrackingFrequencyHintExtension(uint version = k_DefaultHandTrackingFrequencyHintExtensionVersion)
         {
             m_Environment.AddSupportedExtension(k_HandTrackingFrequencyHintExtensionName, version);
@@ -113,7 +113,7 @@ namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
             locateHandJoints.Activate();
             destroyHandTracker.Activate();
 
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
             if (m_HandTrackingFrequencyHintEnabled)
             {
                 m_Environment.SetFunctionForInterceptor(
@@ -137,7 +137,7 @@ namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
             locateHandJoints.Deactivate();
             destroyHandTracker.Deactivate();
 
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
             if (m_HandTrackingFrequencyHintEnabled)
                 setHandTrackingFrequencyHint.Deactivate();
 #endif
@@ -151,6 +151,23 @@ namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
         }
 
         public static XrResult SuccessfulDestroyHandTracker(XrHandTrackerEXT tracker) => XrResult.Success;
+
+        public void InstallMocks(
+            LocateHandJointsThunk.Delegate locate,
+            CreateHandTrackerThunk.Delegate create = null,
+            DestroyHandTrackerThunk.Delegate destroy = null)
+        {
+            createHandTracker.mock = create ?? SuccessfulCreateHandTracker;
+            locateHandJoints.mock = locate;
+            destroyHandTracker.mock = destroy ?? SuccessfulDestroyHandTracker;
+        }
+
+        public void ClearMocks()
+        {
+            createHandTracker.mock = null;
+            locateHandJoints.mock = null;
+            destroyHandTracker.mock = null;
+        }
 
         public void Dispose()
         {

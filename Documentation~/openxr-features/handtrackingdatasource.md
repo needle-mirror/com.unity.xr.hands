@@ -16,8 +16,12 @@ The data source can change between frames. You can query which source the runtim
 
 This feature enables the [XR_EXT_hand_tracking_data_source](https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#XR_EXT_hand_tracking_data_source) OpenXR extension. The `XR_EXT_hand_tracking_data_source` extension must be supported by the target device for the **Hand Tracking Data Source** feature to work. If the extension is not supported, then the runtime uses its default behavior to select a data source and the `TryGetExtendedData` method always returns `false`.
 
-You must enable the [Hand Tracking Subsystem](xref:xrhands-openxr-hands-feature) feature to use this **Hand Tracking Data Source** feature. A validation rule will alert you if it is not enabled.
+## Prerequisites
 
+To use the Hand Tracking Data Source feature, your project must meet the following requirements:
+
+* Install the [OpenXR package](https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.18) `1.18.0` or newer.
+* Enable the [Hand Tracking Subsystem](xref:xrhands-openxr-hands-feature) feature. A validation rule alerts you if it isn't enabled.
 
 ## Feature settings
 To access the **Hand Tracking Data Source** settings, click the gear icon next to **Hand Tracking Data Source** in **Project Settings > XR Plug-in Management > OpenXR**.

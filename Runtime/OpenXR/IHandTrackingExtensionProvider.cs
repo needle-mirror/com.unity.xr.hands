@@ -32,6 +32,16 @@ namespace UnityEngine.XR.Hands.OpenXR
         XrStructureChain GetLocateOutputChain(XrHandEXT hand);
 
         /// <summary>
+        /// Returns the secondary locate-input extension chain for the given hand.
+        /// </summary>
+        XrStructureChain GetSecondaryLocateInputChain(XrHandEXT hand);
+
+        /// <summary>
+        /// Returns the secondary locate-output extension chain for the given hand.
+        /// </summary>
+        XrStructureChain GetSecondaryLocateOutputChain(XrHandEXT hand);
+
+        /// <summary>
         /// Registers an extension feature for dispatch callbacks. Registered
         /// features receive <c>OnHandTrackingCreateRequest</c>,
         /// <c>OnLocateHandJointsResult</c>, and lifecycle notifications.

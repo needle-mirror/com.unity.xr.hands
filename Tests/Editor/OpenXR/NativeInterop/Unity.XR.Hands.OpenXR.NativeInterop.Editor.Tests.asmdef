@@ -1,6 +1,6 @@
 {
-    "name": "Unity.XR.Hands.Editor.Tests.OpenXR.NativeInterop",
-    "rootNamespace": "UnityEngine.XR.Hands.Tests.OpenXR.NativeInterop",
+    "name": "Unity.XR.Hands.OpenXR.NativeInterop.Editor.Tests",
+    "rootNamespace": "UnityEngine.XR.Hands.OpenXR.NativeInterop.Tests",
     "references": [
         "Unity.XR.Hands",
         "Unity.XR.OpenXR"

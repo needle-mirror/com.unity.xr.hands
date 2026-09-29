@@ -1,16 +1,16 @@
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 using UnityEngine.XR.Hands.OpenXR;
-using UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime;
+using UnityEngine.XR.Hands.OpenXR.MockHandsRuntime.Tests;
 using UnityEngine.XR.OpenXR.NativeTypes;
 
 using XrHandTrackerEXT = System.UInt64;
 using XrSession = System.UInt64;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR
+namespace UnityEngine.XR.Hands.OpenXR.Tests
 {
     /// <summary>
     /// Integration tests for the <see cref="MetaHandTrackingFrequencyHintFeature"/>

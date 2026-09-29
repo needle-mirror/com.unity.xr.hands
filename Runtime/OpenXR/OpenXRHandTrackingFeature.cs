@@ -265,6 +265,42 @@ namespace UnityEngine.XR.Hands.OpenXR
         }
 
         /// <summary>
+        /// Returns the secondary locate input chain for the specified hand.
+        /// </summary>
+        /// <param name="hand">The hand for which to retrieve the secondary locate input chain.</param>
+        /// <returns>
+        /// The <see cref="XrStructureChain"/> for the specified hand, or <c>null</c>
+        /// when hand tracking extensibility is not available.
+        /// </returns>
+        /// <remarks>
+        /// The secondary locate runs only during <c>Dynamic</c> updates, and only when a
+        /// feature drives it. The return value is not <c>null</c> during any
+        /// <c>OpenXRFeature</c> session callback, from <c>OnSessionCreate</c> through
+        /// <c>OnSessionDestroy</c>.
+        /// </remarks>
+        internal XrStructureChain GetSecondaryLocateInputChain(XrHandEXT hand)
+        {
+            return m_HandExtensionProvider?.GetSecondaryLocateInputChain(hand);
+        }
+
+        /// <summary>
+        /// Returns the secondary locate output chain for the specified hand.
+        /// </summary>
+        /// <param name="hand">The hand for which to retrieve the secondary locate output chain.</param>
+        /// <returns>
+        /// The <see cref="XrStructureChain"/> for the specified hand, or <c>null</c>
+        /// when hand tracking extensibility is not available.
+        /// </returns>
+        /// <remarks>
+        /// Results from the secondary locate are not dispatched to
+        /// <see cref="OnLocateHandJointsResult"/>. Read this chain directly.
+        /// </remarks>
+        internal XrStructureChain GetSecondaryLocateOutputChain(XrHandEXT hand)
+        {
+            return m_HandExtensionProvider?.GetSecondaryLocateOutputChain(hand);
+        }
+
+        /// <summary>
         /// Requests that the hand trackers be destroyed and recreated at the
         /// start of the next Dynamic update.
         /// </summary>

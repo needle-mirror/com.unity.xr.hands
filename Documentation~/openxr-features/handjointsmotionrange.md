@@ -62,13 +62,13 @@ You can read and update the requested hand joints motion range at runtime throug
 
 Use [XRHandSubsystem.TryGetConfiguration&lt;HandJointsMotionRangeConfig&gt;](xref:UnityEngine.XR.Hands.XRHandSubsystem.TryGetConfiguration``1(``0@)) to read the requested motion range for each hand:
 
-[!code-cs [get_hand_joints_motion_range_sample](../../DocCodeSamples.Tests/HandJointsMotionRangeSample.cs#get_hand_joints_motion_range_sample)]
+[!code-cs [get_hand_joints_motion_range_sample](../../Tests/Editor/DocCodeSamples/HandJointsMotionRangeSample.cs#get_hand_joints_motion_range_sample)]
 
 ### Update the configuration
 
 Use [XRHandSubsystem.TryUpdateConfiguration&lt;HandJointsMotionRangeConfig&gt;](xref:UnityEngine.XR.Hands.XRHandSubsystem.TryUpdateConfiguration``1(``0)) to change the motion range. The update takes effect on the next `xrLocateHandJointsEXT` call:
 
-[!code-cs [update_hand_joints_motion_range_sample](../../DocCodeSamples.Tests/HandJointsMotionRangeSample.cs#update_hand_joints_motion_range_sample)]
+[!code-cs [update_hand_joints_motion_range_sample](../../Tests/Editor/DocCodeSamples/HandJointsMotionRangeSample.cs#update_hand_joints_motion_range_sample)]
 
 The method returns `false` if either value isn't a valid [HandJointsMotionRange](xref:UnityEngine.XR.Hands.OpenXR.HandJointsMotionRange) member or if the internal structure chain isn't available.
 

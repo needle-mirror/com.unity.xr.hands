@@ -1,7 +1,7 @@
 #if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
 using UnityEngine.XR.OpenXR.NativeTypes;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR.NativeInterop
+namespace UnityEngine.XR.Hands.OpenXR.NativeInterop.Tests
 {
     /// <summary>
     /// Mock <see cref="XrStructureType"/> constants for testing. Uses high

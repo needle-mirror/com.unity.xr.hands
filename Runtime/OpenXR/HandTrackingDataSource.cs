@@ -25,7 +25,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </summary>
         Controller = 2,
 
-#if OPENXR_1_19_OR_NEWER || PACKAGE_DOCS_GENERATION
+#if OPENXR_1_19_0_PRE_1_OR_NEWER || PACKAGE_DOCS_GENERATION
         /// <summary>
         /// Hand tracking data is derived from inference algorithms that estimate
         /// hand poses when hands are outside the normal camera tracking volume.

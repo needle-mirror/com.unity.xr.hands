@@ -12,7 +12,7 @@ Unity OpenXR provides support for the `XR_META_hand_tracking_frequency_hint` ext
 
 To use the Meta Hand Tracking Frequency Hint feature, your project must meet the following requirements:
 
-* Install the [OpenXR package](https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.19) `1.19.0` or newer.
+* Install the [OpenXR package](https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.19) `1.19.0-pre.1` or newer.
 * Enable the [Hand Tracking Subsystem](xref:xrhands-openxr-hands-feature) feature.
 
 ## Enable the feature

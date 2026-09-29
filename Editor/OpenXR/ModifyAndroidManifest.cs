@@ -120,7 +120,7 @@ namespace UnityEditor.XR.Hands.OpenXR
                     "oculus.software.handtracking",
                     ("required", "false"));
 
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
                 var wideMotionFeature = OpenXRSettings.ActiveBuildTargetInstance.GetFeature<MetaHandTrackingWideMotionMode>();
                 if (wideMotionFeature != null && wideMotionFeature.enabled)
                 {

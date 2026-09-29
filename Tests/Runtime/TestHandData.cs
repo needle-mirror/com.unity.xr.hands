@@ -11,6 +11,16 @@ static class TestHandData
     public static readonly Pose rightRoot;
     public static readonly Pose[] rightHand;
 
+    public const long unextrapolatedCaptureTime = 1234567890L;
+
+    public static readonly Vector3 unextrapolatedPositionOffset = new Vector3(0.05f, -0.02f, 0.01f);
+    public static readonly Quaternion unextrapolatedRotationOffset = Quaternion.Euler(3f, 5f, 7f);
+
+    public static Pose ToUnextrapolated(Pose pose)
+        => new Pose(
+            pose.position + unextrapolatedPositionOffset,
+            pose.rotation * unextrapolatedRotationOffset);
+
     static TestHandData()
     {
         // this uses data captured from a run on OpenXR, so the data layout matches that

@@ -14,6 +14,7 @@ The XR Hands package implements the following hand-related features for applicat
 | [Meta Hand Tracking Aim](xref:xrhands-meta-aim-feature) | Implements the Meta Aim Hand extension to OpenXR. |
 | [Meta Hand Tracking Frequency Hint](xref:xrhands-meta-frequency-hint-feature) | Allows requesting higher frequency hand tracking updates for improved responsiveness. |
 | [Meta Hand Tracking Wide Motion Mode](xref:xrhands-meta-wide-motion-feature) | Enable inference-based hand tracking when hands are outside the camera tracking volume. |
+| [Meta Hand Tracking Unextrapolated Poses](xref:xrhands-meta-unextrapolated-poses-feature) | Surfaces hand joint poses without runtime extrapolation, along with the time at which they were captured. |
 
 The package also lets you augment hand tracking with additional OpenXR extensions:
 

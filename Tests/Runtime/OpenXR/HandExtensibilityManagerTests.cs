@@ -5,17 +5,17 @@ using Unity.Scripting.LifecycleManagement;
 using System.Collections;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
+using UnityEngine.Scripting.APIUpdating;
 using UnityEngine.TestTools;
 using UnityEngine.XR.Hands.OpenXR;
+using UnityEngine.XR.Hands.OpenXR.MockHandsRuntime.Tests;
 using UnityEngine.XR.Hands.OpenXR.NativeInterop;
-using UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime;
 using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.NativeTypes;
-
 using XrHandTrackerEXT = System.UInt64;
 using XrSession = System.UInt64;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR
+namespace UnityEngine.XR.Hands.OpenXR.Tests
 {
     /// <summary>
     /// Integration tests that verify HandExtensibilityManager lifecycle and
@@ -24,6 +24,7 @@ namespace UnityEngine.XR.Hands.Tests.OpenXR
 #if UNITY_6000_5_OR_NEWER
     [NoAutoStaticsCleanup]
 #endif
+    [MovedFrom("UnityEngine.XR.Hands.Tests.OpenXR")]
     public class HandExtensibilityManagerTests : OpenXRHandTrackingTestFixture
     {
         MockHandsEnvironment m_MockEnvironment;
@@ -86,13 +87,29 @@ namespace UnityEngine.XR.Hands.Tests.OpenXR
         public void OnSessionEnd_ClearsChainContents()
         {
             using var manager = new HandExtensibilityManager();
-            manager.GetLocateInputChain(XrHandEXT.Left)
-                .TryAddNode(new XrMockChainTestInfoEXT(0x31415));
+            foreach (var chain in AllChainsOf(manager))
+                chain.TryAddNode(new XrMockChainTestInfoEXT(0x31415));
 
             manager.OnSessionEnd();
 
-            Assert.That(manager.GetLocateInputChain(XrHandEXT.Left).count, Is.EqualTo(0));
+            foreach (var chain in AllChainsOf(manager))
+                Assert.That(chain.count, Is.EqualTo(0));
         }
+
+        static XrStructureChain[] AllChainsOf(HandExtensibilityManager manager)
+            => new[]
+            {
+                manager.GetCreateChain(XrHandEXT.Left),
+                manager.GetCreateChain(XrHandEXT.Right),
+                manager.GetLocateInputChain(XrHandEXT.Left),
+                manager.GetLocateInputChain(XrHandEXT.Right),
+                manager.GetLocateOutputChain(XrHandEXT.Left),
+                manager.GetLocateOutputChain(XrHandEXT.Right),
+                manager.GetSecondaryLocateInputChain(XrHandEXT.Left),
+                manager.GetSecondaryLocateInputChain(XrHandEXT.Right),
+                manager.GetSecondaryLocateOutputChain(XrHandEXT.Left),
+                manager.GetSecondaryLocateOutputChain(XrHandEXT.Right),
+            };
 
         [UnityTest]
         public IEnumerator ChainAccessors_ReturnNonNull_DuringSession()

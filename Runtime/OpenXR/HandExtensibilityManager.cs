@@ -34,12 +34,14 @@ namespace UnityEngine.XR.Hands.OpenXR
         XrStructureChain[] m_CreateChains;
         XrStructureChain[] m_LocateInputChains;
         XrStructureChain[] m_LocateOutputChains;
+        XrStructureChain[] m_SecondaryLocateInputChains;
+        XrStructureChain[] m_SecondaryLocateOutputChains;
 
         readonly List<OpenXRHandTrackingFeature> m_RegisteredFeatures = new();
 
         /// <summary>
-        /// Allocates the six per-hand chains (create, locate-input, locate-output
-        /// for left and right hands).
+        /// Allocates the ten per-hand chains (create, locate-input, locate-output,
+        /// secondary locate-input and secondary locate-output for left and right hands).
         /// </summary>
         public HandExtensibilityManager()
         {
@@ -60,6 +62,18 @@ namespace UnityEngine.XR.Hands.OpenXR
                 new XrStructureChain(),
                 new XrStructureChain(),
             };
+
+            m_SecondaryLocateInputChains = new XrStructureChain[]
+            {
+                new XrStructureChain(),
+                new XrStructureChain(),
+            };
+
+            m_SecondaryLocateOutputChains = new XrStructureChain[]
+            {
+                new XrStructureChain(),
+                new XrStructureChain(),
+            };
         }
 
         /// <summary>
@@ -72,6 +86,8 @@ namespace UnityEngine.XR.Hands.OpenXR
             ClearChains(m_CreateChains);
             ClearChains(m_LocateInputChains);
             ClearChains(m_LocateOutputChains);
+            ClearChains(m_SecondaryLocateInputChains);
+            ClearChains(m_SecondaryLocateOutputChains);
         }
 
         /// <summary>
@@ -91,6 +107,18 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </summary>
         public XrStructureChain GetLocateOutputChain(XrHandEXT hand)
             => m_LocateOutputChains[ToHandIndex(hand)];
+
+        /// <summary>
+        /// Returns the secondary locate-input extension chain for the given hand.
+        /// </summary>
+        public XrStructureChain GetSecondaryLocateInputChain(XrHandEXT hand)
+            => m_SecondaryLocateInputChains[ToHandIndex(hand)];
+
+        /// <summary>
+        /// Returns the secondary locate-output extension chain for the given hand.
+        /// </summary>
+        public XrStructureChain GetSecondaryLocateOutputChain(XrHandEXT hand)
+            => m_SecondaryLocateOutputChains[ToHandIndex(hand)];
 
         /// <inheritdoc/>
         public void Register(OpenXRHandTrackingFeature feature)
@@ -113,7 +141,8 @@ namespace UnityEngine.XR.Hands.OpenXR
 
         ~HandExtensibilityManager()
         {
-            if (m_CreateChains != null || m_LocateInputChains != null || m_LocateOutputChains != null)
+            if (m_CreateChains != null || m_LocateInputChains != null || m_LocateOutputChains != null ||
+                m_SecondaryLocateInputChains != null || m_SecondaryLocateOutputChains != null)
                 Debug.LogError(
                     "HandExtensibilityManager was not disposed. Call Dispose() explicitly before the manager is garbage collected.");
         }
@@ -124,10 +153,14 @@ namespace UnityEngine.XR.Hands.OpenXR
             DisposeChains(m_CreateChains);
             DisposeChains(m_LocateInputChains);
             DisposeChains(m_LocateOutputChains);
+            DisposeChains(m_SecondaryLocateInputChains);
+            DisposeChains(m_SecondaryLocateOutputChains);
 
             m_CreateChains = null;
             m_LocateInputChains = null;
             m_LocateOutputChains = null;
+            m_SecondaryLocateInputChains = null;
+            m_SecondaryLocateOutputChains = null;
             m_RegisteredFeatures.Clear();
 
             GC.SuppressFinalize(this);

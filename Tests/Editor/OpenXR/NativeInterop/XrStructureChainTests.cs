@@ -5,7 +5,7 @@ using UnityEngine.TestTools;
 using UnityEngine.XR.Hands.OpenXR.NativeInterop;
 using UnityEngine.XR.OpenXR.NativeTypes;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR.NativeInterop
+namespace UnityEngine.XR.Hands.OpenXR.NativeInterop.Tests
 {
     [TestFixture]
     unsafe class XrStructureChainTests

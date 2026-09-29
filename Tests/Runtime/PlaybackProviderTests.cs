@@ -10,12 +10,6 @@ using UnityEngine.XR.Hands.Capture.Recording;
 
 class PlaybackProviderTests
 {
-    static readonly Handedness[] s_HandednessOptions =
-    {
-        Handedness.Left,
-        Handedness.Right,
-    };
-
     readonly List<XRHandCaptureSequence> m_CreatedSequences = new List<XRHandCaptureSequence>();
 
     [TearDown]
@@ -62,7 +56,7 @@ class PlaybackProviderTests
         var updateFlags = subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic);
         Assert.That(updateFlags, Is.EqualTo(XRHandSubsystem.UpdateSuccessFlags.All));
 
-        foreach (var handedness in s_HandednessOptions)
+        foreach (var handedness in TestHandUtils.handednessOptions)
         {
             AssertProviderSurfacesCommonPoseData(handedness, provider);
             AssertSubsystemHasCommonPoseData(handedness, subsystem);

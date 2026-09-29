@@ -5,7 +5,7 @@ using UnityEngine.XR.OpenXR.NativeTypes;
 
 using XrHandTrackerEXT = System.UInt64;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
+namespace UnityEngine.XR.Hands.OpenXR.MockHandsRuntime.Tests
 {
     /// <summary>
     /// Exception-safe native callback thunk for <c>xrLocateHandJointsEXT</c>.

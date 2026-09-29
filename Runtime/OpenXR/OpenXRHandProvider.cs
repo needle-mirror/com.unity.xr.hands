@@ -18,6 +18,10 @@ using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features.Interactions;
 #endif
 
+#if OPENXR_1_19_0_PRE_2_OR_NEWER
+using UnityEngine.XR.OpenXR.NativeTypes;
+#endif
+
 namespace UnityEngine.XR.Hands.OpenXR
 {
     /// <summary>
@@ -135,6 +139,63 @@ namespace UnityEngine.XR.Hands.OpenXR
 
             return successFlags;
         }
+
+#if OPENXR_1_19_0_PRE_2_OR_NEWER
+        /// <inheritdoc/>
+        public override bool canSurfaceUnextrapolatedPoses
+        {
+            get
+            {
+                if (m_IsUnextrapolatedPosesExtensionEnabled)
+                    return true;
+
+                m_IsUnextrapolatedPosesExtensionEnabled =
+                    OpenXRRuntime.IsExtensionEnabled(MetaHandTrackingUnextrapolatedPoses.extensionString);
+                return m_IsUnextrapolatedPosesExtensionEnabled;
+            }
+        }
+        bool m_IsUnextrapolatedPosesExtensionEnabled;
+
+        /// <inheritdoc/>
+        public override XRHandSubsystem.UpdateSuccessFlags TryUpdateUnextrapolatedPoses(
+            Handedness handedness,
+            ref Pose rootPose,
+            NativeArray<XRHandJoint> joints,
+            out long? captureTime)
+        {
+            captureTime = null;
+
+            if (!m_IsValid)
+                return XRHandSubsystem.UpdateSuccessFlags.None;
+
+            var extensibilityManager = HandTracking.extensibilityManager;
+            if (extensibilityManager == null)
+                return XRHandSubsystem.UpdateSuccessFlags.None;
+
+            var xrHand = handedness == Handedness.Left ? XrHandEXT.Left : XrHandEXT.Right;
+            var inputChain = extensibilityManager.GetSecondaryLocateInputChain(xrHand);
+            var outputChain = extensibilityManager.GetSecondaryLocateOutputChain(xrHand);
+            if (inputChain == null || outputChain == null)
+                return XRHandSubsystem.UpdateSuccessFlags.None;
+
+            var successFlags = NativeApi.TryLocateHand(
+                XRHandSubsystem.UpdateType.Dynamic,
+                handedness,
+                inputChain.GetHeadPointer(),
+                outputChain.GetHeadPointer(),
+                ref rootPose,
+                joints.GetUnsafePtr());
+
+            // The runtime leaves captureTime at zero when it returns no valid poses, so it is only
+            // meaningful on a locate that succeeded.
+            if (successFlags.IsHandTracked(handedness) &&
+                outputChain.TryGetNode<XrHandTrackingUnextrapolatedPosesMETA>(
+                    XrStructureType.HandTrackingUnextrapolatedPosesMETA, out var unextrapolatedPoses))
+                captureTime = unextrapolatedPoses.captureTime;
+
+            return successFlags;
+        }
+#endif // OPENXR_1_19_0_PRE_2_OR_NEWER
 
         /// <inheritdoc/>
         public override bool canSurfaceCommonPoseData
@@ -666,6 +727,15 @@ namespace UnityEngine.XR.Hands.OpenXR
                 void* leftHandJoints,
                 ref Pose rightRootPose,
                 void* rightHandJoints);
+
+            [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_TryLocateHand")]
+            internal static extern unsafe XRHandSubsystem.UpdateSuccessFlags TryLocateHand(
+                XRHandSubsystem.UpdateType updateType,
+                Handedness handedness,
+                void* inputChain,
+                void* outputChain,
+                ref Pose rootPose,
+                void* handJoints);
 
             [DllImport(HandTracking.k_LibraryName, EntryPoint = "UnityOpenXRHands_GetDetectedHandMeshLayout")]
             internal static extern XRDetectedHandMeshLayout GetDetectedHandMeshLayout();

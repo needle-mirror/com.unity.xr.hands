@@ -16,7 +16,7 @@ namespace UnityEngine.XR.Hands.OpenXR
     /// <example>
     /// <para>The following example mocks how a permissions checking script might respond
     /// to permission requests for hand tracking by enabling or disabling this component.</para>
-    /// <code source="../../DocCodeSamples.Tests/SubsystemManagerSample.cs"/>
+    /// <code source="../../Tests/Editor/DocCodeSamples/SubsystemManagerSample.cs"/>
     /// </example>
     public class OpenXRHandSubsystemManager : MonoBehaviour
     {

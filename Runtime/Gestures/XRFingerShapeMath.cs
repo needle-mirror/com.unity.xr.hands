@@ -27,6 +27,7 @@ namespace UnityEngine.XR.Hands.Gestures
         static XRFingerShapeMath()
         {
             s_CachedFingerShapes = new XRFingerShape[k_HandednessCacheSize, Constants.k_NumFingersPerHand];
+            s_CachedUnextrapolatedFingerShapes = new XRFingerShape[k_HandednessCacheSize, Constants.k_NumFingersPerHand];
             var defaultStates = XRHandSubsystemProvider.FingerConfigDefaults.configurationStates;
             s_Configurations = new XRFingerShapeConfiguration[Constants.k_NumFingersPerHand];
             s_RestoreStatesWhenPlaybackEnds = new XRFingerShapeConfigurationState[Constants.k_NumFingersPerHand];
@@ -135,7 +136,7 @@ namespace UnityEngine.XR.Hands.Gestures
             XRFingerShapeTypes shapeTypes,
             XRFingerShapeConfiguration configuration)
         {
-            ref var fingerShape = ref s_CachedFingerShapes[(int)xrHand.handedness, fingerID.ToIndex()];
+            ref var fingerShape = ref GetCachedFingerShape(xrHand, fingerID);
 
             // if all the requested values are already calculated, return the
             // cached value - otherwise, try to calculate missing fields before returning
@@ -225,6 +226,8 @@ namespace UnityEngine.XR.Hands.Gestures
 
             s_CachedFingerShapes[(int)Handedness.Left, fingerIndex].Clear();
             s_CachedFingerShapes[(int)Handedness.Right, fingerIndex].Clear();
+            s_CachedUnextrapolatedFingerShapes[(int)Handedness.Left, fingerIndex].Clear();
+            s_CachedUnextrapolatedFingerShapes[(int)Handedness.Right, fingerIndex].Clear();
         }
 
         internal static void SetDefaultFingerShapeConfiguration(XRHandFingerID fingerID, XRFingerShapeConfiguration configuration)
@@ -240,6 +243,8 @@ namespace UnityEngine.XR.Hands.Gestures
             {
                 s_CachedFingerShapes[(int)Handedness.Left, fingerShapeIndex].Clear();
                 s_CachedFingerShapes[(int)Handedness.Right, fingerShapeIndex].Clear();
+                s_CachedUnextrapolatedFingerShapes[(int)Handedness.Left, fingerShapeIndex].Clear();
+                s_CachedUnextrapolatedFingerShapes[(int)Handedness.Right, fingerShapeIndex].Clear();
             }
         }
 
@@ -593,8 +598,14 @@ namespace UnityEngine.XR.Hands.Gestures
             return math.degrees(math.acos(math.dot(to0, to2)));
         }
 
+        static ref XRFingerShape GetCachedFingerShape(XRHand xrHand, XRHandFingerID fingerID)
+            => ref (xrHand.extrapolationMode == XRHandExtrapolation.Unextrapolated
+                ? ref s_CachedUnextrapolatedFingerShapes[(int)xrHand.handedness, fingerID.ToIndex()]
+                : ref s_CachedFingerShapes[(int)xrHand.handedness, fingerID.ToIndex()]);
+
         const int k_HandednessCacheSize = 3;
         static readonly XRFingerShape[,] s_CachedFingerShapes;
+        static readonly XRFingerShape[,] s_CachedUnextrapolatedFingerShapes;
         static readonly XRFingerShapeConfiguration[] s_Configurations;
         static readonly XRFingerShapeConfigurationState[] s_RestoreStatesWhenPlaybackEnds;
     }

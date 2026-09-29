@@ -18,7 +18,7 @@ namespace UnityEditor.XR.Hands.OpenXR
         const string k_ParentFoldKey = "XRHands.ProjectSettingsGUI.ParentExpanded";
         const string k_DataSourceFoldKey = "XRHands.ProjectSettingsGUI.DataSourceExpanded";
         const string k_MotionRangeFoldKey = "XRHands.ProjectSettingsGUI.MotionRangeExpanded";
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
         const string k_FrequencyHintFoldKey = "XRHands.ProjectSettingsGUI.FrequencyHintExpanded";
 #endif
 
@@ -42,7 +42,7 @@ namespace UnityEditor.XR.Hands.OpenXR
             EditorGUIUtility.TrTextContent(
                 "Controls hand joint motion range: full natural range or constrained to mimic gripping a held controller.");
 
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
         static readonly GUIContent k_FrequencyHintSection =
             EditorGUIUtility.TrTextContent("Requested Hand Tracking Update Frequency");
         static readonly GUIContent k_FrequencyHintDescription =
@@ -89,7 +89,7 @@ namespace UnityEditor.XR.Hands.OpenXR
                     DrawDataSourceSection(settings);
                     EditorGUILayout.Space();
                     DrawMotionRangeSection(settings);
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
                     EditorGUILayout.Space();
                     DrawFrequencyHintSection(settings);
 #endif
@@ -163,7 +163,7 @@ namespace UnityEditor.XR.Hands.OpenXR
             }
         }
 
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
         static void DrawFrequencyHintSection(OpenXRSettings settings)
         {
             var feature = settings != null ? settings.GetFeature<MetaHandTrackingFrequencyHintFeature>() : null;

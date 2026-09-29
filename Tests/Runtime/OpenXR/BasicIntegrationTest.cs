@@ -4,17 +4,19 @@ using NUnit.Framework;
 using System.Collections;
 using UnityEngine.TestTools;
 using UnityEngine.XR.Hands.OpenXR;
-using UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime;
+using UnityEngine.XR.Hands.OpenXR.MockHandsRuntime.Tests;
 using UnityEngine.XR.OpenXR.NativeTypes;
 using XrHandTrackerEXT = System.UInt64;
 using XrSession = System.UInt64;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR
+namespace UnityEngine.XR.Hands.OpenXR.Tests
 {
     /// <summary>
     /// Basic integration test validating OpenXRHandProvider initialization
     /// using MockHandsEnvironment.
     /// </summary>
+    [MovedFrom("UnityEngine.XR.Hands.Tests.OpenXR")]
     public class BasicOpenXRHandTrackingExtensionIntegrationTests : OpenXRHandTrackingTestFixture
     {
         MockHandsEnvironment m_MockEnvironment;

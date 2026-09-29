@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Profiling;
+using UnityEngine.Assertions;
 using UnityEngine.SubsystemsImplementation;
 using UnityEngine.XR.Hands.Analytics;
 using UnityEngine.XR.Hands.Configuration;
@@ -105,16 +106,9 @@ namespace UnityEngine.XR.Hands
         /// Will only ever return either <see cref="leftHand"/>
         /// or <see cref="rightHand"/>.
         /// </remarks>
+        /// <seealso cref="GetHand(Handedness, XRHandExtrapolation)"/>
         public XRHand GetHand(Handedness handedness)
-        {
-            if (!handedness.IsValid())
-                throw new ArgumentException($"Cannot get hand for Handedness.{handedness}. Only Handedness.Left and Handedness.Right are valid.", nameof(handedness));
-
-            if (!TryGetHand(handedness, out var hand))
-                throw new InvalidOperationException("Hand subsystem state is not initialized.");
-
-            return hand;
-        }
+            => GetHand(handedness, XRHandExtrapolation.Extrapolated);
 
         /// <summary>
         /// Attempts to get the <see cref="XRHand"/> associated with the given
@@ -137,15 +131,92 @@ namespace UnityEngine.XR.Hands
         /// Will only ever successfully retrieve either <see cref="leftHand"/>
         /// or <see cref="rightHand"/>.
         /// </remarks>
+        /// <seealso cref="TryGetHand(Handedness, XRHandExtrapolation, out XRHand)"/>
         public bool TryGetHand(Handedness handedness, out XRHand hand)
+            => TryGetHand(handedness, XRHandExtrapolation.Extrapolated, out hand);
+
+        /// <summary>
+        /// Gets the <see cref="XRHand"/> associated with the given <see cref="Handedness"/>,
+        /// in the requested extrapolation mode.
+        /// </summary>
+        /// <param name="handedness">
+        /// The <see cref="Handedness"/> you wish to retrieve the associated
+        /// <see cref="XRHand"/> for.
+        /// </param>
+        /// <param name="extrapolation">
+        /// Which set of poses to retrieve. <see cref="XRHandExtrapolation.Extrapolated"/>
+        /// behaves identically to <see cref="GetHand(Handedness)"/>.
+        /// </param>
+        /// <returns>
+        /// The <see cref="XRHand"/> associated with the given <see cref="Handedness"/>
+        /// in the requested extrapolation mode.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown if <paramref name="handedness"/> is anything other than
+        /// <see cref="Handedness.Left"/> or <see cref="Handedness.Right"/>, or if
+        /// <paramref name="extrapolation"/> is not a defined
+        /// <see cref="XRHandExtrapolation"/> member.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the subsystem state is not initialized, or if the current provider
+        /// cannot surface the requested <paramref name="extrapolation"/> mode.
+        /// </exception>
+        public XRHand GetHand(Handedness handedness, XRHandExtrapolation extrapolation)
         {
-            if (!handedness.IsValid() || m_StatePerHand == null)
+            if (!handedness.IsValid())
+                throw new ArgumentException($"Cannot get hand for Handedness.{handedness}. Only Handedness.Left and Handedness.Right are valid.", nameof(handedness));
+
+            if (!IsValid(extrapolation))
+                throw new ArgumentException($"Cannot get hand for XRHandExtrapolation.{extrapolation}. Only defined XRHandExtrapolation members are valid.", nameof(extrapolation));
+
+            if (!TryGetHand(handedness, extrapolation, out var hand))
+            {
+                throw new InvalidOperationException(
+                    extrapolation == XRHandExtrapolation.Unextrapolated
+                        ? "Unextrapolated poses are unavailable. Either the hand subsystem state is not initialized, or the current provider does not support them."
+                        : "Hand subsystem state is not initialized.");
+            }
+
+            return hand;
+        }
+
+        /// <summary>
+        /// Attempts to get the <see cref="XRHand"/> associated with the given
+        /// <see cref="Handedness"/>, in the requested extrapolation mode.
+        /// </summary>
+        /// <param name="handedness">
+        /// The <see cref="Handedness"/> you wish to retrieve the associated
+        /// <see cref="XRHand"/> for.
+        /// </param>
+        /// <param name="extrapolation">
+        /// Which set of poses to retrieve. <see cref="XRHandExtrapolation.Extrapolated"/>
+        /// behaves identically to <see cref="TryGetHand(Handedness, out XRHand)"/>.
+        /// </param>
+        /// <param name="hand">
+        /// If this returns <c>true</c>, this will be filled out with the
+        /// associated hand data requested.
+        /// </param>
+        /// <returns>
+        /// Returns <c>true</c> if the requested hand and extrapolation mode
+        /// are available, returns <c>false</c> otherwise.
+        /// </returns>
+        /// <remarks>
+        /// Requesting <see cref="XRHandExtrapolation.Unextrapolated"/> returns
+        /// <c>false</c> when the current provider cannot surface
+        /// unextrapolated poses. Also returns <c>false</c> if
+        /// <paramref name="extrapolation"/> is not a defined
+        /// <see cref="XRHandExtrapolation"/> member.
+        /// </remarks>
+        public bool TryGetHand(Handedness handedness, XRHandExtrapolation extrapolation, out XRHand hand)
+        {
+            if (!handedness.IsValid() || !IsValid(extrapolation) || m_StatePerHand == null ||
+                (extrapolation == XRHandExtrapolation.Unextrapolated && !canSurfaceUnextrapolatedPoses))
             {
                 hand = default;
                 return false;
             }
 
-            hand = m_StatePerHand[handedness.ToIndex()].m_Hand;
+            hand = m_StatePerHand[handedness.ToIndex()].GetHand(extrapolation);
             return true;
         }
 
@@ -452,13 +523,19 @@ namespace UnityEngine.XR.Hands
                 rightHand.m_RootPose = rightPose;
                 XRFingerShapeMath.ClearFingerStateCaches();
 
+                if (updateType == UpdateType.Dynamic && canSurfaceUnextrapolatedPoses)
+                {
+                    using (s_UpdateUnextrapolatedHandsMarker.Auto())
+                    {
+                        UpdateUnextrapolatedHand(Handedness.Left);
+                        UpdateUnextrapolatedHand(Handedness.Right);
+                    }
+                }
+
                 using (s_TrackingEventsMarker.Auto())
                 {
-                    const UpdateSuccessFlags leftSuccessFlags = UpdateSuccessFlags.LeftHandRootPose | UpdateSuccessFlags.LeftHandJoints;
-                    const UpdateSuccessFlags rightSuccessFlags = UpdateSuccessFlags.RightHandRootPose | UpdateSuccessFlags.RightHandJoints;
-
                     var wasLeftHandTracked = leftHand.isTracked;
-                    leftHand.isTracked = (updateSuccessFlags & leftSuccessFlags) == leftSuccessFlags;
+                    leftHand.isTracked = updateSuccessFlags.IsHandTracked(Handedness.Left);
                     m_StatePerHand[Handedness.Left.ToIndex()].m_Hand = leftHand;
 
                     if (!wasLeftHandTracked && leftHand.isTracked)
@@ -467,7 +544,7 @@ namespace UnityEngine.XR.Hands
                         trackingLost?.Invoke(leftHand);
 
                     var wasRightHandTracked = rightHand.isTracked;
-                    rightHand.isTracked = (updateSuccessFlags & rightSuccessFlags) == rightSuccessFlags;
+                    rightHand.isTracked = updateSuccessFlags.IsHandTracked(Handedness.Right);
                     m_StatePerHand[Handedness.Right.ToIndex()].m_Hand = rightHand;
 
                     if (!wasRightHandTracked && rightHand.isTracked)
@@ -667,7 +744,7 @@ namespace UnityEngine.XR.Hands
             m_JointsInLayout = new NativeArray<bool>(Constants.k_NumJointsPerHand, Allocator.Persistent);
             provider.GetHandLayout(m_JointsInLayout);
             foreach (var handedness in HandsUtility.validHandednessValues)
-                m_StatePerHand[handedness.ToIndex()].m_Hand.ApplyJointLayout(m_JointsInLayout);
+                m_StatePerHand[handedness.ToIndex()].ApplyJointLayout(m_JointsInLayout);
             provider.SubscribeToSubsystemActions(ref m_Actions);
         }
 
@@ -705,13 +782,24 @@ namespace UnityEngine.XR.Hands
 
         internal unsafe void SetHand(XRHand hand)
         {
-            if (hand.m_Joints.GetUnsafePtr() != GetHand(hand.handedness).m_Joints.GetUnsafePtr())
+            if (!hand.handedness.IsValid())
+                throw new ArgumentException("Cannot set an invalid hand. Only use hands retrieved from an XRHandSubsystem.GetHand().", nameof(hand));
+
+            if (m_StatePerHand == null)
+                throw new InvalidOperationException("Hand subsystem state is not initialized.");
+
+            ref var storedHand = ref m_StatePerHand[hand.handedness.ToIndex()].GetHand(hand.extrapolationMode);
+
+            if (hand.m_Joints.GetUnsafePtr() != storedHand.m_Joints.GetUnsafePtr())
             {
                 var handednessName = hand.handedness.ToString().ToLower();
                 throw new InvalidOperationException(
-                    $"Cannot overwrite the {handednessName} hand with a hand that was not first retrieved from the subsystem's {handednessName}Hand property!");
+                    hand.extrapolationMode == XRHandExtrapolation.Unextrapolated
+                        ? $"Cannot overwrite the {handednessName} unextrapolated hand with a hand that was not first retrieved from this subsystem via GetHand(Handedness.{hand.handedness}, XRHandExtrapolation.Unextrapolated)."
+                        : $"Cannot overwrite the {handednessName} hand with a hand that was not first retrieved from the subsystem's {handednessName}Hand property.");
             }
-            m_StatePerHand[hand.handedness.ToIndex()].m_Hand = hand;
+
+            storedHand = hand;
         }
 
         void RetrieveCommonPoseData(Handedness handedness, XRCommonHandGestures commonGestures)
@@ -794,19 +882,60 @@ namespace UnityEngine.XR.Hands
             }
         }
 
+        static bool IsValid(XRHandExtrapolation extrapolation)
+            => extrapolation == XRHandExtrapolation.Extrapolated
+                || extrapolation == XRHandExtrapolation.Unextrapolated;
+
+        bool canSurfaceUnextrapolatedPoses => provider.canSurfaceUnextrapolatedPoses;
+
+        void UpdateUnextrapolatedHand(Handedness handedness)
+        {
+            Assert.IsTrue(canSurfaceUnextrapolatedPoses,
+                "UpdateUnextrapolatedHand requires a provider that can surface unextrapolated poses.");
+
+            ref var hand = ref m_StatePerHand[handedness.ToIndex()].m_UnextrapolatedHand;
+            if (!hand.isValid)
+                return;
+
+            var flags = provider.TryUpdateUnextrapolatedPoses(
+                handedness, ref hand.m_RootPose, hand.m_Joints, out var captureTime);
+
+            // A hand that isn't tracked keeps the capture time of its last good poses.
+            var isTracked = flags.IsHandTracked(handedness);
+            if (isTracked)
+                hand.m_Timestamp = captureTime;
+
+            hand.isTracked = isTracked;
+        }
+
         class StatePerHand
         {
             internal StatePerHand(Handedness handedness)
             {
                 m_Hand = new XRHand(Allocator.Persistent, handedness, k_HandLifetimeType);
+                m_UnextrapolatedHand = new XRHand(Allocator.Persistent, handedness, k_HandLifetimeType, XRHandExtrapolation.Unextrapolated);
                 m_CommonGestures = new XRCommonHandGestures(handedness);
             }
 
-            internal void OnDestroy() => m_Hand.DisposeInternal(k_HandLifetimeType);
+            internal ref XRHand GetHand(XRHandExtrapolation extrapolation)
+                => ref (extrapolation == XRHandExtrapolation.Unextrapolated ? ref m_UnextrapolatedHand : ref m_Hand);
+
+            internal void ApplyJointLayout(NativeArray<bool> jointsInLayout)
+            {
+                m_Hand.ApplyJointLayout(jointsInLayout);
+                m_UnextrapolatedHand.ApplyJointLayout(jointsInLayout);
+            }
+
+            internal void OnDestroy()
+            {
+                m_Hand.DisposeInternal(k_HandLifetimeType);
+                m_UnextrapolatedHand.DisposeInternal(k_HandLifetimeType);
+            }
 
             const XRHand.LifetimeType k_HandLifetimeType = XRHand.LifetimeType.Subsystem;
 
             internal XRHand m_Hand;
+            internal XRHand m_UnextrapolatedHand;
             internal XRCommonHandGestures m_CommonGestures;
             internal XRHandAimState m_AimState;
             internal bool m_IsAimStateValid;
@@ -822,6 +951,7 @@ namespace UnityEngine.XR.Hands
         // Profiler markers
         static readonly ProfilerMarker s_TryUpdateHandsMarker = new ProfilerMarker("XRHandSubsystem.TryUpdateHands");
         static readonly ProfilerMarker s_RetrieveCommonPoseDataMarker = new ProfilerMarker("XRHandSubsystem.RetrieveCommonPoseData");
+        static readonly ProfilerMarker s_UpdateUnextrapolatedHandsMarker = new ProfilerMarker("XRHandSubsystem.UpdateUnextrapolatedHands");
         static readonly ProfilerMarker s_TrackingEventsMarker = new ProfilerMarker("XRHandSubsystem.TrackingEvents");
         static readonly ProfilerMarker s_ProviderTryUpdateHandsMarker = new ProfilerMarker("XRHandSubsystem.Provider.TryUpdateHands");
         static readonly ProfilerMarker s_PostUpdateMarker = new ProfilerMarker("XRHandSubsystem.PostUpdate");

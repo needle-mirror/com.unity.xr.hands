@@ -12,7 +12,7 @@ namespace UnityEngine.XR.Hands.Processing
         /// Sets the subsystem's hand corresponding to hand passed in, which must
         /// have been initially retrieved from the <see cref="XRHandSubsystem"/>'s
         /// <see cref="XRHandSubsystem.leftHand"/> or <see cref="XRHandSubsystem.rightHand"/>
-        /// property.
+        /// property, or <see cref="XRHandSubsystem.GetHand(Handedness, XRHandExtrapolation)"/>.
         /// </summary>
         /// <param name="subsystem">
         /// The invoking subsystem for this extension method. To call this method,
@@ -22,6 +22,9 @@ namespace UnityEngine.XR.Hands.Processing
         /// The hand to update to on the subsystem. Must have originally been
         /// retrieved from that <see cref="XRHandSubsystem"/>
         /// </param>
+        /// <remarks>
+        /// Only the hand of the corresponding <see cref="XRHandExtrapolation"/> mode will be updated.
+        /// </remarks>
         public static void SetCorrespondingHand(this XRHandSubsystem subsystem, XRHand hand)
             => subsystem.SetHand(hand);
 
@@ -44,7 +47,7 @@ namespace UnityEngine.XR.Hands.Processing
         public static NativeArray<XRHandJoint> GetRawJointArray(this XRHand hand)
         {
             if (hand.handedness == Handedness.Invalid)
-                throw new ArgumentException("Cannot manipulate joints on an invalid hand. Only use hands retrieved from an XRHandSubsystem's leftHand or rightHand property.");
+                throw new ArgumentException("Cannot manipulate joints on an invalid hand. Only use hands retrieved from an XRHandSubsystem.GetHand().");
 
             return hand.m_Joints;
         }
@@ -66,7 +69,7 @@ namespace UnityEngine.XR.Hands.Processing
         public static void SetRootPose(this ref XRHand hand, Pose rootPose)
         {
             if (hand.handedness == Handedness.Invalid)
-                throw new ArgumentException("Cannot set root pose on an invalid hand. Only use hands retrieved from an XRHandSubsystem's leftHand or rightHand property.");
+                throw new ArgumentException("Cannot set root pose on an invalid hand. Only use hands retrieved from an XRHandSubsystem.GetHand().");
 
             var offsetRotation = rootPose.rotation * Quaternion.Inverse(hand.m_RootPose.rotation);
             for (int jointIndex = 0; jointIndex < hand.m_Joints.Length; ++jointIndex)

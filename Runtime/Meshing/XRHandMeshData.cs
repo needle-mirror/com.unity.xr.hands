@@ -385,188 +385,188 @@ namespace UnityEngine.XR.Hands.Meshing
         NativeArray<byte> m_BonesPerVertex;
         NativeArray<BoneWeight1> m_BoneWeights;
     }
+}
 
-    namespace ProviderImplementation
+namespace UnityEngine.XR.Hands.Meshing.ProviderImplementation
+{
+    /// <summary>
+    /// Contains extensions to <see cref="XRHandMeshData"/> relevant
+    /// to supplying data when <see cref="XRHandSubsystem.TryGetMeshData"/> is called.
+    /// </summary>
+    public static class XRHandMeshDataExtensions
     {
         /// <summary>
-        /// Contains extensions to <see cref="XRHandMeshData"/> relevant
-        /// to supplying data when <see cref="XRHandSubsystem.TryGetMeshData"/> is called.
+        /// Set the <see cref="XRHandMeshData.indices"/> data on the <see cref="XRHandMeshData"/>.
         /// </summary>
-        public static class XRHandMeshDataExtensions
-        {
-            /// <summary>
-            /// Set the <see cref="XRHandMeshData.indices"/> data on the <see cref="XRHandMeshData"/>.
-            /// </summary>
-            /// <param name="meshData">
-            /// Mesh data to set index data on.
-            /// </param>
-            /// <param name="indices">
-            /// Index data to set on the invoking mesh data.
-            /// </param>
-            public static void SetIndices(this ref XRHandMeshData meshData, NativeArray<int> indices)
-                => meshData.indices = indices;
+        /// <param name="meshData">
+        /// Mesh data to set index data on.
+        /// </param>
+        /// <param name="indices">
+        /// Index data to set on the invoking mesh data.
+        /// </param>
+        public static void SetIndices(this ref XRHandMeshData meshData, NativeArray<int> indices)
+            => meshData.indices = indices;
 
-            /// <summary>
-            /// Set the <see cref="XRHandMeshData.positions"/> data on the <see cref="XRHandMeshData"/>.
-            /// </summary>
-            /// <param name="meshData">
-            /// Mesh data to set position data on.
-            /// </param>
-            /// <param name="positions">
-            /// Index data to set on the invoking mesh data.
-            /// </param>
-            public static void SetPositions(this ref XRHandMeshData meshData, NativeArray<Vector3> positions)
-                => meshData.positions = positions;
+        /// <summary>
+        /// Set the <see cref="XRHandMeshData.positions"/> data on the <see cref="XRHandMeshData"/>.
+        /// </summary>
+        /// <param name="meshData">
+        /// Mesh data to set position data on.
+        /// </param>
+        /// <param name="positions">
+        /// Index data to set on the invoking mesh data.
+        /// </param>
+        public static void SetPositions(this ref XRHandMeshData meshData, NativeArray<Vector3> positions)
+            => meshData.positions = positions;
 
-            /// <summary>
-            /// Set the <see cref="XRHandMeshData.normals"/> data on the <see cref="XRHandMeshData"/>.
-            /// </summary>
-            /// <param name="meshData">
-            /// Mesh data to set normal data on.
-            /// </param>
-            /// <param name="normals">
-            /// Index data to set on the invoking mesh data.
-            /// </param>
-            public static void SetNormals(this ref XRHandMeshData meshData, NativeArray<Vector3> normals)
-                => meshData.normals = normals;
+        /// <summary>
+        /// Set the <see cref="XRHandMeshData.normals"/> data on the <see cref="XRHandMeshData"/>.
+        /// </summary>
+        /// <param name="meshData">
+        /// Mesh data to set normal data on.
+        /// </param>
+        /// <param name="normals">
+        /// Index data to set on the invoking mesh data.
+        /// </param>
+        public static void SetNormals(this ref XRHandMeshData meshData, NativeArray<Vector3> normals)
+            => meshData.normals = normals;
 
-            /// <summary>
-            /// Set the <see cref="XRHandMeshData.uvs"/> data on the <see cref="XRHandMeshData"/>.
-            /// </summary>
-            /// <param name="meshData">
-            /// Mesh data to set texture coordinate data on.
-            /// </param>
-            /// <param name="uvs">
-            /// Texture coordinate data to set on the invoking mesh data.
-            /// </param>
-            public static void SetUVs(this ref XRHandMeshData meshData, NativeArray<Vector2> uvs)
-                => meshData.uvs = uvs;
+        /// <summary>
+        /// Set the <see cref="XRHandMeshData.uvs"/> data on the <see cref="XRHandMeshData"/>.
+        /// </summary>
+        /// <param name="meshData">
+        /// Mesh data to set texture coordinate data on.
+        /// </param>
+        /// <param name="uvs">
+        /// Texture coordinate data to set on the invoking mesh data.
+        /// </param>
+        public static void SetUVs(this ref XRHandMeshData meshData, NativeArray<Vector2> uvs)
+            => meshData.uvs = uvs;
 
-            /// <summary>
-            /// Set the root <see cref="Pose"/> on the <see cref="XRHandMeshData"/>.
-            /// </summary>
-            /// <param name="meshData">
-            /// Mesh data to set index data on.
-            /// </param>
-            /// <param name="rootPose">
-            /// Root pose to set on the invoking mesh data.
-            /// </param>
-            public static void SetRootPose(this ref XRHandMeshData meshData, Pose rootPose)
-                => meshData.SetRootPose(rootPose);
+        /// <summary>
+        /// Set the root <see cref="Pose"/> on the <see cref="XRHandMeshData"/>.
+        /// </summary>
+        /// <param name="meshData">
+        /// Mesh data to set index data on.
+        /// </param>
+        /// <param name="rootPose">
+        /// Root pose to set on the invoking mesh data.
+        /// </param>
+        public static void SetRootPose(this ref XRHandMeshData meshData, Pose rootPose)
+            => meshData.SetRootPose(rootPose);
 
-            /// <summary>
-            /// Invalidates the root <see cref="Pose"/> on the <see cref="XRHandMeshData"/>.
-            /// </summary>
-            /// <param name="meshData">
-            /// Mesh data to invalidate the root pose on.
-            /// </param>
-            public static void InvalidateRootPose(this ref XRHandMeshData meshData)
-                => meshData.InvalidateRootPose();
+        /// <summary>
+        /// Invalidates the root <see cref="Pose"/> on the <see cref="XRHandMeshData"/>.
+        /// </summary>
+        /// <param name="meshData">
+        /// Mesh data to invalidate the root pose on.
+        /// </param>
+        public static void InvalidateRootPose(this ref XRHandMeshData meshData)
+            => meshData.InvalidateRootPose();
 
-            /// <summary>
-            /// Set the joint pose validity on the <see cref="XRHandMeshData"/>.
-            /// Must have enough room for each joint up to and including the
-            /// last valid one. Must have memory allocated for joints with
-            /// lower-integer-value <see cref="XRHandJointID"/>s, even if those
-            /// joints are invalid.
-            /// </summary>
-            /// <param name="meshData">
-            /// Mesh data to set joint data validity flags on.
-            /// </param>
-            /// <param name="matchingJointBindPoseIsValid">
-            /// The value at each index is set to <see langword="true"/> if the
-            /// bind <see cref="Pose"/> for that joint is valid. That bind
-            /// <see cref="Pose"/> can then be retrieved from
-            /// <see cref="XRHandMesh.TryGetJointPose"/>.
-            /// </param>
-            public static void SetMatchingJointBindPoseValidity(this ref XRHandMeshData meshData, NativeArray<bool> matchingJointBindPoseIsValid)
-                => meshData.SetMatchingJointBindPoseValidity(matchingJointBindPoseIsValid);
+        /// <summary>
+        /// Set the joint pose validity on the <see cref="XRHandMeshData"/>.
+        /// Must have enough room for each joint up to and including the
+        /// last valid one. Must have memory allocated for joints with
+        /// lower-integer-value <see cref="XRHandJointID"/>s, even if those
+        /// joints are invalid.
+        /// </summary>
+        /// <param name="meshData">
+        /// Mesh data to set joint data validity flags on.
+        /// </param>
+        /// <param name="matchingJointBindPoseIsValid">
+        /// The value at each index is set to <see langword="true"/> if the
+        /// bind <see cref="Pose"/> for that joint is valid. That bind
+        /// <see cref="Pose"/> can then be retrieved from
+        /// <see cref="XRHandMesh.TryGetJointPose"/>.
+        /// </param>
+        public static void SetMatchingJointBindPoseValidity(this ref XRHandMeshData meshData, NativeArray<bool> matchingJointBindPoseIsValid)
+            => meshData.SetMatchingJointBindPoseValidity(matchingJointBindPoseIsValid);
 
-            /// <summary>
-            /// Set the joint bind poses on the <see cref="XRHandMeshData"/>.
-            /// Must have enough room for each joint up to and including the
-            /// last valid one. Must have memory allocated for joints with
-            /// lower-integer-value <see cref="XRHandJointID"/>s, even if those
-            /// joints are invalid.
-            /// </summary>
-            /// <param name="meshData">
-            /// Mesh data to set joint data validity flags on.
-            /// </param>
-            /// <param name="jointBindPoses">
-            /// <see cref="Pose"/> for each joint known with known data this frame.
-            /// </param>
-            /// <remarks>
-            /// The bind <see cref="Pose"/> at each index can only be retrieved
-            /// if the value at the matching index in what's supplied to
-            /// <see cref="SetMatchingJointBindPoseValidity"/> is set to
-            /// <see langword="true"/>.
-            /// </remarks>
-            public static void SetJointBindPoses(this ref XRHandMeshData meshData, NativeArray<Matrix4x4> jointBindPoses)
-                => meshData.SetJointBindPoses(jointBindPoses);
+        /// <summary>
+        /// Set the joint bind poses on the <see cref="XRHandMeshData"/>.
+        /// Must have enough room for each joint up to and including the
+        /// last valid one. Must have memory allocated for joints with
+        /// lower-integer-value <see cref="XRHandJointID"/>s, even if those
+        /// joints are invalid.
+        /// </summary>
+        /// <param name="meshData">
+        /// Mesh data to set joint data validity flags on.
+        /// </param>
+        /// <param name="jointBindPoses">
+        /// <see cref="Pose"/> for each joint known with known data this frame.
+        /// </param>
+        /// <remarks>
+        /// The bind <see cref="Pose"/> at each index can only be retrieved
+        /// if the value at the matching index in what's supplied to
+        /// <see cref="SetMatchingJointBindPoseValidity"/> is set to
+        /// <see langword="true"/>.
+        /// </remarks>
+        public static void SetJointBindPoses(this ref XRHandMeshData meshData, NativeArray<Matrix4x4> jointBindPoses)
+            => meshData.SetJointBindPoses(jointBindPoses);
 
-            /// <summary>
-            /// Set the joint radius validity on the <see cref="XRHandMeshData"/>.
-            /// Must have enough room for each joint up to and including the
-            /// last valid one. Must have memory allocated for joints with
-            /// lower-integer-value <see cref="XRHandJointID"/>s, even if those
-            /// joints are invalid.
-            /// </summary>
-            /// <param name="meshData">
-            /// Mesh data to set joint data validity flags on.
-            /// </param>
-            /// <param name="matchingJointRadiusIsValid">
-            /// The value at each index is set to <see langword="true"/> if the
-            /// radius for that joint is valid. That radius can then be
-            /// retrieved from <see cref="XRHandMesh.TryGetJointRadius"/>.
-            /// </param>
-            public static void SetMatchingJointRadiusValidity(this ref XRHandMeshData meshData, NativeArray<bool> matchingJointRadiusIsValid)
-                => meshData.SetMatchingJointRadiusValidity(matchingJointRadiusIsValid);
+        /// <summary>
+        /// Set the joint radius validity on the <see cref="XRHandMeshData"/>.
+        /// Must have enough room for each joint up to and including the
+        /// last valid one. Must have memory allocated for joints with
+        /// lower-integer-value <see cref="XRHandJointID"/>s, even if those
+        /// joints are invalid.
+        /// </summary>
+        /// <param name="meshData">
+        /// Mesh data to set joint data validity flags on.
+        /// </param>
+        /// <param name="matchingJointRadiusIsValid">
+        /// The value at each index is set to <see langword="true"/> if the
+        /// radius for that joint is valid. That radius can then be
+        /// retrieved from <see cref="XRHandMesh.TryGetJointRadius"/>.
+        /// </param>
+        public static void SetMatchingJointRadiusValidity(this ref XRHandMeshData meshData, NativeArray<bool> matchingJointRadiusIsValid)
+            => meshData.SetMatchingJointRadiusValidity(matchingJointRadiusIsValid);
 
-            /// <summary>
-            /// Set the joint radii on the <see cref="XRHandMeshData"/>. Must
-            /// have enough room for each joint up to and including the last
-            /// valid one. Must have memory allocated for joints with
-            /// lower-integer-value <see cref="XRHandJointID"/>s, even if those
-            /// joints are invalid.
-            /// </summary>
-            /// <param name="meshData">
-            /// Mesh data to set joint data validity flags on.
-            /// </param>
-            /// <param name="jointRadii">
-            /// Radius for each joint known with known data this frame.
-            /// </param>
-            /// <remarks>
-            /// The radius at each index can only be retrieved if
-            /// the value at the matching index in what's supplied to
-            /// <see cref="SetMatchingJointRadiusValidity"/> is set to
-            /// <see langword="true"/>.
-            /// </remarks>
-            public static void SetJointRadii(this ref XRHandMeshData meshData, NativeArray<float> jointRadii)
-                => meshData.SetJointRadii(jointRadii);
+        /// <summary>
+        /// Set the joint radii on the <see cref="XRHandMeshData"/>. Must
+        /// have enough room for each joint up to and including the last
+        /// valid one. Must have memory allocated for joints with
+        /// lower-integer-value <see cref="XRHandJointID"/>s, even if those
+        /// joints are invalid.
+        /// </summary>
+        /// <param name="meshData">
+        /// Mesh data to set joint data validity flags on.
+        /// </param>
+        /// <param name="jointRadii">
+        /// Radius for each joint known with known data this frame.
+        /// </param>
+        /// <remarks>
+        /// The radius at each index can only be retrieved if
+        /// the value at the matching index in what's supplied to
+        /// <see cref="SetMatchingJointRadiusValidity"/> is set to
+        /// <see langword="true"/>.
+        /// </remarks>
+        public static void SetJointRadii(this ref XRHandMeshData meshData, NativeArray<float> jointRadii)
+            => meshData.SetJointRadii(jointRadii);
 
-            /// <summary>
-            /// Set bones per vertex on the <see cref="XRHandMeshData"/>.
-            /// </summary>
-            /// <param name="meshData">
-            /// Mesh data to set bones per vertex on.
-            /// </param>
-            /// <param name="bonesPerVertex">
-            /// Bone count for each vertex in the mesh.
-            /// </param>
-            public static void SetBonesPerVertex(this ref XRHandMeshData meshData, NativeArray<byte> bonesPerVertex)
-                => meshData.bonesPerVertex = bonesPerVertex;
+        /// <summary>
+        /// Set bones per vertex on the <see cref="XRHandMeshData"/>.
+        /// </summary>
+        /// <param name="meshData">
+        /// Mesh data to set bones per vertex on.
+        /// </param>
+        /// <param name="bonesPerVertex">
+        /// Bone count for each vertex in the mesh.
+        /// </param>
+        public static void SetBonesPerVertex(this ref XRHandMeshData meshData, NativeArray<byte> bonesPerVertex)
+            => meshData.bonesPerVertex = bonesPerVertex;
 
-            /// <summary>
-            /// Set bone weights on the <see cref="XRHandMeshData"/>.
-            /// </summary>
-            /// <param name="meshData">
-            /// Mesh data to set bone weights on.
-            /// </param>
-            /// <param name="boneWeights">
-            /// Bone weights for each vertex, sorted by vertex index.
-            /// </param>
-            public static void SetBoneWeights(this ref XRHandMeshData meshData, NativeArray<BoneWeight1> boneWeights)
-                => meshData.boneWeights = boneWeights;
-        }
+        /// <summary>
+        /// Set bone weights on the <see cref="XRHandMeshData"/>.
+        /// </summary>
+        /// <param name="meshData">
+        /// Mesh data to set bone weights on.
+        /// </param>
+        /// <param name="boneWeights">
+        /// Bone weights for each vertex, sorted by vertex index.
+        /// </param>
+        public static void SetBoneWeights(this ref XRHandMeshData meshData, NativeArray<BoneWeight1> boneWeights)
+            => meshData.boneWeights = boneWeights;
     }
 }

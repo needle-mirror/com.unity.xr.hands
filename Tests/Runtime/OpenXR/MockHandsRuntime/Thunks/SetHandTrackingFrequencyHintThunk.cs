@@ -1,11 +1,11 @@
-#if OPENXR_1_19_OR_NEWER
+#if OPENXR_1_19_0_PRE_1_OR_NEWER
 using System;
 using AOT;
 using UnityEngine.XR.OpenXR.NativeTypes;
 
 using XrSession = System.UInt64;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime
+namespace UnityEngine.XR.Hands.OpenXR.MockHandsRuntime.Tests
 {
     /// <summary>
     /// Exception-safe native callback thunk for <c>xrSetHandTrackingFrequencyHintMETA</c>.

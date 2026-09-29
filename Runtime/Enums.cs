@@ -561,6 +561,27 @@ namespace UnityEngine.XR.Hands
     }
 
     /// <summary>
+    /// Specifies whether the runtime extrapolates hand joint poses to compensate for hand-tracking latency.
+    /// </summary>
+    /// <seealso cref="XRHandSubsystem.GetHand(Handedness, XRHandExtrapolation)"/>
+    /// <seealso cref="XRHand.extrapolationMode"/>
+    public enum XRHandExtrapolation
+    {
+        /// <summary>
+        /// Uses extrapolated poses to keep rendered hands aligned with the user's real hands.
+        /// This is the default mode.
+        /// </summary>
+        Extrapolated,
+
+        /// <summary>
+        /// Uses the poses most recently captured by the provider, without extrapolation. These poses might
+        /// lag behind the user's real hands because they do not account for hand-tracking latency. This mode
+        /// is available only when supported by the provider.
+        /// </summary>
+        Unextrapolated,
+    }
+
+    /// <summary>
     /// Describes which version of authored hand meshes is detected for use by the provider.
     /// </summary>
     public enum XRDetectedHandMeshLayout

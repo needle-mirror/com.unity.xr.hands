@@ -1,14 +1,16 @@
 #if UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
 using NUnit.Framework;
+using UnityEngine.Scripting.APIUpdating;
 using UnityEngine.TestTools;
 using UnityEngine.XR.Management;
 
-namespace UnityEngine.XR.Hands.Tests.OpenXR
+namespace UnityEngine.XR.Hands.OpenXR.Tests
 {
     /// <summary>
     /// Base test fixture that saves and restores XRGeneralSettings
     /// InitManagerOnStart so tests can control XR loader initialization.
     /// </summary>
+    [MovedFrom("UnityEngine.XR.Hands.Tests.OpenXR")]
     public abstract class OpenXRHandTrackingTestFixture : IPrebuildSetup, IPostBuildCleanup
     {
 #if UNITY_EDITOR

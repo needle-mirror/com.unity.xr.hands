@@ -32,6 +32,12 @@ namespace UnityEngine.XR.Hands
         public static XRHandSubsystem.UpdateSuccessFlags ToUpdateSuccessFlags(this Handedness handedness)
             => handedness == Handedness.Left ? XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints : XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
 
+        public static bool IsHandTracked(this XRHandSubsystem.UpdateSuccessFlags successFlags, Handedness handedness)
+        {
+            var requiredFlags = handedness.ToUpdateSuccessFlags();
+            return (successFlags & requiredFlags) == requiredFlags;
+        }
+
         public static FrameFlags ToFrameFlagForSnapshot(this Handedness handedness)
         {
             return handedness == Handedness.Left

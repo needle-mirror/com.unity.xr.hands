@@ -9,6 +9,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- Headers should be listed in this order: Added, Changed, Deprecated, Removed, Fixed, Security -->
+
+## [1.10.0-pre.2] - 2026-09-29
+
+### Added
+
+- Added [Meta Hand Tracking Unextrapolated Poses](xref:xrhands-meta-unextrapolated-poses-feature) OpenXR feature, which enables the `XR_META_hand_tracking_unextrapolated_poses` extension to surface hand joint poses without runtime extrapolation, along with the time at which they were captured.
+
 ## [1.10.0-pre.1] - 2026-09-03
 
 ### Added

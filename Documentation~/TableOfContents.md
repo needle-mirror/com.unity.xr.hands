@@ -17,6 +17,7 @@
   * [Meta Hand Tracking Aim feature](xref:xrhands-meta-aim-feature)
   * [Meta Hand Tracking Frequency Hint feature](xref:xrhands-meta-frequency-hint-feature)
   * [Meta Hand Tracking Wide Motion Mode feature](xref:xrhands-meta-wide-motion-feature)
+  * [Meta Hand Tracking Unextrapolated Poses feature](xref:xrhands-meta-unextrapolated-poses-feature)
 * [Custom gestures](xref:xrhands-custom-gestures)
   * [Gesture design](xref:xrhands-gesture-design)
   * [Gesture building blocks](xref:xrhands-gesture-building-blocks)

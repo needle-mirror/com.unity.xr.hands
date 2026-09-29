@@ -1,6 +1,6 @@
 {
-    "name": "Unity.XR.Hands.Tests.OpenXR.MockHandsRuntime",
-    "rootNamespace": "UnityEngine.XR.Hands.Tests.OpenXR.MockHandsRuntime",
+    "name": "Unity.XR.Hands.OpenXR.MockHandsRuntime.Tests",
+    "rootNamespace": "UnityEngine.XR.Hands.OpenXR.MockHandsRuntime.Tests",
     "references": [
         "Unity.XR.Hands",
         "Unity.XR.OpenXR",
@@ -27,7 +27,12 @@
         {
             "name": "com.unity.xr.openxr",
             "expression": "1.19.0-pre.1",
-            "define": "OPENXR_1_19_OR_NEWER"
+            "define": "OPENXR_1_19_0_PRE_1_OR_NEWER"
+        },
+        {
+            "name": "com.unity.xr.openxr",
+            "expression": "1.19.0-pre.2",
+            "define": "OPENXR_1_19_0_PRE_2_OR_NEWER"
         }
     ],
     "noEngineReferences": false
