@@ -13,6 +13,9 @@ namespace UnityEditor.XR.Hands.Capture
 #endif
     class HandGameObjects
     {
+        internal const string k_HandRootNameSuffix = "Hand Capture Playback";
+        internal const string k_DrawJointsParentNameSuffix = "Hand Capture Joints";
+
         GameObject m_JointPrefab;
         GameObject m_HandPrefab;
         GameObject m_HandRoot;
@@ -41,9 +44,8 @@ namespace UnityEditor.XR.Hands.Capture
             if (m_HandPrefab == null)
                 return;
 
-            var isSceneObject = m_HandPrefab.scene.IsValid();
-            m_HandRoot = isSceneObject ? m_HandPrefab : Object.Instantiate(m_HandPrefab);
-            m_HandRoot.name = $"{handedness} Hand Capture Playback";
+            m_HandRoot = Object.Instantiate(m_HandPrefab);
+            m_HandRoot.name = $"{handedness} {k_HandRootNameSuffix}";
             m_HandRoot.SetHideFlagsRecursively(k_CaptureHideFlags);
 
             m_HandRoot.transform.localPosition = Vector3.zero;
@@ -95,7 +97,7 @@ namespace UnityEditor.XR.Hands.Capture
                 m_JointTransformsLookup[jointIndex] = joint.jointTransform;
             }
 
-            var drawJointsParentName = $"{handedness} Hand Capture Joints";
+            var drawJointsParentName = $"{handedness} {k_DrawJointsParentNameSuffix}";
             m_DrawJointsParent = new GameObject(drawJointsParentName);
             m_DrawJointsParent.transform.parent = parent;
             m_DrawJointsParent.transform.localPosition = Vector3.zero;

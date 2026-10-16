@@ -36,7 +36,8 @@ namespace UnityEngine.XR.Hands.OpenXR
         Version = "0.0.1",
         OpenxrExtensionStrings = extensionString,
         Category = UnityEditor.XR.OpenXR.Features.FeatureCategory.Feature,
-        FeatureId = featureId)]
+        FeatureId = featureId,
+        Priority = HandTracking.k_ExtensionPriority)]
 #endif
     public class MetaHandTrackingUnextrapolatedPoses : OpenXRHandTrackingFeature
     {

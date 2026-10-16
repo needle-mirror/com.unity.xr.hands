@@ -240,7 +240,7 @@ namespace UnityEngine.XR.Hands.OpenXR.Tests
 
             bool? stagingResult = null;
 
-            // Fires after HandJointsMotionRangeFeature.OnInstanceCreate (priority 0) but before
+            // Fires after HandJointsMotionRangeFeature.OnInstanceCreate (lower priority) but before
             // any OnSessionCreate — the window where the chain is non-null but empty.
             m_TestFeature.instanceCreate = _ =>
             {

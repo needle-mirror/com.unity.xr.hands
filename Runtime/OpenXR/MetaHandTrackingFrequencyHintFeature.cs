@@ -55,7 +55,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         Category = UnityEditor.XR.OpenXR.Features.FeatureCategory.Feature,
         FeatureId = featureId,
         // Must run after HandTracking so that the xr session handle is available.
-        Priority = HandTracking.k_Priority - 1)]
+        Priority = HandTracking.k_ExtensionPriority)]
 #endif
     internal class MetaHandTrackingFrequencyHintFeature
         : OpenXRHandTrackingFeature,

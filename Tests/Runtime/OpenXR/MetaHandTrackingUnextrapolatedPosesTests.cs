@@ -23,9 +23,25 @@ namespace UnityEngine.XR.Hands.OpenXR.Tests
         public const float k_UnextrapolatedLeftMarker = 0.625f;
         public const float k_UnextrapolatedRightMarker = 0.875f;
 
+        // Restored by Reset(), which each test fixture calls in SetUp.
+#if UNITY_6000_5_OR_NEWER
+        [NoAutoStaticsCleanup]
+#endif
         public static int locateCallCount;
+
+#if UNITY_6000_5_OR_NEWER
+        [NoAutoStaticsCleanup]
+#endif
         public static int locatesCarryingRequest;
+
+#if UNITY_6000_5_OR_NEWER
+        [NoAutoStaticsCleanup]
+#endif
         public static long captureTimeToReport = k_CaptureTime;
+
+#if UNITY_6000_5_OR_NEWER
+        [NoAutoStaticsCleanup]
+#endif
         public static bool leftSecondaryLocateIsActive = true;
 
         public static void Reset()

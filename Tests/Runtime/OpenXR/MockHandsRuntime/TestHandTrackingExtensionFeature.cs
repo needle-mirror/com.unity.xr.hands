@@ -98,7 +98,7 @@ namespace UnityEngine.XR.Hands.OpenXR.MockHandsRuntime.Tests
         UiName = "Test Hand Tracking Extension",
         BuildTargetGroups = new[] { UnityEditor.BuildTargetGroup.Standalone },
         Hidden = true,
-        Priority = -1,
+        Priority = HandTracking.k_ExtensionPriority - 1,
         FeatureId = featureId)]
 #endif
     class TestHandTrackingExtensionFeature : OpenXRHandTrackingFeature

@@ -48,6 +48,7 @@ namespace UnityEditor.XR.Hands.Capture
         const string k_JointPrefabLabel = "Joint Prefab";
         const string k_DrawMeshesToggleLabel = "Should Draw Meshes";
         const string k_DrawJointsToggleLabel = "Should Draw Joints";
+        const string k_SceneObjectNotSupportedText = "{0} expects a prefab asset from the Project window. Scene objects can't be assigned.";
 
         const string k_ImportPathLabel = "Import To";
         const string k_ImportButtonText = "Import From Connected Headset";
@@ -119,25 +120,19 @@ namespace UnityEditor.XR.Hands.Capture
         {
             var handMeshSettings = EditorUIUtils.CreateFoldout(k_VisualizationSettingsTitle);
 
-            var leftHandPrefabField = EditorUIUtils.CreateObjectField(k_LeftHandPrefabLabel, typeof(GameObject));
-            leftHandPrefabField.value = m_CapturePlayback.leftHandPrefab;
-            leftHandPrefabField.RegisterValueChangedCallback(evt =>
-                m_CapturePlayback.leftHandPrefab = evt.newValue as GameObject);
+            var leftHandPrefabField = CreatePrefabAssetField(k_LeftHandPrefabLabel, m_CapturePlayback.leftHandPrefab,
+                prefab => m_CapturePlayback.leftHandPrefab = prefab);
 
-            var rightHandPrefabField = EditorUIUtils.CreateObjectField(k_RightHandPrefabLabel, typeof(GameObject));
-            rightHandPrefabField.value = m_CapturePlayback.rightHandPrefab;
-            rightHandPrefabField.RegisterValueChangedCallback(evt =>
-                m_CapturePlayback.rightHandPrefab = evt.newValue as GameObject);
+            var rightHandPrefabField = CreatePrefabAssetField(k_RightHandPrefabLabel, m_CapturePlayback.rightHandPrefab,
+                prefab => m_CapturePlayback.rightHandPrefab = prefab);
 
             var materialField = EditorUIUtils.CreateObjectField(k_HandMeshMaterialLabel, typeof(Material));
             materialField.value = m_CapturePlayback.handMeshMaterial;
             materialField.RegisterValueChangedCallback(evt =>
                 m_CapturePlayback.handMeshMaterial = evt.newValue as Material);
 
-            var jointPrefabField = EditorUIUtils.CreateObjectField(k_JointPrefabLabel, typeof(GameObject));
-            jointPrefabField.value = m_CapturePlayback.jointPrefab;
-            jointPrefabField.RegisterValueChangedCallback(evt =>
-                m_CapturePlayback.jointPrefab = evt.newValue as GameObject);
+            var jointPrefabField = CreatePrefabAssetField(k_JointPrefabLabel, m_CapturePlayback.jointPrefab,
+                prefab => m_CapturePlayback.jointPrefab = prefab);
 
             // Create Toggle controls for boolean properties
             var drawMeshesToggle = new Toggle(k_DrawMeshesToggleLabel) { value = m_CapturePlayback.shouldDrawMeshes };
@@ -157,6 +152,35 @@ namespace UnityEditor.XR.Hands.Capture
             handMeshSettings.Add(drawJointsToggle);
 
             return handMeshSettings;
+        }
+
+        static VisualElement CreatePrefabAssetField(string label, GameObject value, Action<GameObject> setPrefab)
+        {
+            var field = EditorUIUtils.CreateObjectField(label, typeof(GameObject));
+            field.value = value;
+            var warning = new HelpBox(string.Format(k_SceneObjectNotSupportedText, label), HelpBoxMessageType.Warning)
+            {
+                style = { display = DisplayStyle.None }
+            };
+
+            // Dropping the value the field already holds fires no change event, so clear the warning on every drop.
+            field.RegisterCallback<DragPerformEvent>(_ => warning.style.display = DisplayStyle.None, TrickleDown.TrickleDown);
+            field.RegisterValueChangedCallback(evt =>
+            {
+                var prefab = evt.newValue as GameObject;
+                var isSceneObject = prefab != null && prefab.scene.IsValid();
+                warning.style.display = isSceneObject ? DisplayStyle.Flex : DisplayStyle.None;
+
+                if (isSceneObject)
+                    field.SetValueWithoutNotify(evt.previousValue);
+                else
+                    setPrefab(prefab);
+            });
+
+            var container = new VisualElement();
+            container.Add(field);
+            container.Add(warning);
+            return container;
         }
 
         Foldout CreateImportRecordingSection(string title)
@@ -203,7 +227,7 @@ namespace UnityEditor.XR.Hands.Capture
             selectedRecordingField.value = m_CapturePlayback.selectedRecording;
             selectedRecordingField.RegisterValueChangedCallback(evt =>
             {
-                m_CapturePlayback.selectedRecording = evt.newValue as XRHandCaptureSequence;
+                m_CapturePlayback.SelectRecording(evt.newValue as XRHandCaptureSequence);
             });
             selectFrameSettings.Add(selectedRecordingField);
 
@@ -363,9 +387,8 @@ namespace UnityEditor.XR.Hands.Capture
             bool isRecordingAvailable = m_CapturePlayback != null && m_CapturePlayback.IsRecordingDataAvailable();
             m_FrameSelectionContainer.SetEnabled(isRecordingAvailable);
 
-            // Reset the frame ID to 0 when the recording data changes
-            OnFrameChanged(0);
-            m_CapturePlayback.selectedFrameID = 0;
+            // Changing the recording resets the frame ID to 0, so this line is needed to render the first frame
+            OnFrameChanged(m_CapturePlayback.selectedFrameID);
 
             // Reset the frame selection slider range
             ResetFrameSelectionSliderRange();
@@ -373,6 +396,7 @@ namespace UnityEditor.XR.Hands.Capture
             // If recording data is not available, clear the inspector and hide it
             if (!isRecordingAvailable)
             {
+                m_CapturePlayback.DestroyHandGameObjects();
                 m_XRHandShapeInspector.Clear();
                 m_XRHandShapeInspector.style.display = DisplayStyle.None;
             }

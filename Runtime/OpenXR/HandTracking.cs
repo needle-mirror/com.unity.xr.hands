@@ -59,6 +59,12 @@ namespace UnityEngine.XR.Hands.OpenXR
         internal const int k_Priority = -100;
 
         /// <summary>
+        /// The priority of features that extend Hand Tracking. Lower than <see cref="k_Priority"/>
+        /// so that Hand Tracking has initialized before any extension receives a callback.
+        /// </summary>
+        internal const int k_ExtensionPriority = k_Priority - 1;
+
+        /// <summary>
         /// (Deprecated) The feature ID string. This is used to give the feature a well known
         /// ID for reference.
         /// </summary>

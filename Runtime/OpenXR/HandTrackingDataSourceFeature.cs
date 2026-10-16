@@ -32,7 +32,8 @@ namespace UnityEngine.XR.Hands.OpenXR
         Version = "0.0.1",
         OpenxrExtensionStrings = extensionString,
         Category = UnityEditor.XR.OpenXR.Features.FeatureCategory.Feature,
-        FeatureId = featureId)]
+        FeatureId = featureId,
+        Priority = k_Priority)]
 #endif
     internal unsafe class HandTrackingDataSourceFeature
         : OpenXRHandTrackingFeature,
@@ -50,6 +51,8 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// extension is available or enabled.
         /// </summary>
         public const string extensionString = "XR_EXT_hand_tracking_data_source";
+
+        internal const int k_Priority = HandTracking.k_ExtensionPriority;
 
         [SerializeField]
         [Tooltip("Specifies hand tracking data sources the runtime should use for the left hand.")]

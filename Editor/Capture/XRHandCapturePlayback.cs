@@ -143,17 +143,16 @@ namespace UnityEditor.XR.Hands.Capture
             set => m_FingerShapeUpperTolerance = value;
         }
 
-        internal XRHandCaptureSequence selectedRecording
+        internal XRHandCaptureSequence selectedRecording => m_SelectedRecording;
+
+        internal void SelectRecording(XRHandCaptureSequence recording)
         {
-            get => m_SelectedRecording;
-            set
-            {
-                if (m_SelectedRecording != value)
-                {
-                    m_SelectedRecording = value;
-                    recordingChanged?.Invoke();
-                }
-            }
+            if (m_SelectedRecording == recording)
+                return;
+
+            m_SelectedRecording = recording;
+            m_SelectedFrameID = 0; // resets the frameID to 0
+            recordingChanged?.Invoke();
         }
 
         internal int selectedFrameID
@@ -284,11 +283,7 @@ namespace UnityEditor.XR.Hands.Capture
         internal void OnDestroy()
         {
             SavePreferences();
-
-            m_LeftHandGameObjects?.OnDestroy();
-            m_RightHandGameObjects?.OnDestroy();
-            m_LeftHandGameObjects = null;
-            m_RightHandGameObjects = null;
+            DestroyHandGameObjects();
 
             if (m_LeftHandShape != null)
                 ScriptableObject.DestroyImmediate(m_LeftHandShape);
@@ -296,6 +291,14 @@ namespace UnityEditor.XR.Hands.Capture
                 ScriptableObject.DestroyImmediate(m_RightHandShape);
 
             s_Instance = null;
+        }
+
+        internal void DestroyHandGameObjects()
+        {
+            m_LeftHandGameObjects?.OnDestroy();
+            m_RightHandGameObjects?.OnDestroy();
+            m_LeftHandGameObjects = null;
+            m_RightHandGameObjects = null;
         }
 
         internal void UpdateHandShapes()

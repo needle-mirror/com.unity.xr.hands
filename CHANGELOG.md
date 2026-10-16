@@ -10,11 +10,27 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 <!-- Headers should be listed in this order: Added, Changed, Deprecated, Removed, Fixed, Security -->
 
-## [1.10.0-pre.2] - 2026-09-29
+## [1.10.0] - 2026-10-16
+
+### Changed
+
+- The hand and joint prefab fields in the XR Hand Capture window no longer accept scene objects. Assigning one shows a warning and keeps the previous value.
+- Changed the recommended installation version of XR Interaction Toolkit to `3.6.1` for the Hand Capture sample.
+
+### Fixed
+
+- Fixed an issue where clearing the recording field in the XR Hand Capture window left the spawned hand visuals in the scene.
+- Fixed project validation checks in Gestures and HandCapture samples so they do not pop up the Project Validation window unless the check returns as an error, and never open it when the Editor runs in batch mode. [UUM-150025](https://issuetracker.unity3d.com/product/unity/issues/guid/UUM-150025)
+
+## [1.10.0-pre.2] - 2026-09-30
 
 ### Added
 
 - Added [Meta Hand Tracking Unextrapolated Poses](xref:xrhands-meta-unextrapolated-poses-feature) OpenXR feature, which enables the `XR_META_hand_tracking_unextrapolated_poses` extension to surface hand joint poses without runtime extrapolation, along with the time at which they were captured.
+
+### Fixed
+
+- Fixed an issue where importing package samples into Unity 7 alpha versions caused a compiler error.
 
 ## [1.10.0-pre.1] - 2026-09-03
 

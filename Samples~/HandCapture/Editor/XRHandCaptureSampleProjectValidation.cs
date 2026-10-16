@@ -39,7 +39,7 @@ namespace UnityEditor.XR.Hands.Samples.Capture
         const string k_SpatialKeyboardSampleName = "Spatial Keyboard";
         const string k_XRIPackageName = "com.unity.xr.interaction.toolkit";
         static readonly PackageVersion s_MinimumXRIPackageVersion = new PackageVersion("3.0.7");
-        static readonly PackageVersion s_RecommendedXRIPackageVersion = new PackageVersion("3.2.0");
+        static readonly PackageVersion s_RecommendedXRIPackageVersion = new PackageVersion("3.6.1");
         static AddRequest s_XRIPackageAddRequest;
 
 #if UNITY_6000_0_OR_NEWER
@@ -149,7 +149,7 @@ namespace UnityEditor.XR.Hands.Samples.Capture
                 FixItAutomatic = true,
                 Error = true,
             },
-#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
+#if !UNITY_7000_0_OR_NEWER && (TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER))
             new BuildValidationRule
             {
                 IsRuleEnabled = () => PackageVersionUtility.IsPackageInstalled(k_UIPackageName),
@@ -203,9 +203,12 @@ namespace UnityEditor.XR.Hands.Samples.Capture
 
         static void ShowWindowIfIssuesExist()
         {
+            if (Application.isBatchMode)
+                return;
+
             foreach (var validation in s_BuildValidationRules)
             {
-                if (validation.CheckPredicate == null || !validation.CheckPredicate.Invoke())
+                if (validation.CheckPredicate == null || (!validation.CheckPredicate.Invoke() && validation.Error))
                 {
                     ShowWindow();
                     return;

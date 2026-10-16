@@ -2,6 +2,7 @@
     "name": "Unity.XR.Hands.Editor.Tests",
     "references": [
         "Unity.XR.Hands",
+        "Unity.XR.Hands.Editor",
         "Unity.XR.Hands.OpenXR",
         "Unity.XR.OpenXR",
         "Unity.XR.OpenXR.Features",

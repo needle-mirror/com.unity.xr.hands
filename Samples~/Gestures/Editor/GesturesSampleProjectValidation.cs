@@ -105,7 +105,7 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample.Editor
                 FixItAutomatic = true,
                 Error = true,
             },
-#if TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER)
+#if !UNITY_7000_0_OR_NEWER && (TEXT_MESH_PRO_PRESENT || (UGUI_2_0_PRESENT && UNITY_6000_0_OR_NEWER))
             new BuildValidationRule
             {
                 IsRuleEnabled = () => PackageVersionUtility.IsPackageInstalled(k_UIPackageName),
@@ -161,9 +161,12 @@ namespace UnityEngine.XR.Hands.Samples.GestureSample.Editor
 
         static void ShowWindowIfIssuesExist()
         {
+            if (Application.isBatchMode)
+                return;
+
             foreach (var validation in s_BuildValidationRules)
             {
-                if (validation.CheckPredicate == null || !validation.CheckPredicate.Invoke())
+                if (validation.CheckPredicate == null || (!validation.CheckPredicate.Invoke() && validation.Error))
                 {
                     ShowWindow();
                     return;

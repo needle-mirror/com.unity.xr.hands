@@ -43,8 +43,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         OpenxrExtensionStrings = extensionString,
         Category = UnityEditor.XR.OpenXR.Features.FeatureCategory.Feature,
         FeatureId = featureId,
-        // Must run after HandTracking so that HandTrackingDataSourceFeature is initialized.
-        Priority = HandTracking.k_Priority - 1)]
+        Priority = k_Priority)]
 #endif
     public class MetaHandTrackingWideMotionMode : OpenXRFeature
     {
@@ -59,6 +58,13 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// extension is available or enabled.
         /// </summary>
         public const string extensionString = "XR_META_hand_tracking_wide_motion_mode2";
+
+        /// <summary>
+        /// Must be lower than <see cref="HandTrackingDataSourceFeature.k_Priority"/> so that this
+        /// feature's <c>OnInstanceCreate</c> runs after the data source feature's, which resets
+        /// the preferred sources that this feature overrides.
+        /// </summary>
+        internal const int k_Priority = HandTrackingDataSourceFeature.k_Priority - 1;
 
         /// <inheritdoc/>
         protected override bool OnInstanceCreate(ulong xrInstance)

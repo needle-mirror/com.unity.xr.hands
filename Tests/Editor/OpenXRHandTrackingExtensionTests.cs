@@ -1,5 +1,6 @@
 #if UNITY_EDITOR && UNITY_OPENXR_HAS_EXTENSIBLE_HAND_TRACKING
 
+using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEditor.XR.OpenXR.Features;
@@ -211,6 +212,27 @@ namespace UnityEditor.XR.Hands.Tests
             }
         }
 #endif
+
+        [Test]
+        public void HandTrackingExtensionFeatures_Priority_IsBelowHandTracking()
+        {
+            var featureTypes = new List<string>();
+            var featuresRunningBeforeHandTracking = new List<string>();
+            foreach (var type in TypeCache.GetTypesDerivedFrom<OpenXRHandTrackingFeature>())
+            {
+                var attribute = type.GetCustomAttribute<OpenXRFeatureAttribute>();
+                if (attribute == null)
+                    continue;
+
+                featureTypes.Add(type.Name);
+                if (attribute.Priority >= HandTracking.k_Priority)
+                    featuresRunningBeforeHandTracking.Add($"{type.Name} ({attribute.Priority})");
+            }
+
+            Assert.That(featureTypes, Is.Not.Empty, $"Expected to find {nameof(OpenXRHandTrackingFeature)} subclasses to check.");
+            Assert.That(featuresRunningBeforeHandTracking, Is.Empty,
+                $"These features should have a priority lower than {nameof(HandTracking)} ({HandTracking.k_Priority}) so that they run after it.");
+        }
     }
 }
 
