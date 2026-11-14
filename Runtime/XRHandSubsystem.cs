@@ -228,6 +228,77 @@ namespace UnityEngine.XR.Hands
         XRHandSubsystemConfiguration m_XRHandSubsystemConfiguration;
 
         /// <summary>
+        /// A callback invoked for each hand update.
+        /// </summary>
+        /// <remarks>
+        /// This callback is invoked twice per frame, once near
+        /// the <c>MonoBehaviour.Update</c> event and once near the <see cref="Application.onBeforeRender"/>
+        /// event. The <see cref="UpdateType.BeforeRender"/> update provides the lowest latency between
+        /// hand motion and rendering, but occurs too late to affect physics. In addition, trying to
+        /// perform too much work during the <c>BeforeRender</c> callback can negatively impact framerate.
+        /// For best results, update game logic affected by hand tracking in a
+        /// <see cref="UpdateType.Dynamic"/> update and update hand visuals in a
+        /// <see cref="UpdateType.BeforeRender"/> update.
+        ///
+        /// The delegate assigned to this property must take three parameters, which have the
+        /// following types and assigned values when the callback is invoked:
+        ///
+        /// * <see cref="XRHandSubsystem"/>: contains a reference to this subsystem.
+        /// * <see cref="UpdateSuccessFlags"/>: the flags indicating which data could be updated.
+        /// * <see cref="UpdateType"/>: the update timing.
+        /// </remarks>
+        public Action<XRHandSubsystem, UpdateSuccessFlags, UpdateType> updatedHands;
+
+        /// <summary>
+        /// A callback invoked when the subsystem begins tracking a hand's root pose and joints.
+        /// </summary>
+        /// <remarks>
+        /// This is called before <see cref="updatedHands"/>.
+        ///
+        /// The delegate assigned to this property must take one parameter of type
+        /// <see cref="XRHand"/>, which is assigned a reference to the hand whose tracking was acquired.
+        /// </remarks>
+        public Action<XRHand> trackingAcquired;
+
+        /// <summary>
+        /// A callback invoked when the subsystem stops tracking a hand's root pose and joints.
+        /// </summary>
+        /// <remarks>
+        /// This is called before <see cref="updatedHands"/>.
+        ///
+        /// The delegate assigned to this property must take one parameter of type
+        /// <see cref="XRHand"/>, which is assigned a reference to the hand whose tracking was lost.
+        /// </remarks>
+        public Action<XRHand> trackingLost;
+
+        /// <summary>
+        /// This is called after the subsystem retrieves joint data from the
+        /// provider, and before and <see cref="IXRHandProcessor"/>s'
+        /// <see cref="IXRHandProcessor.ProcessJoints"/> are called.
+        /// </summary>
+        public Action<XRHandSubsystem, UpdateSuccessFlags, UpdateType> preprocessJoints;
+
+        StatePerHand[] m_StatePerHand;
+
+        UpdateSuccessFlags m_UpdateSuccessFlags;
+        NativeArray<bool> m_JointsInLayout;
+
+        List<IXRHandProcessor> m_Processors = new List<IXRHandProcessor>();
+
+        // Profiler markers
+        static readonly ProfilerMarker s_TryUpdateHandsMarker = new ProfilerMarker("XRHandSubsystem.TryUpdateHands");
+        static readonly ProfilerMarker s_RetrieveCommonPoseDataMarker = new ProfilerMarker("XRHandSubsystem.RetrieveCommonPoseData");
+        static readonly ProfilerMarker s_UpdateUnextrapolatedHandsMarker = new ProfilerMarker("XRHandSubsystem.UpdateUnextrapolatedHands");
+        static readonly ProfilerMarker s_TrackingEventsMarker = new ProfilerMarker("XRHandSubsystem.TrackingEvents");
+        static readonly ProfilerMarker s_ProviderTryUpdateHandsMarker = new ProfilerMarker("XRHandSubsystem.Provider.TryUpdateHands");
+        static readonly ProfilerMarker s_PostUpdateMarker = new ProfilerMarker("XRHandSubsystem.PostUpdate");
+
+        XRHandSubsystemActions m_Actions;
+
+        readonly Dictionary<Type, IXRHandExtendedDataReadHandler> m_ExtendedDataHandlers = new();
+        readonly Dictionary<Type, IXRHandConfigurationHandler> m_ConfigurationHandlers = new();
+
+        /// <summary>
         /// The current subsystem configuration settings.
         /// </summary>
         public XRHandSubsystemConfiguration handSubsystemConfiguration => m_XRHandSubsystemConfiguration;
@@ -347,50 +418,6 @@ namespace UnityEngine.XR.Hands
             /// </summary>
             BeforeRender
         }
-
-        /// <summary>
-        /// A callback invoked for each hand update.
-        /// </summary>
-        /// <remarks>
-        /// This callback is invoked twice per frame, once near
-        /// the <c>MonoBehaviour.Update</c> event and once near the <see cref="Application.onBeforeRender"/>
-        /// event. The <see cref="UpdateType.BeforeRender"/> update provides the lowest latency between
-        /// hand motion and rendering, but occurs too late to affect physics. In addition, trying to
-        /// perform too much work during the <c>BeforeRender</c> callback can negatively impact framerate.
-        /// For best results, update game logic affected by hand tracking in a
-        /// <see cref="UpdateType.Dynamic"/> update and update hand visuals in a
-        /// <see cref="UpdateType.BeforeRender"/> update.
-        ///
-        /// The delegate assigned to this property must take three parameters, which have the
-        /// following types and assigned values when the callback is invoked:
-        ///
-        /// * <see cref="XRHandSubsystem"/>: contains a reference to this subsystem.
-        /// * <see cref="UpdateSuccessFlags"/>: the flags indicating which data could be updated.
-        /// * <see cref="UpdateType"/>: the update timing.
-        /// </remarks>
-        public Action<XRHandSubsystem, UpdateSuccessFlags, UpdateType> updatedHands;
-
-        /// <summary>
-        /// A callback invoked when the subsystem begins tracking a hand's root pose and joints.
-        /// </summary>
-        /// <remarks>
-        /// This is called before <see cref="updatedHands"/>.
-        ///
-        /// The delegate assigned to this property must take one parameter of type
-        /// <see cref="XRHand"/>, which is assigned a reference to the hand whose tracking was acquired.
-        /// </remarks>
-        public Action<XRHand> trackingAcquired;
-
-        /// <summary>
-        /// A callback invoked when the subsystem stops tracking a hand's root pose and joints.
-        /// </summary>
-        /// <remarks>
-        /// This is called before <see cref="updatedHands"/>.
-        ///
-        /// The delegate assigned to this property must take one parameter of type
-        /// <see cref="XRHand"/>, which is assigned a reference to the hand whose tracking was lost.
-        /// </remarks>
-        public Action<XRHand> trackingLost;
 
         /// <summary>
         /// Gets common hand gestures getters and callbacks for the left hand.
@@ -576,11 +603,6 @@ namespace UnityEngine.XR.Hands
                         }
                     }
 
-#if UNITY_OPENXR_PACKAGE
-                    if (provider is OpenXR.OpenXRHandProvider openXRProvider)
-                        openXRProvider.FlushMetaAimChanges();
-#endif // UNITY_OPENXR_PACKAGE
-
                     // Avoid foreach allocation by iterating handedness values directly
                     {
                         int handedIndex = Handedness.Left.ToIndex();
@@ -597,11 +619,6 @@ namespace UnityEngine.XR.Hands
 
                     if (updatedHands != null)
                         updatedHands.Invoke(this, updateSuccessFlags, updateType);
-
-#pragma warning disable 618
-                    if (handsUpdated != null)
-                        handsUpdated.Invoke(updateSuccessFlags, updateType);
-#pragma warning restore 618
 
                     return updateSuccessFlags;
                 }
@@ -683,13 +700,6 @@ namespace UnityEngine.XR.Hands
             meshData.m_IsRootPoseValid = false;
             return meshData;
         }
-
-        /// <summary>
-        /// This is called after the subsystem retrieves joint data from the
-        /// provider, and before and <see cref="IXRHandProcessor"/>s'
-        /// <see cref="IXRHandProcessor.ProcessJoints"/> are called.
-        /// </summary>
-        public Action<XRHandSubsystem, UpdateSuccessFlags, UpdateType> preprocessJoints;
 
         /// <summary>
         /// Describes which version of authored hand meshes is detected for use.
@@ -880,6 +890,19 @@ namespace UnityEngine.XR.Hands
                 else
                     commonGestures.InvalidatePokePose();
             }
+
+            if (subsystemDescriptor.supportsMicrogestures)
+            {
+                var microgestures = XRHandMicrogestureFlags.None;
+                for (var gestureIdx = (int)XRHandMicrogestureUtility.k_FirstMicrogesture; gestureIdx <= (int)XRHandMicrogestureUtility.k_LastMicrogesture; gestureIdx++)
+                {
+                    var microgesture = (XRHandMicrogesture)gestureIdx;
+                    if (provider.IsMicrogestureActive(handedness, microgesture))
+                        microgestures |= microgesture.ToMicrogestureFlag();
+                }
+
+                commonGestures.UpdateMicrogestures(microgestures);
+            }
         }
 
         static bool IsValid(XRHandExtrapolation extrapolation)
@@ -941,28 +964,8 @@ namespace UnityEngine.XR.Hands
             internal bool m_IsAimStateValid;
         }
 
-        StatePerHand[] m_StatePerHand;
-
-        UpdateSuccessFlags m_UpdateSuccessFlags;
-        NativeArray<bool> m_JointsInLayout;
-
-        List<IXRHandProcessor> m_Processors = new List<IXRHandProcessor>();
-
-        // Profiler markers
-        static readonly ProfilerMarker s_TryUpdateHandsMarker = new ProfilerMarker("XRHandSubsystem.TryUpdateHands");
-        static readonly ProfilerMarker s_RetrieveCommonPoseDataMarker = new ProfilerMarker("XRHandSubsystem.RetrieveCommonPoseData");
-        static readonly ProfilerMarker s_UpdateUnextrapolatedHandsMarker = new ProfilerMarker("XRHandSubsystem.UpdateUnextrapolatedHands");
-        static readonly ProfilerMarker s_TrackingEventsMarker = new ProfilerMarker("XRHandSubsystem.TrackingEvents");
-        static readonly ProfilerMarker s_ProviderTryUpdateHandsMarker = new ProfilerMarker("XRHandSubsystem.Provider.TryUpdateHands");
-        static readonly ProfilerMarker s_PostUpdateMarker = new ProfilerMarker("XRHandSubsystem.PostUpdate");
-
-        XRHandSubsystemActions m_Actions;
-
         static int CompareProcessors(IXRHandProcessor a, IXRHandProcessor b)
             => a.callbackOrder.CompareTo(b.callbackOrder);
-
-        readonly Dictionary<Type, IXRHandExtendedDataReadHandler> m_ExtendedDataHandlers = new();
-        readonly Dictionary<Type, IXRHandConfigurationHandler> m_ConfigurationHandlers = new();
 
         /// <summary>
         /// Registers a handler that provides per-hand extended data of type

@@ -36,12 +36,19 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// <summary>
         /// See <see cref="UnityEngine.SubsystemsImplementation.SubsystemProvider{T}.Start"/>.
         /// </summary>
-        public override void Start() {}
+        public override void Start()
+        {
+#if UNITY_OPENXR_PACKAGE_1_8
+            m_ApplyMetaAimRotationOffset = OpenXRRuntime.name == "Oculus";
+#endif
+        }
 
         /// <summary>
         /// See <see cref="UnityEngine.SubsystemsImplementation.SubsystemProvider{T}.Stop"/>.
         /// </summary>
-        public override void Stop() {}
+        public override void Stop()
+        {
+        }
 
         /// <summary>
         /// See <see cref="UnityEngine.SubsystemsImplementation.SubsystemProvider{T}.Destroy"/>.
@@ -202,7 +209,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         {
             get
             {
-                if (m_IsHandInteractionProfileEnabled)
+                if (m_IsHandInteractionProfileEnabled || m_IsMetaHandTrackingAimEnabled)
                     return true;
 
                 m_IsHandInteractionProfileEnabled =
@@ -211,10 +218,19 @@ namespace UnityEngine.XR.Hands.OpenXR
 #else
                     false;
 #endif
-                return m_IsHandInteractionProfileEnabled;
+
+                m_IsMetaHandTrackingAimEnabled =
+#if UNITY_OPENXR_PACKAGE_1_8
+                    OpenXRRuntime.IsExtensionEnabled(MetaHandTrackingAim.extensionString);
+#else
+                    false;
+#endif
+
+                return m_IsHandInteractionProfileEnabled || m_IsMetaHandTrackingAimEnabled;
             }
         }
         bool m_IsHandInteractionProfileEnabled;
+        bool m_IsMetaHandTrackingAimEnabled;
 
         /// <inheritdoc/>
         internal override bool TryGetCommonGesturesState(Handedness handedness, out XRCommonHandGesturesState commonGestures)
@@ -230,7 +246,21 @@ namespace UnityEngine.XR.Hands.OpenXR
 
             // If there's no hand device, all other property values of the state should remain default.
             if (!TryGetHandDevice(handedness, out var handDevice))
+            {
+                // Provide the Meta Aim Pose if available as a fallback to Aim Pose.
+                if (TryGetMetaAim(handedness, out var metaAimPose, out var isAimPoseValid, out var isAimPoseTracked))
+                {
+                    commonGestures.aimPoseInternal = metaAimPose;
+
+                    if (isAimPoseValid)
+                        commonGestures.flags = commonGestures.flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsAimPoseValid);
+
+                    if (isAimPoseTracked)
+                        commonGestures.flags = commonGestures.flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsAimPoseTracked);
+                }
+
                 return true;
+            }
 
             var flags = commonGestures.flags;
 
@@ -296,6 +326,13 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (handDevice.TryGetFeatureValue(Usages.pinchReady, out isReady) && isReady)
                 flags = flags.WithGesturesFlag(XRCommonHandGesturesFlags.IsPinchValueValid | XRCommonHandGesturesFlags.IsPinchTouchedStateValid);
 
+            // Microgestures
+            var microgestures = XRHandMicrogestureFlags.None;
+#if OPENXR_7_0_0_PRE_1_OR_NEWER
+            if (s_RegisteredDescriptorCinfo.HasValue && s_RegisteredDescriptorCinfo.Value.supportsMicrogestures)
+                microgestures = ReadMicrogestures(handDevice);
+#endif
+
             commonGestures.flags = flags;
 
             commonGestures.aimPoseInternal = aimPose;
@@ -312,6 +349,8 @@ namespace UnityEngine.XR.Hands.OpenXR
             commonGestures.pinchValueInternal = pinchValue;
             commonGestures.isPinchTouchedInternal = isPinchTouched;
 
+            commonGestures.microgesturesInternal = microgestures;
+
             return true;
 #else
             return base.TryGetCommonGesturesState(handedness, out commonGestures);
@@ -323,16 +362,26 @@ namespace UnityEngine.XR.Hands.OpenXR
         {
             aimPose = Pose.identity;
 #if UNITY_OPENXR_PACKAGE_1_8
-            if (!TryGetHandDevice(handedness, out var handDevice))
-                return false;
+            if (TryGetHandDevice(handedness, out var handDevice))
+            {
+                if (handDevice.TryGetFeatureValue(Usages.pointerPosition, out var position))
+                    aimPose.position = position;
 
-            if (handDevice.TryGetFeatureValue(Usages.pointerPosition, out var position))
-                aimPose.position = position;
+                if (handDevice.TryGetFeatureValue(Usages.pointerRotation, out var rotation))
+                    aimPose.rotation = rotation;
 
-            if (handDevice.TryGetFeatureValue(Usages.pointerRotation, out var rotation))
-                aimPose.rotation = rotation;
+                return handDevice.TryGetFeatureValue(Usages.pointerTrackingState, out var trackingState) && IsValid(trackingState);
+            }
 
-            return handDevice.TryGetFeatureValue(Usages.pointerTrackingState, out var trackingState) && IsValid(trackingState);
+            // Provide the Meta Aim Pose if available as a fallback to Aim Pose.
+            if (TryGetMetaAim(handedness, out var metaAimPose, out var isAimPoseValid, out _))
+            {
+                aimPose = metaAimPose;
+
+                return isAimPoseValid;
+            }
+
+            return false;
 #else
             return false;
 #endif
@@ -488,10 +537,93 @@ namespace UnityEngine.XR.Hands.OpenXR
 #endif
         }
 
+        /// <inheritdoc/>
+        /// <remarks>
+        /// <see cref="XRHandSubsystem"/> reads microgestures for this provider through the common gestures state, so
+        /// it doesn't call this method during normal updates.
+        /// </remarks>
+        public override bool IsMicrogestureActive(Handedness handedness, XRHandMicrogesture microgesture)
+        {
+#if OPENXR_7_0_0_PRE_1_OR_NEWER
+            return TryGetHandDevice(handedness, out var handDevice) &&
+                TryGetMicrogestureUsage(microgesture, out var usage) &&
+                handDevice.TryGetFeatureValue(usage, out var isActive) &&
+                isActive;
+#else
+            return false;
+#endif
+        }
+
 #if UNITY_OPENXR_PACKAGE_1_8
+#if OPENXR_7_0_0_PRE_1_OR_NEWER
+        static bool TryGetMicrogestureUsage(XRHandMicrogesture microgesture, out InputFeatureUsage<bool> usage)
+        {
+            switch (microgesture)
+            {
+                case XRHandMicrogesture.SwipeLeft:
+                    usage = Usages.swipeLeft;
+                    return true;
+                case XRHandMicrogesture.SwipeRight:
+                    usage = Usages.swipeRight;
+                    return true;
+                case XRHandMicrogesture.SwipeForward:
+                    usage = Usages.swipeForward;
+                    return true;
+                case XRHandMicrogesture.SwipeBackward:
+                    usage = Usages.swipeBackward;
+                    return true;
+                case XRHandMicrogesture.TapThumb:
+                    usage = Usages.tapThumb;
+                    return true;
+                default:
+                    usage = default;
+                    return false;
+            }
+        }
+
+        static XRHandMicrogestureFlags ReadMicrogestures(InputDevice handDevice)
+        {
+            var microgestures = XRHandMicrogestureFlags.None;
+            for (var gestureIndex = (int)XRHandMicrogestureUtility.k_FirstMicrogesture; gestureIndex <= (int)XRHandMicrogestureUtility.k_LastMicrogesture; gestureIndex++)
+            {
+                var microgesture = (XRHandMicrogesture)gestureIndex;
+                if (TryGetMicrogestureUsage(microgesture, out var usage) && handDevice.TryGetFeatureValue(usage, out var isActive) && isActive)
+                    microgestures |= microgesture.ToMicrogestureFlag();
+            }
+
+            return microgestures;
+        }
+#endif
+
         static bool IsValid(uint trackingState)
         {
             return ((InputTrackingState)trackingState & (InputTrackingState.Position | InputTrackingState.Rotation)) == (InputTrackingState.Position | InputTrackingState.Rotation);
+        }
+
+        bool TryGetMetaAim(Handedness handedness, out Pose aimPose, out bool isAimPoseValid, out bool isAimPoseTracked)
+        {
+            aimPose = Pose.identity;
+            isAimPoseValid = false;
+            isAimPoseTracked = false;
+
+            if (s_MetaAim == null)
+                return false;
+
+            var handednessAsIndex = handedness.ToIndex();
+            var aimState = m_AgnosticAimStates[handednessAsIndex];
+
+            aimPose = aimState.aimPoseInternal;
+
+            if (m_ApplyMetaAimRotationOffset)
+                aimPose.rotation *= Quaternion.AngleAxis(90f, Vector3.forward);
+
+            if (m_AgnosticAimStatesValidity[handednessAsIndex])
+            {
+                isAimPoseValid = IsValid((uint)aimState.trackingState);
+                isAimPoseTracked = aimState.isTracked;
+            }
+
+            return true;
         }
 #endif
 
@@ -586,9 +718,16 @@ namespace UnityEngine.XR.Hands.OpenXR
             internal static readonly InputFeatureUsage<bool> pinchReady = new InputFeatureUsage<bool>("PinchReady");
             internal static readonly InputFeatureUsage<float> pinchValue = new InputFeatureUsage<float>("PinchValue");
             internal static readonly InputFeatureUsage<bool> pinchTouched = new InputFeatureUsage<bool>("PinchTouched");
-        }
 
-        internal void FlushMetaAimChanges() => s_MetaAim?.FlushMetaAimChanges();
+#if OPENXR_7_0_0_PRE_1_OR_NEWER
+            // Microgesture actions
+            internal static readonly InputFeatureUsage<bool> swipeLeft = new InputFeatureUsage<bool>("swipeLeft");
+            internal static readonly InputFeatureUsage<bool> swipeRight = new InputFeatureUsage<bool>("swipeRight");
+            internal static readonly InputFeatureUsage<bool> swipeForward = new InputFeatureUsage<bool>("swipeForward");
+            internal static readonly InputFeatureUsage<bool> swipeBackward = new InputFeatureUsage<bool>("swipeBackward");
+            internal static readonly InputFeatureUsage<bool> tapThumb = new InputFeatureUsage<bool>("tapThumb");
+#endif
+        }
 
         InputDevice m_LeftHandInteractionDevice;
         InputDevice m_RightHandInteractionDevice;
@@ -609,8 +748,8 @@ namespace UnityEngine.XR.Hands.OpenXR
 
             InputDevices.GetDevicesWithCharacteristics(
                 handedness == Handedness.Left
-                ? InputDeviceCharacteristics.Left
-                : InputDeviceCharacteristics.Right,
+                    ? InputDeviceCharacteristics.Left
+                    : InputDeviceCharacteristics.Right,
                 s_DevicesReuse);
 
             for (int deviceIndex = 0; deviceIndex < s_DevicesReuse.Count; ++deviceIndex)
@@ -630,6 +769,25 @@ namespace UnityEngine.XR.Hands.OpenXR
             device = default;
             return false;
         }
+
+        /// <summary>
+        /// Whether to modify the rotation of the Meta Aim Pose when providing the common aim pose
+        /// to make it conform to the Hand Interaction Profile convention.
+        /// </summary>
+        /// <remarks>
+        /// On Oculus only, the Meta Aim Pose has a -90 degree offset from the Hand Interaction Profile aim rotation.
+        /// Since the primary way of populating the common hand gestures data is with the Hand Interaction Profile rather
+        /// than the Meta Aim Pose, when this is true the rotation is fixed up to match what the Hand Interaction Profile
+        /// aim pose would be.
+        /// <br/>
+        /// This makes the aim pose rotation consistent in the XRHandDevice no matter which of the Hand Interaction Profile
+        /// or Meta Hand Tracking Aim OpenXR features are enabled if users depend on the rotation.
+        /// However, in practice, users shouldn't place much importance on the orientation of the pose and instead
+        /// just use the forward direction in their logic since for the XR_EXT_hand_interaction aim pose (emphasis added):
+        /// "The +Y direction is a <b>runtime defined direction</b> based on the hand tracking device or ergonomics of the controller in the user’s hand."
+        /// See https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#_aim_pose.
+        /// </remarks>
+        bool m_ApplyMetaAimRotationOffset;
 #endif
 
         bool m_IsValid;
@@ -659,27 +817,39 @@ namespace UnityEngine.XR.Hands.OpenXR
             if (settings == null)
                 return;
 
-            var feature = settings.GetFeature<HandTracking>();
-            if (feature == null || !feature.enabled)
+            var handTracking = settings.GetFeature<HandTracking>();
+            if (handTracking == null || !handTracking.enabled)
                 return;
 
 #if UNITY_OPENXR_PACKAGE_1_8
-            var profile = settings.GetFeature<HandInteractionProfile>();
-            var commonPosesEnabled = profile != null && profile.enabled;
+            var handInteractionProfile = settings.GetFeature<HandInteractionProfile>();
+            var commonPosesEnabled = handInteractionProfile != null && handInteractionProfile.enabled;
+
+            var metaHandTrackingAim = settings.GetFeature<MetaHandTrackingAim>();
+            var metaAimPoseEnabled = metaHandTrackingAim != null && metaHandTrackingAim.enabled;
 #else
             var commonPosesEnabled = false;
+            var metaAimPoseEnabled = false;
+#endif
+
+#if OPENXR_7_0_0_PRE_1_OR_NEWER
+            var microgesturesFeature = settings.GetFeature<HandInteractionProfileMicrogestures>();
+            var microgesturesEnabled = commonPosesEnabled && microgesturesFeature != null && microgesturesFeature.enabled;
+#else
+            var microgesturesEnabled = false;
 #endif
             var handsSubsystemCinfo = new XRHandSubsystemDescriptor.Cinfo
             {
                 id = id,
                 providerType = typeof(OpenXRHandProvider),
-                supportsAimPose = commonPosesEnabled,
+                supportsAimPose = commonPosesEnabled || metaAimPoseEnabled,
                 supportsAimActivateValue = commonPosesEnabled,
                 supportsGraspValue = commonPosesEnabled,
                 supportsGripPose = commonPosesEnabled,
                 supportsPinchPose = commonPosesEnabled,
                 supportsPinchValue = commonPosesEnabled,
                 supportsPokePose = commonPosesEnabled,
+                supportsMicrogestures = microgesturesEnabled,
             };
 
             // Determine if we need to register or replace the subsystem descriptor.
@@ -697,9 +867,8 @@ namespace UnityEngine.XR.Hands.OpenXR
                 // "Registering subsystem descriptor with duplicate ID 'OpenXR Hands' - overwriting previous entry."
                 // There is no API in the subsystem module for avoiding the warning that will be logged
                 // during the Register method when replacing the subsystem descriptor.
-                var enabledOrDisabled = commonPosesEnabled ? "enabled" : "disabled";
                 Debug.Log($"The registered subsystem descriptor with ID '{id}' will be overwritten" +
-                    $" since Hand Interaction Profile has changed to be {enabledOrDisabled} since last Play mode.");
+                    " since Hand Interaction Profile, Hand Interaction Profile Microgestures, or Meta Hand Tracking Aim has changed enabled state since last Play mode.");
 
                 registerSubsystemDescriptor = true;
             }

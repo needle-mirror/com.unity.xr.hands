@@ -69,27 +69,15 @@ namespace UnityEngine.XR.Hands.Gestures
                 set => m_LowerTolerance = Mathf.Clamp01(value);
             }
 
-            [HideInInspector, SerializeField, Obsolete("Deprecated. Use upperTolerance and lowerTolerance instead.")]
-            float m_Tolerance;
-
             /// <summary>
-            /// The deprecated minimum and maximum the value can differ from the <see cref="desired"/>
-            /// for the condition to be met.
+            /// (Obsolete) Always returns <c>0</c>. Use <see cref="upperTolerance"/> and
+            /// <see cref="lowerTolerance"/> instead.
             /// </summary>
-            [Obsolete("Deprecated. Use upperTolerance and lowerTolerance instead.")]
+            [Obsolete("tolerance is obsolete. Use upperTolerance and lowerTolerance instead.", true)]
             public float tolerance
             {
-                get => m_Tolerance;
-                set
-                {
-                    Debug.LogWarning("Deprecated. Use upperTolerance and lowerTolerance instead. Both of those properties will be set via the deprecated tolerance value.");
-                    m_Tolerance = Mathf.Clamp01(value);
-                    upperTolerance = m_Tolerance;
-                    lowerTolerance = m_Tolerance;
-
-                    // Reset tolerance value to zero in order to prevent further deprecated upgrade functionality
-                    m_Tolerance = 0f;
-                }
+                get => 0f;
+                set => throw new NotSupportedException("tolerance is no longer supported. Use upperTolerance and lowerTolerance instead.");
             }
 
             [Range(0f, 1f)]

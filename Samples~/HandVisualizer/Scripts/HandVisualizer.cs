@@ -470,7 +470,7 @@ namespace UnityEngine.XR.Hands.Samples.VisualizerSample
                     for (var childIndex = 0; childIndex < m_HandRoot.transform.childCount; ++childIndex)
                     {
                         var child = m_HandRoot.transform.GetChild(childIndex);
-                        if (child.gameObject.name.EndsWith(XRHandJointID.Wrist.ToString()))
+                        if (child.gameObject.name.EndsWith(nameof(XRHandJointID.Wrist)))
                             root = child;
                     }
 

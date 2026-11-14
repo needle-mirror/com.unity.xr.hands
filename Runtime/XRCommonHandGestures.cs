@@ -358,6 +358,109 @@ namespace UnityEngine.XR.Hands
         }
 
         /// <summary>
+        /// Event-args type for when one or more microgestures become active or inactive.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="XRCommonHandGestures"/> reuses one instance per hand. Its properties read the current state of
+        /// <see cref="commonGestures"/>, so read them inside the <see cref="microgestureUpdated"/> listener.
+        /// </remarks>
+        /// <seealso cref="microgestureUpdated"/>
+        /// <seealso cref="IsMicrogestureActive(XRHandMicrogesture)"/>
+        /// <seealso cref="WasMicrogesturePerformedThisFrame(XRHandMicrogesture)"/>
+        /// <seealso cref="WasMicrogestureCompletedThisFrame(XRHandMicrogesture)"/>
+        public class MicrogestureUpdatedEventArgs
+        {
+            /// <summary>
+            /// Which hand is being updated.
+            /// </summary>
+            public Handedness handedness => m_CommonGestures.handedness;
+
+            /// <summary>
+            /// The common gestures that raised this event.
+            /// </summary>
+            public XRCommonHandGestures commonGestures => m_CommonGestures;
+
+            /// <summary>
+            /// Whether a left thumb swipe is active as of the latest dynamic update.
+            /// </summary>
+            public bool swipeLeftActive => m_CommonGestures.IsMicrogestureActive(XRHandMicrogesture.SwipeLeft);
+
+            /// <summary>
+            /// Whether a left thumb swipe became active in the latest dynamic update.
+            /// </summary>
+            public bool swipeLeftPerformedThisFrame => m_CommonGestures.WasMicrogesturePerformedThisFrame(XRHandMicrogesture.SwipeLeft);
+
+            /// <summary>
+            /// Whether a left thumb swipe became inactive in the latest dynamic update.
+            /// </summary>
+            public bool swipeLeftCompletedThisFrame => m_CommonGestures.WasMicrogestureCompletedThisFrame(XRHandMicrogesture.SwipeLeft);
+
+            /// <summary>
+            /// Whether a right thumb swipe is active as of the latest dynamic update.
+            /// </summary>
+            public bool swipeRightActive => m_CommonGestures.IsMicrogestureActive(XRHandMicrogesture.SwipeRight);
+
+            /// <summary>
+            /// Whether a right thumb swipe became active in the latest dynamic update.
+            /// </summary>
+            public bool swipeRightPerformedThisFrame => m_CommonGestures.WasMicrogesturePerformedThisFrame(XRHandMicrogesture.SwipeRight);
+
+            /// <summary>
+            /// Whether a right thumb swipe became inactive in the latest dynamic update.
+            /// </summary>
+            public bool swipeRightCompletedThisFrame => m_CommonGestures.WasMicrogestureCompletedThisFrame(XRHandMicrogesture.SwipeRight);
+
+            /// <summary>
+            /// Whether a forward thumb swipe is active as of the latest dynamic update.
+            /// </summary>
+            public bool swipeForwardActive => m_CommonGestures.IsMicrogestureActive(XRHandMicrogesture.SwipeForward);
+
+            /// <summary>
+            /// Whether a forward thumb swipe became active in the latest dynamic update.
+            /// </summary>
+            public bool swipeForwardPerformedThisFrame => m_CommonGestures.WasMicrogesturePerformedThisFrame(XRHandMicrogesture.SwipeForward);
+
+            /// <summary>
+            /// Whether a forward thumb swipe became inactive in the latest dynamic update.
+            /// </summary>
+            public bool swipeForwardCompletedThisFrame => m_CommonGestures.WasMicrogestureCompletedThisFrame(XRHandMicrogesture.SwipeForward);
+
+            /// <summary>
+            /// Whether a backward thumb swipe is active as of the latest dynamic update.
+            /// </summary>
+            public bool swipeBackwardActive => m_CommonGestures.IsMicrogestureActive(XRHandMicrogesture.SwipeBackward);
+
+            /// <summary>
+            /// Whether a backward thumb swipe became active in the latest dynamic update.
+            /// </summary>
+            public bool swipeBackwardPerformedThisFrame => m_CommonGestures.WasMicrogesturePerformedThisFrame(XRHandMicrogesture.SwipeBackward);
+
+            /// <summary>
+            /// Whether a backward thumb swipe became inactive in the latest dynamic update.
+            /// </summary>
+            public bool swipeBackwardCompletedThisFrame => m_CommonGestures.WasMicrogestureCompletedThisFrame(XRHandMicrogesture.SwipeBackward);
+
+            /// <summary>
+            /// Whether a thumb tap is active as of the latest dynamic update.
+            /// </summary>
+            public bool tapThumbActive => m_CommonGestures.IsMicrogestureActive(XRHandMicrogesture.TapThumb);
+
+            /// <summary>
+            /// Whether a thumb tap became active in the latest dynamic update.
+            /// </summary>
+            public bool tapThumbPerformedThisFrame => m_CommonGestures.WasMicrogesturePerformedThisFrame(XRHandMicrogesture.TapThumb);
+
+            /// <summary>
+            /// Whether a thumb tap became inactive in the latest dynamic update.
+            /// </summary>
+            public bool tapThumbCompletedThisFrame => m_CommonGestures.WasMicrogestureCompletedThisFrame(XRHandMicrogesture.TapThumb);
+
+            internal MicrogestureUpdatedEventArgs(XRCommonHandGestures commonGestures) => m_CommonGestures = commonGestures;
+
+            readonly XRCommonHandGestures m_CommonGestures;
+        }
+
+        /// <summary>
         /// Event-args type for when the poke pose updates.
         /// </summary>
         /// <seealso cref="pokePoseUpdated"/>
@@ -560,6 +663,71 @@ namespace UnityEngine.XR.Hands
         public bool TryGetPinchTouchedState(out bool isPinchTouched) => m_State.TryGetPinchTouchedState(out isPinchTouched);
 
         /// <summary>
+        /// Checks whether the given microgesture is active.
+        /// </summary>
+        /// <remarks>
+        /// Returns <c>true</c> when the runtime recognizes <paramref name="microgesture"/>. Only
+        /// <see cref="XRHandSubsystem.UpdateType.Dynamic"/> updates change the result;
+        /// <see cref="XRHandSubsystem.UpdateType.BeforeRender"/> updates don't. Returns <c>false</c> for
+        /// <see cref="XRHandMicrogesture.None"/>, for undefined values, and when the provider doesn't support
+        /// microgestures (<see cref="XRHandSubsystemDescriptor.supportsMicrogestures"/>).
+        /// </remarks>
+        /// <param name="microgesture">The microgesture to check.</param>
+        /// <returns>
+        /// Returns <c>true</c> if <paramref name="microgesture"/> is active as of the latest dynamic update. Otherwise,
+        /// returns <c>false</c>.
+        /// </returns>
+        /// <seealso cref="WasMicrogesturePerformedThisFrame(XRHandMicrogesture)"/>
+        /// <seealso cref="WasMicrogestureCompletedThisFrame(XRHandMicrogesture)"/>
+        public bool IsMicrogestureActive(XRHandMicrogesture microgesture) => m_State.IsMicrogestureActive(microgesture);
+
+        /// <summary>
+        /// Checks whether the given microgesture became active in the latest dynamic update.
+        /// </summary>
+        /// <remarks>
+        /// A microgesture becomes active when the runtime recognizes it. This method returns <c>true</c> from
+        /// the <see cref="XRHandSubsystem.UpdateType.Dynamic"/> update in which <paramref name="microgesture"/> becomes
+        /// active until the next dynamic update. By default, the subsystem runs one dynamic update per frame, so
+        /// <c>ThisFrame</c> in the method name refers to that update.
+        /// <see cref="XRHandSubsystem.UpdateType.BeforeRender"/> updates don't change the result.
+        ///
+        /// Returns <c>false</c> for <see cref="XRHandMicrogesture.None"/>, for undefined values, and when the provider
+        /// doesn't support microgestures (<see cref="XRHandSubsystemDescriptor.supportsMicrogestures"/>).
+        /// </remarks>
+        /// <param name="microgesture">The microgesture to check.</param>
+        /// <returns>
+        /// Returns <c>true</c> if <paramref name="microgesture"/> became active in the latest dynamic update.
+        /// Otherwise, returns <c>false</c>.
+        /// </returns>
+        /// <seealso cref="IsMicrogestureActive(XRHandMicrogesture)"/>
+        /// <seealso cref="WasMicrogestureCompletedThisFrame(XRHandMicrogesture)"/>
+        public bool WasMicrogesturePerformedThisFrame(XRHandMicrogesture microgesture) =>
+            (m_ChangedMicrogestures & m_State.microgesturesInternal & microgesture.ToMicrogestureFlag()) != 0;
+
+        /// <summary>
+        /// Checks whether the given microgesture became inactive in the latest dynamic update.
+        /// </summary>
+        /// <remarks>
+        /// A microgesture becomes inactive when the runtime stops reporting it as active. This method returns
+        /// <c>true</c> from the <see cref="XRHandSubsystem.UpdateType.Dynamic"/> update in which
+        /// <paramref name="microgesture"/> becomes inactive until the next dynamic update. By default, the subsystem
+        /// runs one dynamic update per frame, so <c>ThisFrame</c> in the method name refers to that update.
+        /// <see cref="XRHandSubsystem.UpdateType.BeforeRender"/> updates don't change the result.
+        ///
+        /// Returns <c>false</c> for <see cref="XRHandMicrogesture.None"/>, for undefined values, and when the provider
+        /// doesn't support microgestures (<see cref="XRHandSubsystemDescriptor.supportsMicrogestures"/>).
+        /// </remarks>
+        /// <param name="microgesture">The microgesture to check.</param>
+        /// <returns>
+        /// Returns <c>true</c> if <paramref name="microgesture"/> became inactive in the latest dynamic update.
+        /// Otherwise, returns <c>false</c>.
+        /// </returns>
+        /// <seealso cref="IsMicrogestureActive(XRHandMicrogesture)"/>
+        /// <seealso cref="WasMicrogesturePerformedThisFrame(XRHandMicrogesture)"/>
+        public bool WasMicrogestureCompletedThisFrame(XRHandMicrogesture microgesture) =>
+            (m_ChangedMicrogestures & ~m_State.microgesturesInternal & microgesture.ToMicrogestureFlag()) != 0;
+
+        /// <summary>
         /// Attempts to get the poke pose.
         /// </summary>
         /// <param name="pokePose">
@@ -672,6 +840,29 @@ namespace UnityEngine.XR.Hands
         public Action<PinchTouchedStateUpdatedEventArgs> pinchTouchedStateUpdated;
 
         /// <summary>
+        /// Raised when one or more microgestures become active or inactive.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="XRCommonHandGestures"/> raises this event at most once per
+        /// <see cref="XRHandSubsystem.UpdateType.Dynamic"/> update, and only in an update where one or more
+        /// microgestures become active or inactive.
+        ///
+        /// Inside a listener, <see cref="IsMicrogestureActive(XRHandMicrogesture)"/>,
+        /// <see cref="WasMicrogesturePerformedThisFrame(XRHandMicrogesture)"/>, and
+        /// <see cref="WasMicrogestureCompletedThisFrame(XRHandMicrogesture)"/> return the results of this update. To
+        /// find which microgestures changed, read the <c>PerformedThisFrame</c> and <c>CompletedThisFrame</c>
+        /// properties of <see cref="MicrogestureUpdatedEventArgs"/>, such as
+        /// <see cref="MicrogestureUpdatedEventArgs.swipeLeftPerformedThisFrame"/>, or call
+        /// <see cref="WasMicrogesturePerformedThisFrame(XRHandMicrogesture)"/> and
+        /// <see cref="WasMicrogestureCompletedThisFrame(XRHandMicrogesture)"/> on
+        /// <see cref="MicrogestureUpdatedEventArgs.commonGestures"/>.
+        ///
+        /// The <see cref="MicrogestureUpdatedEventArgs"/> instance passed to each listener is valid only while the event
+        /// is invoked. Don't keep a reference to it.
+        /// </remarks>
+        public Action<MicrogestureUpdatedEventArgs> microgestureUpdated;
+
+        /// <summary>
         /// Called when the poke pose is updated. Either the pose changed,
         /// the ability to retrieve it changed, or its tracking status changed.
         /// </summary>
@@ -680,6 +871,22 @@ namespace UnityEngine.XR.Hands
         /// do not hold a reference to it.
         /// </remarks>
         public Action<PokePoseUpdatedEventArgs> pokePoseUpdated;
+
+        readonly Handedness m_Handedness;
+        XRCommonHandGesturesState m_State;
+        XRHandMicrogestureFlags m_ChangedMicrogestures;
+
+        readonly AimPoseUpdatedEventArgs m_AimPose;
+        readonly AimActivateValueUpdatedEventArgs m_AimActivateValue;
+        readonly AimActivatedStateUpdatedEventArgs m_AimActivatedState;
+        readonly GraspValueUpdatedEventArgs m_GraspValue;
+        readonly GraspFirmStateUpdatedEventArgs m_GraspFirmState;
+        readonly GripPoseUpdatedEventArgs m_GripPose;
+        readonly PinchPoseUpdatedEventArgs m_PinchPose;
+        readonly PinchValueUpdatedEventArgs m_PinchValue;
+        readonly PinchTouchedStateUpdatedEventArgs m_PinchTouchedState;
+        readonly MicrogestureUpdatedEventArgs m_Microgesture;
+        readonly PokePoseUpdatedEventArgs m_PokePose;
 
         /// <summary>
         /// Denotes which hand this represents common gestures data for.
@@ -695,6 +902,8 @@ namespace UnityEngine.XR.Hands
         /// A copy of the state that backs this common gestures data.
         /// </summary>
         internal XRCommonHandGesturesState stateInternal => m_State;
+
+        internal XRHandMicrogestureFlags microgesturesInternal => m_State.microgesturesInternal;
 
         internal void UpdateState(XRCommonHandGesturesState newState)
         {
@@ -752,8 +961,11 @@ namespace UnityEngine.XR.Hands
             var firePokePoseUpdated = pokePoseUpdated != null &&
                 (FlagsDiffer(oldFlags, newFlags, XRCommonHandGesturesFlags.IsPokePoseValid | XRCommonHandGesturesFlags.IsPokePoseTracked) ||
                     m_State.pokePoseInternal != newState.pokePoseInternal);
+            var changedMicrogestures = (m_State.microgesturesInternal ^ newState.microgesturesInternal) & XRHandMicrogestureUtility.k_AllMicrogestures;
+            var fireMicrogestureUpdated = microgestureUpdated != null && changedMicrogestures != XRHandMicrogestureFlags.None;
 
             m_State = newState;
+            m_ChangedMicrogestures = changedMicrogestures;
 
             if (fireAimPoseUpdated)
                 aimPoseUpdated.Invoke(m_AimPose);
@@ -775,6 +987,8 @@ namespace UnityEngine.XR.Hands
                 pinchTouchedStateUpdated.Invoke(m_PinchTouchedState);
             if (firePokePoseUpdated)
                 pokePoseUpdated.Invoke(m_PokePose);
+            if (fireMicrogestureUpdated)
+                InvokeMicrogestureUpdated();
 
             return;
 
@@ -1003,6 +1217,27 @@ namespace UnityEngine.XR.Hands
                 pinchTouchedStateUpdated.Invoke(m_PinchTouchedState);
         }
 
+        internal void UpdateMicrogestures(XRHandMicrogestureFlags microgestures, bool allowFireCallback = true)
+        {
+            var changedMicrogestures = (m_State.microgesturesInternal ^ microgestures) & XRHandMicrogestureUtility.k_AllMicrogestures;
+            var fire = allowFireCallback && microgestureUpdated != null && changedMicrogestures != XRHandMicrogestureFlags.None;
+
+            m_State.microgesturesInternal = microgestures;
+            m_ChangedMicrogestures = changedMicrogestures;
+
+            if (fire)
+                InvokeMicrogestureUpdated();
+        }
+
+        void InvokeMicrogestureUpdated()
+        {
+            var callback = microgestureUpdated;
+            if (callback == null)
+                return;
+
+            callback.Invoke(m_Microgesture);
+        }
+
         internal void UpdatePokePose(Pose pokePose, bool allowFireCallback = true)
         {
             var fire = allowFireCallback && pokePoseUpdated != null &&
@@ -1047,21 +1282,8 @@ namespace UnityEngine.XR.Hands
             m_PinchPose = new PinchPoseUpdatedEventArgs(this);
             m_PinchValue = new PinchValueUpdatedEventArgs(this);
             m_PinchTouchedState = new PinchTouchedStateUpdatedEventArgs(this);
+            m_Microgesture = new MicrogestureUpdatedEventArgs(this);
             m_PokePose = new PokePoseUpdatedEventArgs(this);
         }
-
-        readonly Handedness m_Handedness;
-        XRCommonHandGesturesState m_State;
-
-        readonly AimPoseUpdatedEventArgs m_AimPose;
-        readonly AimActivateValueUpdatedEventArgs m_AimActivateValue;
-        readonly AimActivatedStateUpdatedEventArgs m_AimActivatedState;
-        readonly GraspValueUpdatedEventArgs m_GraspValue;
-        readonly GraspFirmStateUpdatedEventArgs m_GraspFirmState;
-        readonly GripPoseUpdatedEventArgs m_GripPose;
-        readonly PinchPoseUpdatedEventArgs m_PinchPose;
-        readonly PinchValueUpdatedEventArgs m_PinchValue;
-        readonly PinchTouchedStateUpdatedEventArgs m_PinchTouchedState;
-        readonly PokePoseUpdatedEventArgs m_PokePose;
     }
 }

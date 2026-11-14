@@ -1,21 +1,13 @@
 using System;
-using System.Collections.Generic;
-using Unity.Collections;
-using Unity.XR.CoreUtils;
-
-#if BURST_PRESENT
-using Unity.Burst;
-#endif
 
 namespace UnityEngine.XR.Hands
 {
     public partial class XRHandSkeletonDriver
     {
         /// <summary>
-        /// A boolean tracking whether the root transform is valid. This is calculated once when the root transform
-        /// changes to avoid a null check every time the root is updated.
+        /// (Obsolete) Use <see cref="hasRootTransform"/> instead.
         /// </summary>
-        [Obsolete("Use hasRootTransform instead.")]
+        [Obsolete("m_HasRootTransform is obsolete. Use hasRootTransform instead.", true)]
         protected bool m_HasRootTransform;
     }
 }

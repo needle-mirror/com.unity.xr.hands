@@ -2,6 +2,55 @@
 uid: xrhands-whats-new
 ---
 
+# What's new in version 7.0
+
+XR Hands 7.0 aligns the package version with Unity 7 and changes long-obsolete APIs from compiler warnings to compiler errors.
+
+Discover new features and performance improvements in the latest update to XR Hands. For a full list of changes and updates in this version, refer to the [XR Hands changelog](xref:xrhands-changelog).
+
+## Added
+
+### Microgestures
+
+XR Hands now reports thumb microgestures: a thumb swipe to the left, right, forward, or backward, and a thumb tap. Query microgestures through [`XRCommonHandGestures`](xref:UnityEngine.XR.Hands.XRCommonHandGestures) with [`IsMicrogestureActive`](xref:UnityEngine.XR.Hands.XRCommonHandGestures.IsMicrogestureActive*), [`WasMicrogesturePerformedThisFrame`](xref:UnityEngine.XR.Hands.XRCommonHandGestures.WasMicrogesturePerformedThisFrame*), [`WasMicrogestureCompletedThisFrame`](xref:UnityEngine.XR.Hands.XRCommonHandGestures.WasMicrogestureCompletedThisFrame*), and the [`microgestureUpdated`](xref:UnityEngine.XR.Hands.XRCommonHandGestures.microgestureUpdated) event, or bind to the new `<XRHandDevice>` controls [`microgestureSwipe`](xref:UnityEngine.XR.Hands.XRHandDevice.microgestureSwipe) and [`microgestureTapThumb`](xref:UnityEngine.XR.Hands.XRHandDevice.microgestureTapThumb). [`XRHandSubsystemDescriptor.supportsMicrogestures`](xref:UnityEngine.XR.Hands.XRHandSubsystemDescriptor.supportsMicrogestures) indicates whether the provider supports microgestures. On OpenXR, microgestures require [specific OpenXR features](xref:xrhands-microgestures#requirements).
+
+For more information, refer to [Microgestures](xref:xrhands-microgestures).
+
+## Changed
+
+### Package version alignment
+
+The package version changed from 1.10 to 7.0 to align the package major version with Unity 7. The minimum supported Unity Editor version increased to 7000.0 from 6000.0.
+
+### Samples require URP
+
+All samples now support only the Universal Render Pipeline (URP), and no longer include the `MaterialPipelineHandler` script that converted materials between render pipelines. To use the samples, install and configure URP in your project. For more information, refer to [Install and configure URP](https://docs.unity3d.com/Manual/urp/InstallingAndConfiguringURP.html).
+
+### Aim pose in Legacy mode
+
+The `<XRHandDevice>` input device now updates the aim pose ([`aimPosition`](xref:UnityEngine.XR.Hands.XRHandDevice.aimPosition), [`aimRotation`](xref:UnityEngine.XR.Hands.XRHandDevice.aimRotation), [`aimIsTracked`](xref:UnityEngine.XR.Hands.XRHandDevice.aimIsTracked), and [`aimTrackingState`](xref:UnityEngine.XR.Hands.XRHandDevice.aimTrackingState)) in Legacy mode, not just Common Gestures mode. If the Hand Interaction Profile isn't enabled and the [Meta Hand Tracking Aim](xref:xrhands-meta-aim-feature) OpenXR feature is, the [`OpenXRHandProvider`](xref:UnityEngine.XR.Hands.OpenXR.OpenXRHandProvider) populates this aim pose from the Meta Hand Tracking Aim pose. For more information, refer to [XR Hand Device: Configuration](xref:xrhands-hand-device#configuration).
+
+## Obsolete APIs now cause compiler errors
+
+Using the following obsolete APIs now causes a compiler error instead of a warning, and the package no longer implements them. If code still calls an obsolete method or property setter, for example from a precompiled assembly, the call throws a NotSupportedException. Update your code to use the replacement APIs:
+
+| Obsolete API | Replacement |
+| :----------- | :---------- |
+| `HandTracking.featureId` | [`HandTracking.featureId2`](xref:UnityEngine.XR.Hands.OpenXR.HandTracking.featureId2) |
+| `MetaHandTrackingAim.AimFlags` | [`MetaAimFlags`](xref:UnityEngine.XR.Hands.MetaAimFlags) |
+| `MetaAimHand.UpdateHand` overload without an `isTracked` parameter | The `MetaAimHand.UpdateHand` overload with a first `isTracked` parameter |
+| `XRHandProviderUtility.CreateJoint` overload without a `Handedness` parameter | The `XRHandProviderUtility.CreateJoint` overload with a first `Handedness` parameter |
+| `XRHandSkeletonDriver.m_HasRootTransform` | `XRHandSkeletonDriver.hasRootTransform` |
+| `XRHandSubsystem.handsUpdated` | [`XRHandSubsystem.updatedHands`](xref:UnityEngine.XR.Hands.XRHandSubsystem.updatedHands) |
+| `XRFingerShapeCondition.Target.tolerance` | `upperTolerance` and `lowerTolerance` |
+
+> [!NOTE]
+> Version 7.0 no longer automatically upgrades hand shape assets created with version 1.3 or earlier, which use a single tolerance value. To upgrade these assets, open your project with version 1.4 to 1.10 of the package and select each affected hand shape asset in the **Project** window before you upgrade to 7.0. If you already upgraded, these hand shapes have upper and lower tolerances of 0 and are unlikely to be detected. Set the tolerances again for each affected finger shape.
+
+## Removed
+
+The obsolete `MetaHandTrackingAim.leftHand`, `MetaHandTrackingAim.rightHand`, and `MetaHandTrackingAim.MetaAimHand` APIs have been removed. Use [`MetaAimHand.left`](xref:UnityEngine.XR.Hands.MetaAimHand.left), [`MetaAimHand.right`](xref:UnityEngine.XR.Hands.MetaAimHand.right), and [`MetaAimHand`](xref:UnityEngine.XR.Hands.MetaAimHand) instead.
+
 # What's new in version 1.10
 
 The main updates in this release include:

@@ -1,8 +1,9 @@
 {
   "name": "com.unity.xr.hands",
   "displayName": "XR Hands",
-  "version": "1.10.0",
-  "unity": "6000.0",
+  "version": "7.0.0-pre.1",
+  "unity": "7000.0",
+  "unityRelease": "0a12",
   "description": "Surfaces the cross-platform subsystem API for hand-tracking. Implementations of providers will be found in the package for that platform.",
   "keywords": [
     "xr",
@@ -17,17 +18,17 @@
   "samples": [
     {
       "displayName": "Gestures",
-      "description": "Sample showing how to detect and debug hand gestures.",
+      "description": "Demo scene and components for detecting and debugging hand shapes and hand poses. Contains the Static Hand Gesture component, so import it to use hand gestures.\n<i>Dependencies:</i>\n • HandVisualizer sample\n • TMP Essential Resources",
       "path": "Samples~/Gestures"
     },
     {
       "displayName": "HandVisualizer",
-      "description": "Basic sample showing how to visualize hands.",
+      "description": "Demo scene and prefabs that render tracked hands with a mesh, plus a Hand Debug Visualizer prefab for joint data. Built for the OpenXR hand joint layout.",
       "path": "Samples~/HandVisualizer"
     },
     {
       "displayName": "Hand Capture",
-      "description": "Sample for recording real-time hand data to create custom gestures.",
+      "description": "Demo scene for recording real-time hand data on your headset, plus an Editor window that turns recordings into custom hand shape assets.\n<i>Dependencies:</i>\n • <a href=\"com.unity3d.kharma:upmpackage/com.unity.xr.interaction.toolkit\">XR Interaction Toolkit</a> 7.0.0-pre.1 or newer\n • <a href=\"com.unity3d.kharma:upmpackage/com.unity.xr.openxr\">OpenXR Plugin</a> 7.0.0-pre.1 or newer\n • HandVisualizer sample\n • Starter Assets sample (from <a href=\"com.unity3d.kharma:upmpackage/com.unity.xr.interaction.toolkit\">XR Interaction Toolkit</a>)\n • Hands Interaction Demo sample (from <a href=\"com.unity3d.kharma:upmpackage/com.unity.xr.interaction.toolkit\">XR Interaction Toolkit</a>)\n • Spatial Keyboard sample (from <a href=\"com.unity3d.kharma:upmpackage/com.unity.xr.interaction.toolkit\">XR Interaction Toolkit</a>)\n • TMP Essential Resources",
       "path": "Samples~/HandCapture"
     }
   ],
@@ -40,15 +41,15 @@
     "com.unity.mathematics": "1.2.6"
   },
   "_upm": {
-    "changelog": "### Changed\n\n- The hand and joint prefab fields in the XR Hand Capture window no longer accept scene objects. Assigning one shows a warning and keeps the previous value.\n- Changed the recommended installation version of XR Interaction Toolkit to `3.6.1` for the Hand Capture sample.\n\n### Fixed\n\n- Fixed an issue where clearing the recording field in the XR Hand Capture window left the spawned hand visuals in the scene.\n- Fixed project validation checks in Gestures and HandCapture samples so they do not pop up the Project Validation window unless the check returns as an error, and never open it when the Editor runs in batch mode. [UUM-150025](https://issuetracker.unity3d.com/product/unity/issues/guid/UUM-150025)"
+    "changelog": "### Added\n\n- Added microgesture support to XR Hands:\n  - Added [`XRHandMicrogesture`](xref:UnityEngine.XR.Hands.XRHandMicrogesture) to identify a microgesture tap or swipe.\n  - Added [`XRHandSubsystemDescriptor.supportsMicrogestures`](xref:UnityEngine.XR.Hands.XRHandSubsystemDescriptor.supportsMicrogestures) so providers can advertise whether they support microgestures.\n  - Added [`XRHandSubsystemProvider.IsMicrogestureActive`](xref:UnityEngine.XR.Hands.ProviderImplementation.XRHandSubsystemProvider.IsMicrogestureActive*) so providers can report whether a microgesture is active.\n  - Added [`XRCommonHandGestures.IsMicrogestureActive`](xref:UnityEngine.XR.Hands.XRCommonHandGestures.IsMicrogestureActive*), [`WasMicrogesturePerformedThisFrame`](xref:UnityEngine.XR.Hands.XRCommonHandGestures.WasMicrogesturePerformedThisFrame*), and [`WasMicrogestureCompletedThisFrame`](xref:UnityEngine.XR.Hands.XRCommonHandGestures.WasMicrogestureCompletedThisFrame*) to query whether a microgesture is active, or became active or inactive, in the latest dynamic update.\n  - Added the [`XRCommonHandGestures.microgestureUpdated`](xref:UnityEngine.XR.Hands.XRCommonHandGestures.microgestureUpdated) event, raised when a microgesture becomes active or inactive.\n  - Updated [`OpenXRHandProvider`](xref:UnityEngine.XR.Hands.OpenXR.OpenXRHandProvider) to report microgestures when the **Hand Interaction Profile Microgestures** feature is enabled.\n\n### Changed\n\n- Changed the package version from 1.10.1 to 7.0.0-pre.1 to align the package major version with Unity 7.\n- Changed the minimum Unity version from 6000.0 to 7000.0.\n- Changed the `<XRHandDevice>` input device to update the aim pose ([`aimPosition`](xref:UnityEngine.XR.Hands.XRHandDevice.aimPosition), [`aimRotation`](xref:UnityEngine.XR.Hands.XRHandDevice.aimRotation), [`aimIsTracked`](xref:UnityEngine.XR.Hands.XRHandDevice.aimIsTracked), and [`aimTrackingState`](xref:UnityEngine.XR.Hands.XRHandDevice.aimTrackingState)) in Legacy mode, not just Common Gestures mode. For more information about hand subsystem configuration mode, see [XR Hand Device: Configuration](xref:xrhands-hand-device#configuration).\n- Changed aim pose data provided to [`XRCommonHandGestures`](xref:UnityEngine.XR.Hands.XRCommonHandGestures) by the [`OpenXRHandProvider`](xref:UnityEngine.XR.Hands.OpenXR.OpenXRHandProvider) to be populated based on the Meta Hand Tracking Aim pose if the Hand Interaction Profile is not enabled. This allows the `<XRHandDevice>` aim pose to use this new source.\n- Upgraded the Android NDK versions used to build the native plug-in from r16b (arm64) and r21d (x64) to r25b. This upgrade has no effect on your app's behavior.\n- Changed the sample descriptions in the Package Manager to use one short summary followed by a list of each sample's dependencies, matching the other XR packages.\n- All samples have been updated to only support the Universal Render Pipeline (URP) and reserialized for Unity 7000.0.\n- Changed the minimum and recommended installation version of XR Interaction Toolkit to `7.0.0-pre.1` for the Hand Capture sample.\n\n### Removed\n\n- Removed the implementations of the following obsolete APIs, which now report a compiler error instead of a warning. Where an obsolete method or property setter is still called, for example from a precompiled assembly, it throws a `NotSupportedException`:\n  - `HandTracking.featureId`: Use [`HandTracking.featureId2`](xref:UnityEngine.XR.Hands.OpenXR.HandTracking.featureId2) instead.\n  - `MetaHandTrackingAim.AimFlags`: Use [`MetaAimFlags`](xref:UnityEngine.XR.Hands.MetaAimFlags) instead.\n  - `MetaAimHand.UpdateHand` overload without an `isTracked` parameter: Use the overload with a first `isTracked` parameter instead.\n  - `XRHandProviderUtility.CreateJoint` overload without a `Handedness` parameter: Use the overload with a first `Handedness` parameter instead.\n  - `XRHandSkeletonDriver.m_HasRootTransform`: Use `XRHandSkeletonDriver.hasRootTransform` instead.\n  - `XRHandSubsystem.handsUpdated`: Use [`XRHandSubsystem.updatedHands`](xref:UnityEngine.XR.Hands.XRHandSubsyst"
   },
   "upmCi": {
-    "footprint": "4941c3145efbeba12d6cb346610fa204b35a7b62"
+    "footprint": "e2711d536436eb7454e6b6e76e3b68b9e67483ea"
   },
-  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@1.10/manual/index.html",
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.hands@7.0/manual/index.html",
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/xr.git",
     "type": "git",
-    "revision": "21671009324b04a5cf766def6620556e1692d5c4"
+    "revision": "97aa00bbf170ab2202509a163aaa8c48beaca341"
   }
 }

@@ -597,6 +597,7 @@ class Tests
         Assume.That(XRHandDevice.leftHand, Is.Null);
         Assume.That(XRHandDevice.rightHand, Is.Null);
 
+        var expectedData = TestCommonGestureData.GetCommonGestureData(handedness);
         var subsystem = TestHandUtils.CreateTestSubsystem();
         var configuration = new XRHandSubsystemConfiguration
         {
@@ -605,6 +606,9 @@ class Tests
 
         subsystem.UpdateHandsConfiguration(configuration);
         subsystem.Start();
+
+        var provider = (TestHandProvider)subsystem.GetProvider();
+        provider.commonGestureBehavior = TestHandProvider.CommonGestureBehavior.CorePosesOnly;
 
         if (handedness == Handedness.Left)
             XRHandDevice.leftHand = XRHandDevice.Create(subsystem, Handedness.Left, XRHandSubsystem.UpdateSuccessFlags.None, XRHandSubsystem.UpdateType.Dynamic);
@@ -689,11 +693,10 @@ class Tests
         Assert.That(currentHandDevice.pinchPosition.ReadValue(), Is.EqualTo(thumbTipPose.position));
         Assert.That(currentHandDevice.pinchRotation.ReadValue(), Is.EqualTo(thumbTipPose.rotation));
 
-        // Make sure aim is still reporting nothing since Legacy does not drive that pose
-        Assert.That((InputTrackingState)currentHandDevice.aimTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
-        Assert.That(currentHandDevice.aimIsTracked.IsPressed(), Is.False);
-        Assert.That(currentHandDevice.aimPosition.ReadValue(), Is.EqualTo(Vector3.zero));
-        Assert.That(currentHandDevice.aimRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
+        Assert.That((InputTrackingState)currentHandDevice.aimTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.Position | InputTrackingState.Rotation));
+        Assert.That(currentHandDevice.aimIsTracked.IsPressed(), Is.EqualTo(expectedData.aimPoseIsTracked));
+        Assert.That(currentHandDevice.aimPosition.ReadValue(), Is.EqualTo(expectedData.aimPose.position));
+        Assert.That(currentHandDevice.aimRotation.ReadValue(), Is.EqualTo(expectedData.aimPose.rotation));
 
         subsystem.Destroy();
         InputSystem.RemoveDevice(currentHandDevice);
@@ -788,13 +791,7 @@ class Tests
         InputSystem.Update();
         yield return null;
 
-        // Legacy does not drive aim pose so it should be reset
-        Assert.That((InputTrackingState)currentHandDevice.aimTrackingState.ReadValue(), Is.EqualTo(InputTrackingState.None));
-        Assert.That(currentHandDevice.aimIsTracked.IsPressed(), Is.False);
-        Assert.That(currentHandDevice.aimPosition.ReadValue(), Is.EqualTo(Vector3.zero));
-        Assert.That(currentHandDevice.aimRotation.ReadValue(), Is.EqualTo(Quaternion.identity));
-
-        // All other non-driven fields should also be reset
+        // All non-driven fields should be reset
         Assert.That(currentHandDevice.pinchValue.ReadValue(), Is.EqualTo(0f));
         Assert.That(currentHandDevice.pinchTouched.IsPressed(), Is.False);
         Assert.That(currentHandDevice.pinchReady.IsPressed(), Is.False);

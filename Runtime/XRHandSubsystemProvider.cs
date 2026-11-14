@@ -115,6 +115,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// <seealso cref="TryGetPinchValue"/>
         /// <seealso cref="TryGetPinchTouchedState"/>
         /// <seealso cref="TryGetPokePose"/>
+        /// <seealso cref="IsMicrogestureActive(Handedness, XRHandMicrogesture)"/>
         public virtual bool canSurfaceCommonPoseData => false;
 
         /// <summary>
@@ -412,6 +413,30 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         public virtual bool TryGetPokePose(Handedness handedness, out Pose pokePose)
         {
             pokePose = Pose.identity;
+            return false;
+        }
+
+        /// <summary>
+        /// Checks whether a microgesture is active for a hand.
+        /// </summary>
+        /// <remarks>
+        /// The subsystem calls this once per microgesture per hand during dynamic updates, only when both
+        /// <see cref="canSurfaceCommonPoseData"/> and <see cref="XRHandSubsystemDescriptor.supportsMicrogestures"/>
+        /// are <c>true</c>. Return <c>true</c> while the runtime reports the gesture as active. Consecutive
+        /// <c>true</c> results count as one activation.
+        /// </remarks>
+        /// <param name="handedness">
+        /// Which hand to retrieve data for.
+        /// </param>
+        /// <param name="microgesture">
+        /// The microgesture to query. The subsystem passes each defined value except
+        /// <see cref="XRHandMicrogesture.None"/>.
+        /// </param>
+        /// <returns>
+        /// Returns <c>true</c> if the gesture is active in the current dynamic update. Otherwise, returns <c>false</c>.
+        /// </returns>
+        public virtual bool IsMicrogestureActive(Handedness handedness, XRHandMicrogesture microgesture)
+        {
             return false;
         }
 

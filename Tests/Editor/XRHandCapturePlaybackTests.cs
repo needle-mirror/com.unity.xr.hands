@@ -189,7 +189,7 @@ namespace UnityEditor.XR.Hands.Tests
         GameObject CreateHandTemplate(string name)
         {
             var hand = new GameObject(name);
-            var wrist = new GameObject($"L_{XRHandJointID.Wrist}");
+            var wrist = new GameObject($"L_{nameof(XRHandJointID.Wrist)}");
             wrist.transform.SetParent(hand.transform, false);
             wrist.AddComponent<SkinnedMeshRenderer>();
             m_CreatedObjects.Add(hand);

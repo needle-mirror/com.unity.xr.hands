@@ -10,12 +10,52 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 <!-- Headers should be listed in this order: Added, Changed, Deprecated, Removed, Fixed, Security -->
 
+## [7.0.0-pre.1] - 2026-11-14
+
+### Added
+
+- Added microgesture support to XR Hands:
+  - Added [`XRHandMicrogesture`](xref:UnityEngine.XR.Hands.XRHandMicrogesture) to identify a microgesture tap or swipe.
+  - Added [`XRHandSubsystemDescriptor.supportsMicrogestures`](xref:UnityEngine.XR.Hands.XRHandSubsystemDescriptor.supportsMicrogestures) so providers can advertise whether they support microgestures.
+  - Added [`XRHandSubsystemProvider.IsMicrogestureActive`](xref:UnityEngine.XR.Hands.ProviderImplementation.XRHandSubsystemProvider.IsMicrogestureActive*) so providers can report whether a microgesture is active.
+  - Added [`XRCommonHandGestures.IsMicrogestureActive`](xref:UnityEngine.XR.Hands.XRCommonHandGestures.IsMicrogestureActive*), [`WasMicrogesturePerformedThisFrame`](xref:UnityEngine.XR.Hands.XRCommonHandGestures.WasMicrogesturePerformedThisFrame*), and [`WasMicrogestureCompletedThisFrame`](xref:UnityEngine.XR.Hands.XRCommonHandGestures.WasMicrogestureCompletedThisFrame*) to query whether a microgesture is active, or became active or inactive, in the latest dynamic update.
+  - Added the [`XRCommonHandGestures.microgestureUpdated`](xref:UnityEngine.XR.Hands.XRCommonHandGestures.microgestureUpdated) event, raised when a microgesture becomes active or inactive.
+  - Updated [`OpenXRHandProvider`](xref:UnityEngine.XR.Hands.OpenXR.OpenXRHandProvider) to report microgestures when the **Hand Interaction Profile Microgestures** feature is enabled.
+
+### Changed
+
+- Changed the package version from 1.10.1 to 7.0.0-pre.1 to align the package major version with Unity 7.
+- Changed the minimum Unity version from 6000.0 to 7000.0.
+- Changed the `<XRHandDevice>` input device to update the aim pose ([`aimPosition`](xref:UnityEngine.XR.Hands.XRHandDevice.aimPosition), [`aimRotation`](xref:UnityEngine.XR.Hands.XRHandDevice.aimRotation), [`aimIsTracked`](xref:UnityEngine.XR.Hands.XRHandDevice.aimIsTracked), and [`aimTrackingState`](xref:UnityEngine.XR.Hands.XRHandDevice.aimTrackingState)) in Legacy mode, not just Common Gestures mode. For more information about hand subsystem configuration mode, see [XR Hand Device: Configuration](xref:xrhands-hand-device#configuration).
+- Changed aim pose data provided to [`XRCommonHandGestures`](xref:UnityEngine.XR.Hands.XRCommonHandGestures) by the [`OpenXRHandProvider`](xref:UnityEngine.XR.Hands.OpenXR.OpenXRHandProvider) to be populated based on the Meta Hand Tracking Aim pose if the Hand Interaction Profile is not enabled. This allows the `<XRHandDevice>` aim pose to use this new source.
+- Upgraded the Android NDK versions used to build the native plug-in from r16b (arm64) and r21d (x64) to r25b. This upgrade has no effect on your app's behavior.
+- Changed the sample descriptions in the Package Manager to use one short summary followed by a list of each sample's dependencies, matching the other XR packages.
+- All samples have been updated to only support the Universal Render Pipeline (URP) and reserialized for Unity 7000.0.
+- Changed the minimum and recommended installation version of XR Interaction Toolkit to `7.0.0-pre.1` for the Hand Capture sample.
+
+### Removed
+
+- Removed the implementations of the following obsolete APIs, which now report a compiler error instead of a warning. Where an obsolete method or property setter is still called, for example from a precompiled assembly, it throws a `NotSupportedException`:
+  - `HandTracking.featureId`: Use [`HandTracking.featureId2`](xref:UnityEngine.XR.Hands.OpenXR.HandTracking.featureId2) instead.
+  - `MetaHandTrackingAim.AimFlags`: Use [`MetaAimFlags`](xref:UnityEngine.XR.Hands.MetaAimFlags) instead.
+  - `MetaAimHand.UpdateHand` overload without an `isTracked` parameter: Use the overload with a first `isTracked` parameter instead.
+  - `XRHandProviderUtility.CreateJoint` overload without a `Handedness` parameter: Use the overload with a first `Handedness` parameter instead.
+  - `XRHandSkeletonDriver.m_HasRootTransform`: Use `XRHandSkeletonDriver.hasRootTransform` instead.
+  - `XRHandSubsystem.handsUpdated`: Use [`XRHandSubsystem.updatedHands`](xref:UnityEngine.XR.Hands.XRHandSubsystem.updatedHands) instead. The package no longer invokes `handsUpdated`.
+  - `XRFingerShapeCondition.Target.tolerance`: Use `upperTolerance` and `lowerTolerance` instead. The package no longer automatically upgrades hand shape assets that use the single serialized tolerance value. Refer to [What's new in version 7.0](xref:xrhands-whats-new).
+- Removed the obsolete `MetaHandTrackingAim.leftHand`, `MetaHandTrackingAim.rightHand`, and `MetaHandTrackingAim.MetaAimHand` APIs. Use [`MetaAimHand.left`](xref:UnityEngine.XR.Hands.MetaAimHand.left), [`MetaAimHand.right`](xref:UnityEngine.XR.Hands.MetaAimHand.right), and [`MetaAimHand`](xref:UnityEngine.XR.Hands.MetaAimHand) instead.
+
+### Fixed
+
+- Fixed `UAC2017` compiler warnings in newer versions of the Unity Editor caused by `[BurstCompile]` static methods being private. These methods are now `internal` so Burst can generate direct calls for them.
+
 ## [1.10.0] - 2026-10-16
 
 ### Changed
 
 - The hand and joint prefab fields in the XR Hand Capture window no longer accept scene objects. Assigning one shows a warning and keeps the previous value.
 - Changed the recommended installation version of XR Interaction Toolkit to `3.6.1` for the Hand Capture sample.
+- Upgraded the VS version used to compile native libraries from 2017 to 2022. As a result, ARMv7 libraries are no longer available.
 
 ### Fixed
 

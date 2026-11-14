@@ -17,11 +17,11 @@ A simple way to change from the default [Legacy](#legacy) mode to [Common Gestur
 The Common Gestures mode is the recommended path to use for your OpenXR project. The Legacy mode is default to avoid breaking existing projects which already made use of the `<XRHandDevice>` and the locations of each of the poses, and for maximum compatibility in projects which are not targeting OpenXR which may not support common gestures.
 
 > [!NOTE]
-> When using Common Gestures mode on OpenXR, you must also enable the [Hand Interaction Profile](xref:openxr-hand-interaction-profile). Refer to [Common Gestures](#common-gestures) for more details.
+> When using Common Gestures mode on OpenXR, you must also enable the [Hand Interaction Profile](xref:openxr-hand-interaction-profile) for full functionality (or enable [Meta Hand Tracking Aim OpenXR feature](xref:xrhands-meta-aim-feature) for a subset of functionality). Refer to [Common Gestures](#common-gestures) for more details.
 
 ### XRHandSubsystemProvider implementers
 
-For advanced users or for platform providers, the [`XRHandSubsystemDescriptor`](xref:UnityEngine.XR.Hands.XRHandSubsystemDescriptor) contains properties which indicate whether the provider can supply each of the [Poses](#common-gestures-poses) or [Gesture values](#gesture-values). The [`XRHandSubsystemProvider.canSurfaceCommonPoseData`](xref:UnityEngine.XR.Hands.ProviderImplementation.XRHandSubsystemProvider.canSurfaceCommonPoseData) must also be implemented to indicate that the provider can supply data for populating [`XRCommonHandGestures`](xref:UnityEngine.XR.Hands.XRCommonHandGestures).
+For advanced users or for platform providers, the [`XRHandSubsystemDescriptor`](xref:UnityEngine.XR.Hands.XRHandSubsystemDescriptor) contains properties which indicate whether the provider can supply each of the [Poses](#common-gestures-poses), [Gesture values](#gesture-values), or [Microgestures](#microgestures). The [`XRHandSubsystemProvider.canSurfaceCommonPoseData`](xref:UnityEngine.XR.Hands.ProviderImplementation.XRHandSubsystemProvider.canSurfaceCommonPoseData) must also be implemented to indicate that the provider can supply data for populating [`XRCommonHandGestures`](xref:UnityEngine.XR.Hands.XRCommonHandGestures).
 
 ## Available controls {#available-controls}
 
@@ -44,34 +44,35 @@ These poses represent the joint poses from a hand, specifically [XRHandJointID.W
 
 You can bind to these poses with [input actions](xref:input-system-actions) to use in your components, such as [Tracked Pose Driver](xref:input-system-tracked-input-devices#tracked-pose-driver), instead of querying them directly from an [XRHand](xref:UnityEngine.XR.Hands.XRHand). Refer to [Access hand data: Get joint data](xref:xrhands-access-data#get-joint-data) to learn how to get hand joint poses through scripting API instead.
 
-|**Data**|**Binding Path**|**Type**|
-|---|---|---|
-| Wrist Position | `<XRHandDevice>/wristPosition`<br/>`<XRHandDevice>/devicePosition`<br/>(or `<TrackedDevice>/devicePosition`) | Vector3 |
-| Wrist Rotation | `<XRHandDevice>/wristRotation`<br/>`<XRHandDevice>/deviceRotation`<br/>(or `<TrackedDevice>/deviceRotation`) | Quaternion |
-| Wrist Is Tracked | `<XRHandDevice>/wristIsTracked`<br/>`<XRHandDevice>/isTracked`<br/>(or `<TrackedDevice>/isTracked`) | Boolean |
-| Wrist Tracking State | `<XRHandDevice>/wristTrackingState`<br/>`<XRHandDevice>/trackingState`<br/>(or `<TrackedDevice>/trackingState`) | Integer ([flags enum](xref:UnityEngine.XR.InputTrackingState)) |
-| Palm Position | `<XRHandDevice>/gripPosition` | Vector3 |
-| Palm Rotation | `<XRHandDevice>/gripRotation` | Quaternion |
-| Palm Is Tracked | `<XRHandDevice>/gripIsTracked` | Boolean |
-| Palm Tracking State | `<XRHandDevice>/gripTrackingState` | Integer ([flags enum](xref:UnityEngine.XR.InputTrackingState)) |
-| Index Tip Position | `<XRHandDevice>/pokePosition` | Vector3 |
-| Index Tip Rotation | `<XRHandDevice>/pokeRotation` | Quaternion |
-| Index Tip Is Tracked | `<XRHandDevice>/pokeIsTracked` | Boolean |
-| Index Tip Tracking State | `<XRHandDevice>/pokeTrackingState` | Integer ([flags enum](xref:UnityEngine.XR.InputTrackingState)) |
-| Thumb Tip Position | `<XRHandDevice>/pinchPosition` | Vector3 |
-| Thumb Tip Rotation | `<XRHandDevice>/pinchRotation` | Quaternion |
-| Thumb Tip Is Tracked | `<XRHandDevice>/pinchIsTracked` | Boolean |
-| Thumb Tip Tracking State | `<XRHandDevice>/pinchTrackingState` | Integer ([flags enum](xref:UnityEngine.XR.InputTrackingState)) |
-
-> [!NOTE]
-> Legacy mode does not supply an Aim Pose. Those four binding paths (`aimPosition`, `aimRotation`, `aimIsTracked`, and `aimTrackingState`) will always remain default values.
+|**Data**|**Binding Path**|**Type**|**OpenXR or Unity Path**|
+|---|---|---|---|
+| Wrist Position | `<XRHandDevice>/wristPosition`<br/>`<XRHandDevice>/devicePosition`<br/>(or `<TrackedDevice>/devicePosition`) | Vector3 | [`XR_HAND_JOINT_WRIST_EXT`](https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#convention-of-hand-joints) |
+| Wrist Rotation | `<XRHandDevice>/wristRotation`<br/>`<XRHandDevice>/deviceRotation`<br/>(or `<TrackedDevice>/deviceRotation`) | Quaternion | `XR_HAND_JOINT_WRIST_EXT` |
+| Wrist Is Tracked | `<XRHandDevice>/wristIsTracked`<br/>`<XRHandDevice>/isTracked`<br/>(or `<TrackedDevice>/isTracked`) | Boolean | `XR_HAND_JOINT_WRIST_EXT` |
+| Wrist Tracking State | `<XRHandDevice>/wristTrackingState`<br/>`<XRHandDevice>/trackingState`<br/>(or `<TrackedDevice>/trackingState`) | Integer ([flags enum](xref:UnityEngine.XR.InputTrackingState)) | `XR_HAND_JOINT_WRIST_EXT` |
+| Palm Position | `<XRHandDevice>/gripPosition` | Vector3 | [`XR_HAND_JOINT_PALM_EXT`](https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#convention-of-hand-joints) |
+| Palm Rotation | `<XRHandDevice>/gripRotation` | Quaternion | `XR_HAND_JOINT_PALM_EXT` |
+| Palm Is Tracked | `<XRHandDevice>/gripIsTracked` | Boolean | `XR_HAND_JOINT_PALM_EXT` |
+| Palm Tracking State | `<XRHandDevice>/gripTrackingState` | Integer ([flags enum](xref:UnityEngine.XR.InputTrackingState)) | `XR_HAND_JOINT_PALM_EXT` |
+| Index Tip Position | `<XRHandDevice>/pokePosition` | Vector3 | [`XR_HAND_JOINT_INDEX_TIP_EXT`](https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#convention-of-hand-joints) |
+| Index Tip Rotation | `<XRHandDevice>/pokeRotation` | Quaternion | `XR_HAND_JOINT_INDEX_TIP_EXT` |
+| Index Tip Is Tracked | `<XRHandDevice>/pokeIsTracked` | Boolean | `XR_HAND_JOINT_INDEX_TIP_EXT` |
+| Index Tip Tracking State | `<XRHandDevice>/pokeTrackingState` | Integer ([flags enum](xref:UnityEngine.XR.InputTrackingState)) | `XR_HAND_JOINT_INDEX_TIP_EXT` |
+| Thumb Tip Position | `<XRHandDevice>/pinchPosition` | Vector3 | [`XR_HAND_JOINT_THUMB_TIP_EXT`](https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#convention-of-hand-joints) |
+| Thumb Tip Rotation | `<XRHandDevice>/pinchRotation` | Quaternion | `XR_HAND_JOINT_THUMB_TIP_EXT` |
+| Thumb Tip Is Tracked | `<XRHandDevice>/pinchIsTracked` | Boolean | `XR_HAND_JOINT_THUMB_TIP_EXT` |
+| Thumb Tip Tracking State | `<XRHandDevice>/pinchTrackingState` | Integer ([flags enum](xref:UnityEngine.XR.InputTrackingState)) | `XR_HAND_JOINT_THUMB_TIP_EXT` |
+| Aim Position | `<XRHandDevice>/aimPosition` | Vector3 | `/input/aim/pose`<br/>`<MetaAimHand>/devicePosition` |
+| Aim Rotation | `<XRHandDevice>/aimRotation` | Quaternion | `/input/aim/pose`<br/>`<MetaAimHand>/deviceRotation` |
+| Aim Is Tracked | `<XRHandDevice>/aimIsTracked` | Boolean | `/input/aim/pose`<br/>`<MetaAimHand>/isTracked` |
+| Aim Tracking State | `<XRHandDevice>/aimTrackingState` | Integer ([flags enum](xref:UnityEngine.XR.InputTrackingState)) | `/input/aim/pose`<br/>`<MetaAimHand>/trackingState` |
 
 > [!NOTE]
 > Legacy mode does not supply any [gesture values](#gesture-values). Those nine binding paths (`graspValue`, `graspFirm`, etc.) will always remain default values.
 
 ### Common Gestures {#common-gestures}
 
-For this input device to work on OpenXR, you must also enable the [Hand Tracking Subsystem](xref:xrhands-openxr-hands-feature) OpenXR feature and enable the [Hand Interaction Profile](xref:openxr-hand-interaction-profile) within the **Edit** &gt; **Project Settings** &gt; **XR Plug-in Management** &gt; **OpenXR** window. The [OpenXR Plugin package](https://docs.unity3d.com/Packages/com.unity.xr.openxr@latest) must be at version `1.8.1` or newer. You must also enable this mode in the `XRHandSubsystem` configuration, as outlined in [Configuration](#configuration).
+For this input device to work on OpenXR, you must also enable the [Hand Tracking Subsystem](xref:xrhands-openxr-hands-feature) OpenXR feature and enable the [Hand Interaction Profile](xref:openxr-hand-interaction-profile) within the **Edit** &gt; **Project Settings** &gt; **XR Plug-in Management** &gt; **OpenXR** window. If the Hand Interaction Profile is not enabled, enabling the [Meta Hand Tracking Aim OpenXR feature](xref:xrhands-meta-aim-feature) will provide a subset of poses, namely the Aim pose. The [OpenXR Plugin package](https://docs.unity3d.com/Packages/com.unity.xr.openxr@latest) must be at version `1.8.1` or newer. You must also enable this mode in the `XRHandSubsystem` configuration, as outlined in [Configuration](#configuration).
 
 The following tables apply when the configuration mode is set to [XRHandDevicePoseSource.CommonGestures](xref:UnityEngine.XR.Hands.Configuration.XRHandDevicePoseSource.CommonGestures):
 
@@ -81,7 +82,7 @@ These poses represent the poses from a hand interaction profile, specifically [G
 
 You can bind to these poses with [input actions](xref:input-system-actions) to use in your components like [Tracked Pose Driver](xref:input-system-tracked-input-devices#tracked-pose-driver) instead of the [HandInteraction](xref:openxr-hand-interaction-profile) poses to support hand playback overriding the values or for supporting simulation.
 
-|**Data**|**Binding Path(s)**|**Type**|**OpenXR Path**|
+|**Data**|**Binding Path(s)**|**Type**|**OpenXR or Unity Path**|
 |---|---|---|---|
 | Wrist Position | `<XRHandDevice>/wristPosition` | Vector3 | [`XR_HAND_JOINT_WRIST_EXT`](https://registry.khronos.org/OpenXR/specs/1.1/html/xrspec.html#convention-of-hand-joints) |
 | Wrist Rotation | `<XRHandDevice>/wristRotation` | Quaternion | `XR_HAND_JOINT_WRIST_EXT` |
@@ -99,10 +100,10 @@ You can bind to these poses with [input actions](xref:input-system-actions) to u
 | Pinch Rotation | `<XRHandDevice>/pinchRotation` | Quaternion | `/input/pinch_ext/pose` |
 | Pinch Is Tracked | `<XRHandDevice>/pinchIsTracked` | Boolean | `/input/pinch_ext/pose` |
 | Pinch Tracking State | `<XRHandDevice>/pinchTrackingState` | Integer ([flags enum](xref:UnityEngine.XR.InputTrackingState)) | `/input/pinch_ext/pose` |
-| Aim Position | `<XRHandDevice>/aimPosition` | Vector3 | `/input/aim/pose` |
-| Aim Rotation | `<XRHandDevice>/aimRotation` | Quaternion | `/input/aim/pose` |
-| Aim Is Tracked | `<XRHandDevice>/aimIsTracked` | Boolean | `/input/aim/pose` |
-| Aim Tracking State | `<XRHandDevice>/aimTrackingState` | Integer ([flags enum](xref:UnityEngine.XR.InputTrackingState)) | `/input/aim/pose` |
+| Aim Position | `<XRHandDevice>/aimPosition` | Vector3 | `/input/aim/pose`<br/>`<MetaAimHand>/devicePosition` |
+| Aim Rotation | `<XRHandDevice>/aimRotation` | Quaternion | `/input/aim/pose`<br/>`<MetaAimHand>/deviceRotation` |
+| Aim Is Tracked | `<XRHandDevice>/aimIsTracked` | Boolean | `/input/aim/pose`<br/>`<MetaAimHand>/isTracked` |
+| Aim Tracking State | `<XRHandDevice>/aimTrackingState` | Integer ([flags enum](xref:UnityEngine.XR.InputTrackingState)) | `/input/aim/pose`<br/>`<MetaAimHand>/trackingState` |
 
 #### Gesture values {#gesture-values}
 
@@ -123,7 +124,26 @@ These values represent three groups of action inputs from a hand interaction pro
 > [!NOTE]
 > These values are not available when using [Legacy](#legacy) mode. Those nine binding paths (`graspValue`, `graspFirm`, etc.) will always remain default values.
 
+### Microgestures {#microgestures}
+
+These values represent thumb microgestures, such as a thumb swipe or a thumb tap. The device supplies these values in both Legacy and Common Gestures modes. On OpenXR, you must also enable the [Hand Interaction Profile](xref:openxr-hand-interaction-profile) and the **Hand Interaction Profile Microgestures** OpenXR features.
+
+Each microgesture value is active when the runtime recognizes the gesture. To respond to each swipe or tap, use the `performed` callback or `WasPerformedThisFrame` on an input action bound to the control, rather than polling the value.
+
+|**Data**|**Binding Path**|**Type**|**OpenXR Path**|
+|---|---|---|---|
+| The direction of a thumb swipe | `<XRHandDevice>/microgestureSwipe` | Vector2 | `/input/swipe_left_meta/click`<br/>`/input/swipe_right_meta/click`<br/>`/input/swipe_forward_meta/click`<br/>`/input/swipe_backward_meta/click` |
+| Whether the runtime recognizes a left thumb swipe | `<XRHandDevice>/microgestureSwipe/swipeLeft` | Boolean | `/input/swipe_left_meta/click` |
+| Whether the runtime recognizes a right thumb swipe | `<XRHandDevice>/microgestureSwipe/swipeRight` | Boolean | `/input/swipe_right_meta/click` |
+| Whether the runtime recognizes a forward thumb swipe | `<XRHandDevice>/microgestureSwipe/swipeForward` | Boolean | `/input/swipe_forward_meta/click` |
+| Whether the runtime recognizes a backward thumb swipe | `<XRHandDevice>/microgestureSwipe/swipeBackward` | Boolean | `/input/swipe_backward_meta/click` |
+| Whether the runtime recognizes a thumb tap | `<XRHandDevice>/microgestureTapThumb` | Boolean | `/input/tap_thumb_meta/click` |
+
+> [!NOTE]
+> These values are not available when the provider doesn't support microgestures, as indicated by [XRHandSubsystemDescriptor.supportsMicrogestures](xref:UnityEngine.XR.Hands.XRHandSubsystemDescriptor.supportsMicrogestures). Those six binding paths will always remain default values.
+
 ## Additional resources
 
 * [Meta Hand Tracking Aim OpenXR feature](xref:xrhands-meta-aim-feature)
 * OpenXR [Hand Interaction Profile](xref:openxr-hand-interaction-profile)
+* [Microgestures](xref:xrhands-microgestures)

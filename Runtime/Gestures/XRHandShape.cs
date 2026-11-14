@@ -1,8 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine.XR.Hands.Analytics;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace UnityEngine.XR.Hands.Gestures
 {
@@ -69,22 +66,6 @@ namespace UnityEngine.XR.Hands.Gestures
             for (var index = 0; index < m_FingerShapeConditions.Count; ++index)
             {
                 var condition = m_FingerShapeConditions[index];
-                for (int i = 0; i < condition.targets.Length; ++i)
-                {
-                    // Upgrade any deprecated single tolerance range values to support separate upper and lower tolerances
-                    var target = condition.targets[i];
-#pragma warning disable 618
-                    if (target.tolerance != 0f)
-                    {
-                        var targetCopy = target;
-                        targetCopy.tolerance = target.tolerance;
-                        condition.targets[i] = targetCopy;
-                        EditorUtility.SetDirty(this);
-                        AssetDatabase.SaveAssets();
-                    }
-#pragma warning restore 618
-                }
-
                 condition.UpdateTypesNeededIfDirty();
             }
         }

@@ -118,7 +118,11 @@ namespace UnityEngine.XR.Hands.Capture.Recording
 
                 if (subsystem.GetProvider().canSurfaceCommonPoseData)
                 {
-                    commonGestures[handedIndex] = subsystem.GetCommonGestures(handedness).stateInternal;
+                    var state = subsystem.GetCommonGestures(handedness).stateInternal;
+
+                    // Microgesture data isn't recorded yet, so don't capture it.
+                    state.microgesturesInternal = XRHandMicrogestureFlags.None;
+                    commonGestures[handedIndex] = state;
                     frameFlags |= handedness.ToFrameFlagForCommonGestures();
                 }
 

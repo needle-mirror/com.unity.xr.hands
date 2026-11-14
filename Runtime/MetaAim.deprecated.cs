@@ -5,7 +5,8 @@ namespace UnityEngine.XR.Hands
     public partial class MetaAimHand
     {
         /// <summary>
-        /// Queues update events in the Input System based on the supplied hand.
+        /// (Obsolete) Queues update events in the Input System based on the supplied hand.
+        /// Use the overload with a first <c>isTracked</c> parameter instead.
         /// It is not recommended that you call this directly. This will be called
         /// for you when appropriate.
         /// </summary>
@@ -27,7 +28,7 @@ namespace UnityEngine.XR.Hands
         /// <param name="pinchLittle">
         /// The pinch strength for the little finger to update in the Input System.
         /// </param>
-        [Obsolete("Use the UpdateHand that has an additional first bool parameter for whether the hand is tracked, or the device pose won't update correctly.")]
+        [Obsolete("This UpdateHand overload is obsolete. Use the overload with a first isTracked parameter instead.", true)]
         public void UpdateHand(
             MetaAimFlags aimFlags,
             Pose aimPose,
@@ -36,16 +37,7 @@ namespace UnityEngine.XR.Hands
             float pinchRing,
             float pinchLittle)
         {
-            // Fallback to using flags where either Computed or Valid flag is set
-            // for driving the tracking fields.
-            UpdateHand(
-                (aimFlags & (MetaAimFlags.Computed | MetaAimFlags.Valid)) != 0,
-                aimFlags,
-                aimPose,
-                pinchIndex,
-                pinchMiddle,
-                pinchRing,
-                pinchLittle);
+            throw new NotSupportedException("UpdateHand without the isTracked parameter is no longer supported. Use the UpdateHand overload that has an additional first bool parameter for whether the hand is tracked.");
         }
     }
 }

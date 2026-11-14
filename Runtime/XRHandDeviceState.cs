@@ -8,7 +8,7 @@ namespace UnityEngine.XR.Hands
     /// <summary>
     /// State for input device representing XR hand gestures.
     /// </summary>
-    [StructLayout(LayoutKind.Explicit, Size = 216)]
+    [StructLayout(LayoutKind.Explicit, Size = 217)]
     struct XRHandDeviceState : IInputStateTypeInfo
     {
         /// <summary>
@@ -252,5 +252,14 @@ namespace UnityEngine.XR.Hands
         [InputControl(usage = "DeviceRotation", offset = 200)]
         [FieldOffset(200)]
         public Quaternion deviceRotation;
+
+        /// <summary>
+        /// Bitfield of active microgestures. Bits 0-3 are the thumb swipes (left, right, forward, backward)
+        /// and bit 4 is the thumb tap, matching the low bits of <see cref="XRHandMicrogestureFlags"/>.
+        /// </summary>
+        [InputControl(name = "microgestureSwipe", layout = MicrogestureSwipeControl.k_LayoutName, offset = 216, bit = 0, sizeInBits = 4)]
+        [InputControl(name = "microgestureTapThumb", layout = "Button", offset = 216, bit = 4)]
+        [FieldOffset(216)]
+        public byte microgestures;
     }
 }

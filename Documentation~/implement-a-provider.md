@@ -38,6 +38,20 @@ class MyHandSubsystem : XRHandSubsystem
 }
 ```
 
+## Supply microgestures
+
+If your platform's runtime recognizes thumb microgestures, your provider can report them to the subsystem.
+
+To supply microgestures from your provider, follow these steps:
+
+1. When you register the subsystem descriptor, set [XRHandSubsystemDescriptor.Cinfo.supportsMicrogestures](xref:UnityEngine.XR.Hands.XRHandSubsystemDescriptor.Cinfo.supportsMicrogestures) to `true`. The registered descriptor reports this value through [XRHandSubsystemDescriptor.supportsMicrogestures](xref:UnityEngine.XR.Hands.XRHandSubsystemDescriptor.supportsMicrogestures).
+2. In your provider, override [canSurfaceCommonPoseData](xref:UnityEngine.XR.Hands.ProviderImplementation.XRHandSubsystemProvider.canSurfaceCommonPoseData) to return `true`.
+3. In your provider, override [IsMicrogestureActive](xref:UnityEngine.XR.Hands.ProviderImplementation.XRHandSubsystemProvider.IsMicrogestureActive*) to return `true` while the runtime reports the gesture as active, and `false` otherwise.
+
+The subsystem calls `IsMicrogestureActive` only during dynamic updates (`XRHandSubsystem.UpdateType.Dynamic`), and only when both `canSurfaceCommonPoseData` and `supportsMicrogestures` are `true`. The default implementation returns `false`.
+
+The subsystem uses these results to update the microgesture state in [XRCommonHandGestures](xref:UnityEngine.XR.Hands.XRCommonHandGestures) and the microgesture controls on the XR Hand Device. For more information, refer to [Microgestures](xref:xrhands-microgestures) and [XR Hand Device: Microgestures](xref:xrhands-hand-device#microgestures).
+
 ## Implement an XR Loader
 
 An `XRLoader` is responsible for creating and destroying subsystem instances based on the settings found in **Project Settings** > **XR Plug-in Management**. All provider plug-ins must implement an `XRLoader`. For more information on authoring an `XRLoader`, see the [XR Plug-in Management provider documentation](https://docs.unity3d.com/Packages/com.unity.xr.management@latest?subfolder=/manual/Provider.html).

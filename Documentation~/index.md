@@ -47,4 +47,4 @@ This package provides samples that you can import into your project through the 
 
 - **Gestures** sample scene: Exiting Play Mode will emit `ObjectDisposedException` errors and related error output.
 - **Hand Capture** sample scene: Quest Link is not currently supported.
-- **Hand Capture** sample scene: If you encounter double-vision artifacts (such as raycast tear drops), this is a [known limitation](https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@latest?subfolder=/manual/index.html#known-limitations) when using Shader Graph shaders on the Build-in Render Pipeline. Please refer to the [troubleshooting](xref:xrhands-xrhandcapture-recording#incorrect-scene-appearance) section for potential solutions.
+- All samples support only the Universal Render Pipeline (URP). For more information, refer to [Incorrect scene appearance](xref:xrhands-xrhandcapture-recording#incorrect-scene-appearance).

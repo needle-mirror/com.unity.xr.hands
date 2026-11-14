@@ -54,6 +54,11 @@ namespace UnityEngine.XR.Hands
         public bool supportsPokePose { get; }
 
         /// <summary>
+        /// Whether the provider can supply microgestures.
+        /// </summary>
+        public bool supportsMicrogestures { get; }
+
+        /// <summary>
         /// Creates an <see cref="XRHandSubsystem"/> that is incapable of
         /// data from a platform API For surfacing live hand-tracking data,
         /// but is useful for playing back <see cref="XRHandCaptureSequence"/>
@@ -149,6 +154,11 @@ namespace UnityEngine.XR.Hands
             public bool supportsPokePose { get; set; }
 
             /// <summary>
+            /// Whether the provider can supply microgestures.
+            /// </summary>
+            public bool supportsMicrogestures { get; set; }
+
+            /// <summary>
             /// Generates a hash suitable for use with containers like <c>HashSet</c> and <c>Dictionary</c>.
             /// </summary>
             /// <returns>A hash code generated from this object's fields.</returns>
@@ -166,6 +176,7 @@ namespace UnityEngine.XR.Hands
                     hashCode = hashCode * 486187739 + supportsPinchPose.GetHashCode();
                     hashCode = hashCode * 486187739 + supportsPinchValue.GetHashCode();
                     hashCode = hashCode * 486187739 + supportsPokePose.GetHashCode();
+                    hashCode = hashCode * 486187739 + supportsMicrogestures.GetHashCode();
                     return hashCode;
                 }
             }
@@ -189,7 +200,8 @@ namespace UnityEngine.XR.Hands
                     supportsGripPose == other.supportsGripPose &&
                     supportsPinchPose == other.supportsPinchPose &&
                     supportsPinchValue == other.supportsPinchValue &&
-                    supportsPokePose == other.supportsPokePose;
+                    supportsPokePose == other.supportsPokePose &&
+                    supportsMicrogestures == other.supportsMicrogestures;
             }
 
             /// <summary>
@@ -284,6 +296,7 @@ namespace UnityEngine.XR.Hands
             supportsPinchPose = cinfo.supportsPinchPose;
             supportsPinchValue = cinfo.supportsPinchValue;
             supportsPokePose = cinfo.supportsPokePose;
+            supportsMicrogestures = cinfo.supportsMicrogestures;
         }
     }
 }

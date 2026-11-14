@@ -92,7 +92,7 @@ namespace UnityEngine.XR.Hands.Gestures
 #if BURST_PRESENT
             [BurstCompile]
 #endif
-            static bool CheckConditionBursted(
+            internal static bool CheckConditionBursted(
                 XRHandAxis handAxis,
                 XRHandAlignmentCondition alignmentCondition,
                 XRHandUserRelativeDirection referenceDirection,
@@ -127,7 +127,7 @@ namespace UnityEngine.XR.Hands.Gestures
 #if BURST_PRESENT
             [BurstCompile]
 #endif
-            static void GetReferenceDirection(
+            internal static void GetReferenceDirection(
                 out float3 result,
                 in float3 handPosition,
                 XRHandUserRelativeDirection direction,
@@ -273,7 +273,7 @@ namespace UnityEngine.XR.Hands.Gestures
 #if BURST_PRESENT
             [BurstCompile]
 #endif
-            static bool CheckConditionBursted(
+            internal static bool CheckConditionBursted(
                 XRHandAxis xrHandAxis,
                 XRHandAlignmentCondition condition,
                 XRHandTargetRelativeDirection direction,
@@ -306,7 +306,7 @@ namespace UnityEngine.XR.Hands.Gestures
 #if BURST_PRESENT
             [BurstCompile]
 #endif
-            static void GetReferenceDirection(
+            internal static void GetReferenceDirection(
                 out float3 result,
                 in float3 rootPosition,
                 in XRHandTargetRelativeDirection direction,

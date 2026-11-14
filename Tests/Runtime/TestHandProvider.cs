@@ -25,6 +25,7 @@ class TestHandProvider : XRHandSubsystemProvider
 
     public CommonGestureBehavior commonGestureBehavior { get; set; }
     public override bool canSurfaceCommonPoseData => commonGestureBehavior.AreCoreCommonGesturesEnabled();
+    public bool commonGesturesFastPathEnabled { get; set; } = true;
 
     public bool unextrapolatedPosesSupported { get; set; }
     public override bool canSurfaceUnextrapolatedPoses => unextrapolatedPosesSupported;
@@ -152,7 +153,9 @@ class TestHandProvider : XRHandSubsystemProvider
     internal override bool TryGetCommonGesturesState(Handedness handedness, out XRCommonHandGesturesState commonGestures)
     {
         commonGestures = TestCommonGestureData.GetCommonGesturesState(handedness, commonGestureBehavior);
-        return commonGestureBehavior.AreCoreCommonGesturesEnabled();
+        commonGestures.microgesturesInternal = microgesturesEnabled ? GetMicrogesturesToReport(handedness) : XRHandMicrogestureFlags.None;
+
+        return commonGesturesFastPathEnabled && commonGestureBehavior.AreCoreCommonGesturesEnabled();
     }
 
     public override bool TryGetAimPose(Handedness handedness, out Pose aimPose)
@@ -274,6 +277,17 @@ class TestHandProvider : XRHandSubsystemProvider
 
         return base.TryGetPokePose(handedness, out pokePose);
     }
+
+    public bool microgesturesEnabled { get; set; }
+
+    public XRHandMicrogestureFlags leftHandMicrogesturesToReport { get; set; }
+    public XRHandMicrogestureFlags rightHandMicrogesturesToReport { get; set; }
+
+    XRHandMicrogestureFlags GetMicrogesturesToReport(Handedness handedness)
+        => handedness == Handedness.Left ? leftHandMicrogesturesToReport : rightHandMicrogesturesToReport;
+
+    public override bool IsMicrogestureActive(Handedness handedness, XRHandMicrogesture microgesture)
+        => microgesturesEnabled && (GetMicrogesturesToReport(handedness) & microgesture.ToMicrogestureFlag()) != 0;
 
     public static string descriptorId => "Test-Hands";
 }

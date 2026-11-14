@@ -33,7 +33,8 @@ namespace UnityEngine.XR.Hands
                 m_PokePose == other.m_PokePose &&
                 m_IsAimActivated == other.m_IsAimActivated &&
                 m_IsGraspFirm == other.m_IsGraspFirm &&
-                m_IsPinchTouched == other.m_IsPinchTouched;
+                m_IsPinchTouched == other.m_IsPinchTouched &&
+                m_Microgestures == other.m_Microgestures;
         }
 
         /// <inheritdoc cref="Equals(in XRCommonHandGesturesState)"/>
@@ -58,18 +59,20 @@ namespace UnityEngine.XR.Hands
         public readonly override int GetHashCode()
         {
             return HashCodeUtil.Combine(
-                m_Handedness.GetHashCode(),
-                m_CommonGesturesFlags.GetHashCode(),
-                m_AimPose.GetHashCode(),
-                m_AimActivateValue.GetHashCode(),
-                m_GraspValue.GetHashCode(),
-                m_GripPose.GetHashCode(),
-                m_PinchPose.GetHashCode(),
-                m_PinchValue.GetHashCode(),
-                m_PokePose.GetHashCode(),
-                m_IsAimActivated.GetHashCode(),
-                m_IsGraspFirm.GetHashCode(),
-                m_IsPinchTouched.GetHashCode());
+                HashCodeUtil.Combine(
+                    m_Handedness.GetHashCode(),
+                    m_CommonGesturesFlags.GetHashCode(),
+                    m_AimPose.GetHashCode(),
+                    m_AimActivateValue.GetHashCode(),
+                    m_GraspValue.GetHashCode(),
+                    m_GripPose.GetHashCode(),
+                    m_PinchPose.GetHashCode(),
+                    m_PinchValue.GetHashCode(),
+                    m_PokePose.GetHashCode(),
+                    m_IsAimActivated.GetHashCode(),
+                    m_IsGraspFirm.GetHashCode(),
+                    m_IsPinchTouched.GetHashCode()),
+                m_Microgestures.GetHashCode());
         }
 
         /// <summary>
@@ -339,6 +342,21 @@ namespace UnityEngine.XR.Hands
             return ret;
         }
 
+        /// <summary>
+        /// Checks whether the given microgesture is active.
+        /// </summary>
+        /// <remarks>
+        /// Returns <c>false</c> if the subsystem doesn't support microgestures
+        /// (<see cref="XRHandSubsystemDescriptor.supportsMicrogestures"/>), or if <paramref name="microgesture"/> is
+        /// <see cref="XRHandMicrogesture.None"/> or an undefined value.
+        /// </remarks>
+        /// <param name="microgesture">The microgesture to check.</param>
+        /// <returns>
+        /// Returns <c>true</c> if the microgesture is active in this state. Otherwise, returns <c>false</c>.
+        /// </returns>
+        public readonly bool IsMicrogestureActive(XRHandMicrogesture microgesture) =>
+            (m_Microgestures & microgesture.ToMicrogestureFlag()) != 0;
+
         internal Pose aimPoseInternal
         {
             readonly get => m_AimPose;
@@ -399,6 +417,12 @@ namespace UnityEngine.XR.Hands
             set => m_IsPinchTouched = value;
         }
 
+        internal XRHandMicrogestureFlags microgesturesInternal
+        {
+            readonly get => m_Microgestures;
+            set => m_Microgestures = value;
+        }
+
         [SerializeField]
         Handedness m_Handedness;
 
@@ -434,5 +458,8 @@ namespace UnityEngine.XR.Hands
 
         [SerializeField]
         bool m_IsPinchTouched;
+
+        [SerializeField]
+        XRHandMicrogestureFlags m_Microgestures;
     }
 }

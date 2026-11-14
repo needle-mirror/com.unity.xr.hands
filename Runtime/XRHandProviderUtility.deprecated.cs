@@ -5,8 +5,9 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
     public static partial class XRHandProviderUtility
     {
         /// <summary>
-        /// Create a fully configurable joint with at least a pose in hand
-        /// space, tracking state, and ID.
+        /// (Obsolete) Create a fully configurable joint with at least a pose in hand
+        /// space, tracking state, and ID. Use the overload with a first
+        /// <see cref="Handedness"/> parameter instead.
         /// </summary>
         /// <param name="trackingState">
         /// The tracking state flags associated with this joint, representing
@@ -38,7 +39,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// An <see cref="XRHandJoint"/> with the given pose and other supplied
         /// data.
         /// </returns>
-        [Obsolete("Use the CreateJoint overload that has an additional first argument for handedness. Otherwise, joints will always report as being from the left hand, even if they were from the right hand.")]
+        [Obsolete("This CreateJoint overload is obsolete. Use the overload with a first Handedness parameter instead.", true)]
         public static XRHandJoint CreateJoint(
             XRHandJointTrackingState trackingState,
             XRHandJointID id,
@@ -47,15 +48,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
             Vector3 linearVelocity = new Vector3(),
             Vector3 angularVelocity = new Vector3())
         {
-            return new XRHandJoint
-            {
-                m_TrackingState = trackingState,
-                m_IdAndHandedness = (int)id,
-                m_Pose = pose,
-                m_Radius = radius,
-                m_LinearVelocity = linearVelocity,
-                m_AngularVelocity = angularVelocity,
-            };
+            throw new NotSupportedException("CreateJoint without a handedness argument is no longer supported. Use the CreateJoint overload that has an additional first argument for handedness.");
         }
     }
 }

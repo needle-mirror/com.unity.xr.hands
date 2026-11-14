@@ -65,14 +65,14 @@ namespace UnityEngine.XR.Hands.OpenXR
         internal const int k_ExtensionPriority = k_Priority - 1;
 
         /// <summary>
-        /// (Deprecated) The feature ID string. This is used to give the feature a well known
+        /// (Obsolete) The feature ID string. This is used to give the feature a well known
         /// ID for reference.
         /// </summary>
         /// <remarks>
-        /// Deprecated due to conflicts with the Microsoft Hand Interaction Profile featureId in the OpenXR package.
+        /// Obsolete because it conflicts with the Microsoft Hand Interaction Profile feature ID in the OpenXR package.
         /// Use <see cref="featureId2"/> instead.
         /// </remarks>
-        [Obsolete("featureId has been deprecated due to conflicts in com.unity.xr.openxr. Use featureId2 instead.")]
+        [Obsolete("featureId is obsolete because it conflicts with a feature ID in com.unity.xr.openxr. Use featureId2 instead.", true)]
         public const string featureId = "com.unity.openxr.feature.input.handtracking";
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// <summary>
         /// The <see cref="XRHandSubsystem"/> that retrieves hand data from its
         /// provider. Will only be valid when this feature is enabled and
-        /// running. To subscribe to updates, use <see cref="XRHandSubsystem.handsUpdated"/>.
+        /// running. To subscribe to updates, use <see cref="XRHandSubsystem.updatedHands"/>.
         /// </summary>
         public static XRHandSubsystem subsystem => s_Subsystem;
 
@@ -316,7 +316,7 @@ namespace UnityEngine.XR.Hands.OpenXR
         /// </summary>
         /// <remarks>
         /// Starts the <see cref="XRHandSubsystem"/> and automatic updating for
-        /// it. To subscribe to updates, use <see cref="XRHandSubsystem.handsUpdated"/>.
+        /// it. To subscribe to updates, use <see cref="XRHandSubsystem.updatedHands"/>.
         /// </remarks>
         protected override void OnSubsystemStart()
         {

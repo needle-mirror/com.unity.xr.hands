@@ -38,8 +38,8 @@ namespace UnityEditor.XR.Hands.Samples.Capture
         const string k_HandsInteractionDemoSampleName = "Hands Interaction Demo";
         const string k_SpatialKeyboardSampleName = "Spatial Keyboard";
         const string k_XRIPackageName = "com.unity.xr.interaction.toolkit";
-        static readonly PackageVersion s_MinimumXRIPackageVersion = new PackageVersion("3.0.7");
-        static readonly PackageVersion s_RecommendedXRIPackageVersion = new PackageVersion("3.6.1");
+        static readonly PackageVersion s_MinimumXRIPackageVersion = new PackageVersion("7.0.0-pre.1");
+        static readonly PackageVersion s_RecommendedXRIPackageVersion = new PackageVersion("7.0.0-pre.1");
         static AddRequest s_XRIPackageAddRequest;
 
 #if UNITY_6000_0_OR_NEWER

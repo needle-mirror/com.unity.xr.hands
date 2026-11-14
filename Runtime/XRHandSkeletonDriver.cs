@@ -85,14 +85,8 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         protected bool hasRootTransform
         {
-#pragma warning disable CS0618
-            get => m_IsRootTransformValid || m_HasRootTransform;
-            set
-            {
-                m_IsRootTransformValid = value;
-                m_HasRootTransform = value;
-            }
-#pragma warning restore CS0618
+            get => m_IsRootTransformValid;
+            set => m_IsRootTransformValid = value;
         }
 
         bool m_IsRootTransformValid;
@@ -144,9 +138,6 @@ namespace UnityEngine.XR.Hands
             {
                 m_RootTransform = value;
                 m_IsRootTransformValid = m_RootTransform != null;
-#pragma warning disable CS0618
-                m_HasRootTransform = m_IsRootTransformValid;
-#pragma warning restore CS0618
             }
         }
 
@@ -342,7 +333,7 @@ namespace UnityEngine.XR.Hands
 #if BURST_PRESENT && UNITY_2022_1_OR_NEWER
         [BurstCompile]
 #endif
-        static void CalculateJointTransformLocalPoses(ref NativeArray<XRHandJoint> joints, ref NativeArray<Pose> jointLocalPoses)
+        internal static void CalculateJointTransformLocalPoses(ref NativeArray<XRHandJoint> joints, ref NativeArray<Pose> jointLocalPoses)
         {
             var wristIndex = XRHandJointID.Wrist.ToIndex();
             if (joints[wristIndex].TryGetPose(out var wristJointPose))

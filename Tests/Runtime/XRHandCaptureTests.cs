@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using UnityEngine.SubsystemsImplementation.Extensions;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.Capture;
 using UnityEngine.XR.Hands.Capture.Recording;
@@ -173,6 +174,53 @@ class XRHandCaptureTests
         Assert.IsFalse(args1.Equals(args2));
         Assert.IsFalse(args1 == args2);
         Assert.IsTrue(args1 != args2);
+    }
+
+    // NOTE: This test *must* be updated when our stance on microgesture support in captures changes. But in the
+    // meantime, this makes sure we don't accidentally leak the bits into a sequence.
+    [Test]
+    [Category("Level.Integration")]
+    [NUnit.Framework.Property("Covers", "Input")]
+    [Description("Capturing a frame from a subsystem reporting microgestures drops the microgesture data while " +
+                 "keeping the other common gestures: the live state reports the microgesture, the captured " +
+                 "microgesture mask is empty, and the captured flags and frame flag match the live state.")]
+    public void CapturedFrameDoesNotIncludeMicrogestures()
+    {
+        var subsystem = TestHandUtils.CreateTestSubsystem(new XRHandSubsystemDescriptor.Cinfo
+        {
+            id = "TestHandProviderMicrogestures",
+            providerType = typeof(TestHandProvider),
+            supportsMicrogestures = true,
+        });
+        var frameBuffer = new FrameBuffer(0f, XRHandRecordingOptions.None);
+        try
+        {
+            subsystem.Start();
+
+            var provider = (TestHandProvider)subsystem.GetProvider();
+            provider.commonGestureBehavior = TestHandProvider.CommonGestureBehavior.CorePosesOnly;
+            provider.microgesturesEnabled = true;
+            provider.leftHandMicrogesturesToReport = XRHandMicrogestureFlags.TapThumb;
+
+            subsystem.TryUpdateHands(XRHandSubsystem.UpdateType.Dynamic);
+
+            var liveState = subsystem.leftHandCommonGestures.stateInternal;
+            Assert.That(subsystem.leftHandCommonGestures.IsMicrogestureActive(XRHandMicrogesture.TapThumb), Is.True);
+            Assert.That(liveState.microgesturesInternal, Is.EqualTo(XRHandMicrogestureFlags.TapThumb));
+
+            frameBuffer.CaptureUpdateTypeAgnosticData(subsystem);
+
+            var capturedState = frameBuffer.m_CommonGestures[Handedness.Left.ToIndex()];
+            Assert.That(frameBuffer.m_FrameFlags & Handedness.Left.ToFrameFlagForCommonGestures(),
+                Is.EqualTo(Handedness.Left.ToFrameFlagForCommonGestures()));
+            Assert.That(capturedState.microgesturesInternal, Is.EqualTo(XRHandMicrogestureFlags.None));
+            Assert.That(capturedState.flags, Is.EqualTo(liveState.flags));
+        }
+        finally
+        {
+            frameBuffer.Dispose();
+            subsystem.Destroy();
+        }
     }
 
     [Test]

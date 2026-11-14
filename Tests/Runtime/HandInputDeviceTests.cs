@@ -8,6 +8,14 @@ namespace Unity.XR.Hands.Runtime.Tests
     [TestFixture]
     class HandInputDeviceTests : InputTestFixture
     {
+        public override void Setup()
+        {
+            base.Setup();
+
+            // InputTestFixture resets the Input System, dropping layouts the hands package registered at load.
+            XRHandDevice.RegisterInputLayouts();
+        }
+
         [Test]
 #if !ENABLE_INPUT_SYSTEM
         [Ignore("Layout is only registered with Input System when ENABLE_INPUT_SYSTEM is defined.")]

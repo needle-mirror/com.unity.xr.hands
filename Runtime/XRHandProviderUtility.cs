@@ -119,7 +119,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// <summary>
         /// Use this with your provider (if hand-tracking is enabled in your
         /// build settings) to have the subsystem automatically update. Users
-        /// can subscribe to <see cref="XRHandSubsystem.handsUpdated"/> to
+        /// can subscribe to <see cref="XRHandSubsystem.updatedHands"/> to
         /// respond to updates instead of waiting until a following update step.
         /// Makes use of <c>UnityEngine.LowLevel.PlayerLoop</c> to insert this
         /// automatic update at the beginning of the <c>EarlyUpdate.XRUpdate</c>
@@ -128,7 +128,7 @@ namespace UnityEngine.XR.Hands.ProviderImplementation
         /// <remarks>
         /// If the Input System backend is enabled, this will also create and
         /// <see cref="XRHandDevice"/>s which update themselves from the
-        /// <see cref="XRHandSubsystem.handsUpdated"/> callback.
+        /// <see cref="XRHandSubsystem.updatedHands"/> callback.
         /// </remarks>
         public class SubsystemUpdater
         {

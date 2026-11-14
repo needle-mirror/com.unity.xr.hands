@@ -43,17 +43,31 @@ After completing the setup, your **Hierarchy** window should contain the followi
 
 ### Enable hand tracking
 
-To enable hand tracking with OpenXR, open **Project Settings** &gt; **XR Plug-in Management** &gt; **OpenXR** and enable **Hand Tracking Subsystem** under **OpenXR Feature Groups**.
+To enable hand tracking with OpenXR, open **Edit** &gt; **Project Settings** &gt; **XR Plug-in Management** &gt; **OpenXR** and enable the [Hand Tracking Subsystem](xref:xrhands-openxr-hands-feature) feature under **OpenXR Feature Groups**.
 
 For other provider plug-ins, check the documentation for that plug-in for hand-tracking configuration steps.
 
-### Meta Quest support via OpenXR
+### Build for Meta Quest with OpenXR {#meta-quest-support-via-openxr}
 
-If building for Meta Quest, you must also enable the [Meta Quest Support](https://docs.unity3d.com/Packages/com.unity.xr.openxr@latest?subfolder=/manual/features/metaquest.html) in the **Android** tab of **Project Settings** &gt; **XR Plug-in Management** &gt; **OpenXR**.
+To build for Meta Quest devices, complete the following steps in addition to [enabling hand tracking](#enable-hand-tracking):
 
-Then add an **Interaction Profile**, such as the [Oculus Touch Controller Profile](https://docs.unity3d.com/Packages/com.unity.xr.openxr@latest?subfolder=/manual/features/oculustouchcontrollerprofile.html), for controller support.
+1. In the **Android** tab of **Edit** &gt; **Project Settings** &gt; **XR Plug-in Management** &gt; **OpenXR**, enable the [Meta Quest Support](xref:openxr-meta-quest-support) feature.
+1. Add an **Interaction Profile**, such as the [Oculus Touch Controller Profile](xref:openxr-oculus-touch-controller-profile), for controller support.
 
 ![Project Settings - OpenXR settings](../images/XRHandCapture/hand-capture-sample/XR-Plugin-Management-OpenXR.png)<br/>*OpenXR project settings configured for Meta Quest with hand tracking*
+
+Your OpenXR settings now include Meta Quest support and controller input.
+
+### Build for Android XR with OpenXR
+
+To build for Android XR devices, complete the following steps:
+
+1. Install the [Unity OpenXR: Android XR](https://docs.unity3d.com/Packages/com.unity.xr.androidxr-openxr@latest) package, and enable the **Android XR** feature group in the **Android** tab of **Edit** &gt; **Project Settings** &gt; **XR Plug-in Management** &gt; **OpenXR**. This feature group includes the **Android XR Support** feature. For detailed steps, refer to [Configure project settings](https://docs.unity3d.com/Packages/com.unity.xr.androidxr-openxr@latest?subfolder=/manual/get-started/project-setup.html) in the Android XR documentation.
+1. In the same **Android** tab, make sure the [Hand Tracking Subsystem](xref:xrhands-openxr-hands-feature) feature is enabled. The **Android XR** feature group doesn't include this feature, so enabling the group doesn't enable hand tracking.
+1. Add an **Interaction Profile** for each type of input your app supports, such as the [Hand Interaction Profile](xref:openxr-hand-interaction-profile) for hand input or the [Oculus Touch Controller Profile](xref:openxr-oculus-touch-controller-profile) for controller input. OpenXR Project Validation shows a warning if you don't enable an **Interaction Profile**.
+1. In your app, request the `android.permission.HAND_TRACKING` permission from the user at runtime. Unity adds this permission to the Android manifest when you build, but your app doesn't receive hand tracking data until the user grants the permission. For example code, refer to [Hand tracking](https://docs.unity3d.com/Packages/com.unity.xr.androidxr-openxr@latest?subfolder=/manual/features/hand-tracking.html) in the Android XR documentation.
+
+To start hand tracking only after the user grants the permission, use [deferred initialization](xref:xrhands-openxr-subsystem-manager#deferred-initialization).
 
 ## Additional resources
 

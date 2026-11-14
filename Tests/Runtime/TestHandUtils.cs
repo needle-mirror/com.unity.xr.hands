@@ -23,7 +23,8 @@ static class TestHandUtils
             cinfo.supportsGraspValue == descriptor.supportsGraspValue &&
             cinfo.supportsPinchPose == descriptor.supportsPinchPose &&
             cinfo.supportsPinchValue == descriptor.supportsPinchValue &&
-            cinfo.supportsPokePose == descriptor.supportsPokePose, errorMessage);
+            cinfo.supportsPokePose == descriptor.supportsPokePose &&
+            cinfo.supportsMicrogestures == descriptor.supportsMicrogestures, errorMessage);
     }
 
     public class MockHandAction<TParam>

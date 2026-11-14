@@ -46,7 +46,7 @@ namespace UnityEngine.XR.Hands
 
             // First check if the parent itself is the wrist
             var rootTransformName = skeletonDriver.rootTransform.name;
-            if (StartsOrEndsWith(rootTransformName, XRHandJointID.Wrist.ToString()))
+            if (StartsOrEndsWith(rootTransformName, nameof(XRHandJointID.Wrist)))
             {
                 wristRootTransform = skeletonDriver.rootTransform;
             }
@@ -55,7 +55,7 @@ namespace UnityEngine.XR.Hands
                 for (var childIndex = 0; childIndex < skeletonDriver.rootTransform.childCount; ++childIndex)
                 {
                     var child = skeletonDriver.rootTransform.GetChild(childIndex);
-                    if (child.gameObject.name.EndsWith(XRHandJointID.Wrist.ToString()))
+                    if (child.gameObject.name.EndsWith(nameof(XRHandJointID.Wrist)))
                         wristRootTransform = child;
                 }
             }
@@ -63,7 +63,7 @@ namespace UnityEngine.XR.Hands
             if (wristRootTransform == null)
             {
                 if (missingJointNames != null)
-                    missingJointNames.Add(XRHandJointID.Wrist.ToString());
+                    missingJointNames.Add(nameof(XRHandJointID.Wrist));
             }
             else
             {

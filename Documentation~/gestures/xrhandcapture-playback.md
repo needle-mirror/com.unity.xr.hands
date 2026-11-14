@@ -68,7 +68,7 @@ Default finger shape target threshold value is `0.15` (higher values allow for m
 
 1. Select an **XRHandShape** asset to save the newly computed hand pose data.
     > [!Tip]
-    > To create a new XRHandShape asset, go to `Assets > Create > XR > Hand Interactions > Hand Shape` in the Editor Assets menu. For more details, refer to the [XRHandShape asset documentation]((xref:xrhands-hand-shapes#create-a-hand-shape-asset)).
+    > To create a new XRHandShape asset, go to `Assets > Create > XR > Hand Interactions > Hand Shape` in the Editor Assets menu. For more details, refer to the [XRHandShape asset documentation](xref:xrhands-hand-shapes#create-a-hand-shape-asset).
 
 2. Click **Overwrite with Computed Shape** to save the hand shape data into the selected XRHandShape asset.
 

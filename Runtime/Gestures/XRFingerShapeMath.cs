@@ -418,7 +418,7 @@ namespace UnityEngine.XR.Hands.Gestures
 #if BURST_PRESENT
         [BurstCompile]
 #endif
-        static float CalculateFullCurl(
+        internal static float CalculateFullCurl(
             XRHandFingerID fingerID,
             in float3 position0,
             in float3 position1, in quaternion rotation1,
@@ -447,7 +447,7 @@ namespace UnityEngine.XR.Hands.Gestures
 #if BURST_PRESENT
         [BurstCompile]
 #endif
-        static float CalculateBaseCurlThumb(
+        internal static float CalculateBaseCurlThumb(
             in float3 wristPosition, in quaternion wristRotation,
             in float3 thisPosition1, in float3 thisPosition2,
             in float3 nextPosition1, in float3 nextPosition2,
@@ -478,7 +478,7 @@ namespace UnityEngine.XR.Hands.Gestures
 #if BURST_PRESENT
         [BurstCompile]
 #endif
-        static float CalculateBaseCurl(
+        internal static float CalculateBaseCurl(
             in float3 position0,
             in float3 position1, in quaternion rotation1,
             in float3 position2,
@@ -492,7 +492,7 @@ namespace UnityEngine.XR.Hands.Gestures
 #if BURST_PRESENT
         [BurstCompile]
 #endif
-        static float CalculateTipCurl(
+        internal static float CalculateTipCurl(
             in float3 position0,
             in float3 pose1Position, in quaternion pose1Rotation,
             in float3 pose2Position, in quaternion pose2Rotation,
@@ -512,7 +512,7 @@ namespace UnityEngine.XR.Hands.Gestures
 #if BURST_PRESENT
         [BurstCompile]
 #endif
-        static float CalculatePinch(
+        internal static float CalculatePinch(
             in float3 fingerTipPosition,
             in float3 thumbTipPosition,
             float minimumDistance, float maximumDistance)
@@ -532,7 +532,7 @@ namespace UnityEngine.XR.Hands.Gestures
 #if BURST_PRESENT
         [BurstCompile]
 #endif
-        static float CalculateSpread(
+        internal static float CalculateSpread(
             Handedness handedness,
             XRHandFingerID fingerID,
             in float3 wristPosition, in quaternion wristRotation,
@@ -572,7 +572,7 @@ namespace UnityEngine.XR.Hands.Gestures
 #if BURST_PRESENT
         [BurstCompile]
 #endif
-        static void LocalizeTo(
+        internal static void LocalizeTo(
             out float3 localized,
             in float3 poseDefinitingSpacePosition,
             in quaternion poseDefinitingSpaceRotationInverse,
@@ -582,7 +582,7 @@ namespace UnityEngine.XR.Hands.Gestures
 #if BURST_PRESENT
         [BurstCompile]
 #endif
-        static float DegreesBetween(
+        internal static float DegreesBetween(
             in float3 position0,
             in float3 position1, in quaternion rotation1,
             in float3 position2)

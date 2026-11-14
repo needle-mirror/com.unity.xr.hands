@@ -5,9 +5,9 @@ namespace UnityEngine.XR.Hands
     public partial class XRHandSubsystem
     {
         /// <summary>
-        /// Obsolete. Use <see cref="updatedHands"/> instead.
+        /// (Obsolete) No longer invoked. Use <see cref="updatedHands"/> instead.
         /// </summary>
-        [Obsolete("Use updatedHands instead.")]
+        [Obsolete("handsUpdated is obsolete and is no longer invoked. Use updatedHands instead.", true)]
         public Action<UpdateSuccessFlags, UpdateType> handsUpdated;
     }
 }

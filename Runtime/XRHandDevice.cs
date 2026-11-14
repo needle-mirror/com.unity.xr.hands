@@ -246,6 +246,45 @@ namespace UnityEngine.XR.Hands
         /// </summary>
         public QuaternionControl wristRotation { get; private set; }
 
+        /// <summary>
+        /// [Vector2Control](xref:UnityEngine.InputSystem.Controls.Vector2Control) that represents the thumb swipe
+        /// microgesture.
+        /// </summary>
+        /// <remarks>
+        /// When the runtime recognizes a thumb swipe, the value becomes the unit vector of the swipe direction:
+        /// <see cref="Vector2.left"/> for a left swipe, <see cref="Vector2.right"/> for a right swipe,
+        /// <see cref="Vector2.up"/> for a forward swipe, and <see cref="Vector2.down"/> for a backward swipe. Otherwise,
+        /// the value is <see cref="Vector2.zero"/>.
+        ///
+        /// To respond to each swipe, use the <see cref="InputAction.performed"/> callback or
+        /// <see cref="InputAction.WasPerformedThisFrame"/> on an action bound to this control, rather than polling the
+        /// value.
+        ///
+        /// The value is always <see cref="Vector2.zero"/> when the hand subsystem doesn't support microgestures. To check
+        /// support, read <see cref="XRHandSubsystemDescriptor.supportsMicrogestures"/>.
+        ///
+        /// Each direction is also available as a [ButtonControl](xref:UnityEngine.InputSystem.Controls.ButtonControl).
+        /// Refer to <see cref="MicrogestureSwipeControl"/>.
+        /// </remarks>
+        public MicrogestureSwipeControl microgestureSwipe { get; private set; }
+
+        /// <summary>
+        /// [ButtonControl](xref:UnityEngine.InputSystem.Controls.ButtonControl) that indicates whether the runtime
+        /// recognizes a thumb tap microgesture.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="ButtonControl.isPressed"/> becomes <c>true</c> when the runtime recognizes a thumb tap, and is
+        /// <c>false</c> otherwise.
+        ///
+        /// To respond to each tap, use the <see cref="InputAction.performed"/> callback or
+        /// <see cref="InputAction.WasPerformedThisFrame"/> on an action bound to this control, rather than polling
+        /// <see cref="ButtonControl.isPressed"/>.
+        ///
+        /// The value is always <c>false</c> when the hand subsystem doesn't support
+        /// microgestures. To check support, read <see cref="XRHandSubsystemDescriptor.supportsMicrogestures"/>.
+        /// </remarks>
+        public ButtonControl microgestureTapThumb { get; private set; }
+
         Action<XRHandSubsystem, XRHandSubsystem.UpdateSuccessFlags, XRHandSubsystem.UpdateType> m_UpdateBehavior;
 
         XRHandDeviceState m_DeviceState;
@@ -287,6 +326,8 @@ namespace UnityEngine.XR.Hands
             wristTrackingState = GetChildControl<IntegerControl>("wristTrackingState");
             wristPosition = GetChildControl<Vector3Control>("wristPosition");
             wristRotation = GetChildControl<QuaternionControl>("wristRotation");
+            microgestureSwipe = GetChildControl<MicrogestureSwipeControl>("microgestureSwipe");
+            microgestureTapThumb = GetChildControl<ButtonControl>("microgestureTapThumb");
 
             // Explicitly initialize all rotations in the device state to identity (Quaternion(0f, 0f, 0f, 1f))
             // instead of the struct default (Quaternion(0f, 0f, 0f, 0f)).
@@ -482,6 +523,16 @@ namespace UnityEngine.XR.Hands
                             name = "wrist_tracking_state",
                             featureType = FeatureType.DiscreteStates
                         },
+                        new XRFeatureDescriptor
+                        {
+                            name = "microgesture_swipe",
+                            featureType = FeatureType.Axis2D
+                        },
+                        new XRFeatureDescriptor
+                        {
+                            name = "microgesture_tap_thumb",
+                            featureType = FeatureType.Binary
+                        },
                     }
                 }.ToJson()
             };
@@ -536,10 +587,6 @@ namespace UnityEngine.XR.Hands
                 m_DeviceState.aimActivateValue = default;
                 m_DeviceState.aimActivateReady = default;
                 m_DeviceState.aimActivated = default;
-                m_DeviceState.aimPosition = default;
-                m_DeviceState.aimRotation = Quaternion.identity;
-                m_DeviceState.aimIsTracked = default;
-                m_DeviceState.aimTrackingState = (int)InputTrackingState.None;
 
                 m_DeviceStateDirty = true;
             }
@@ -552,16 +599,19 @@ namespace UnityEngine.XR.Hands
 
         void OnUpdatedHandsLegacy(XRHandSubsystem subsystem, XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags, XRHandSubsystem.UpdateType updateType)
         {
+            XRCommonHandGestures commonGestures;
             XRHand hand;
             bool isValid;
             if (m_Handedness == Handedness.Left)
             {
+                commonGestures = subsystem.leftHandCommonGestures;
                 hand = subsystem.leftHand;
                 const XRHandSubsystem.UpdateSuccessFlags success = XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose | XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints;
                 isValid = (updateSuccessFlags & success) == success;
             }
             else
             {
+                commonGestures = subsystem.rightHandCommonGestures;
                 hand = subsystem.rightHand;
                 const XRHandSubsystem.UpdateSuccessFlags success = XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose | XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
                 isValid = (updateSuccessFlags & success) == success;
@@ -575,17 +625,20 @@ namespace UnityEngine.XR.Hands
                     m_DeviceState.gripIsTracked = false;
                     m_DeviceState.pokeIsTracked = false;
                     m_DeviceState.pinchIsTracked = false;
+                    m_DeviceState.aimIsTracked = false;
                     m_DeviceState.wristIsTracked = false;
                     m_DeviceState.trackingState = (int)InputTrackingState.None;
                     m_DeviceState.gripTrackingState = (int)InputTrackingState.None;
                     m_DeviceState.pokeTrackingState = (int)InputTrackingState.None;
                     m_DeviceState.pinchTrackingState = (int)InputTrackingState.None;
+                    m_DeviceState.aimTrackingState = (int)InputTrackingState.None;
                     m_DeviceState.wristTrackingState = (int)InputTrackingState.None;
                     m_WasValid = false;
 
                     m_DeviceStateDirty = true;
                 }
 
+                UpdateMicrogestures(commonGestures);
                 if (m_DeviceStateDirty)
                     QueueStateEvent();
 
@@ -662,6 +715,21 @@ namespace UnityEngine.XR.Hands
 
             m_DeviceState.pinchIsTracked = (thumbTipJoint.trackingState & XRHandJointTrackingState.HighFidelityPose) != 0;
 
+            // Aim Pose
+            if (commonGestures.TryGetAimPose(out var aimPose))
+            {
+                m_DeviceState.aimPosition = aimPose.position;
+                m_DeviceState.aimRotation = aimPose.rotation;
+                m_DeviceState.aimTrackingState = positionAndRotation;
+            }
+            else
+            {
+                m_DeviceState.aimTrackingState = (int)InputTrackingState.None;
+            }
+
+            m_DeviceState.aimIsTracked = commonGestures.GetAimPoseIsTracked();
+
+            UpdateMicrogestures(commonGestures);
             QueueStateEvent();
         }
 
@@ -706,6 +774,7 @@ namespace UnityEngine.XR.Hands
                     m_DeviceStateDirty = true;
                 }
 
+                UpdateMicrogestures(commonGestures);
                 if (m_DeviceStateDirty)
                     QueueStateEvent();
 
@@ -837,7 +906,19 @@ namespace UnityEngine.XR.Hands
 
             m_DeviceState.wristIsTracked = (wristJoint.trackingState & XRHandJointTrackingState.HighFidelityPose) != 0;
 
+            UpdateMicrogestures(commonGestures);
             QueueStateEvent();
+        }
+
+        void UpdateMicrogestures(XRCommonHandGestures commonGestures)
+        {
+            var microgestures = (byte)(commonGestures.microgesturesInternal & XRHandMicrogestureUtility.k_AllMicrogestures);
+
+            if (microgestures == m_DeviceState.microgestures)
+                return;
+
+            m_DeviceState.microgestures = microgestures;
+            m_DeviceStateDirty = true;
         }
 
         void QueueStateEvent()
@@ -857,7 +938,14 @@ namespace UnityEngine.XR.Hands
             leftHand = null;
             rightHand = null;
 
+            RegisterInputLayouts();
+        }
+
+        internal static void RegisterInputLayouts()
+        {
 #if ENABLE_INPUT_SYSTEM
+            InputSystem.InputSystem.RegisterLayout<MicrogestureSwipeControl>(MicrogestureSwipeControl.k_LayoutName);
+            InputSystem.InputSystem.RegisterLayout<MicrogestureSwipeControl.MicrogestureSwipeAxisControl>(MicrogestureSwipeControl.k_AxisLayoutName);
             InputSystem.InputSystem.RegisterLayout<XRHandDevice>(
                 matches: new InputDeviceMatcher()
                     .WithProduct(k_DeviceProductName));

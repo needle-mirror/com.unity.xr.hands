@@ -7,6 +7,7 @@
   * [Hand data model](xref:xrhands-data-model)
   * [Access hand data](xref:xrhands-access-data)
   * [XR Hand Device](xref:xrhands-hand-device)
+  * [Query microgestures](xref:xrhands-microgestures)
   * [Hand visuals](xref:xrhands-visuals)
 * [OpenXR features](xref:xrhands-openxr-features)
   * [Hand Tracking Subsystem feature](xref:xrhands-openxr-hands-feature)
